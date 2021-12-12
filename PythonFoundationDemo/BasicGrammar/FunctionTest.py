@@ -142,6 +142,7 @@ if __name__ == '__main__':
 
     '''
 
+    functionTest.testlocationFunction(10, 20, 30, d=40, e=50, f=60)
     '''输出结果：
     10
     20
@@ -161,7 +162,7 @@ if __name__ == '__main__':
     '''
 
     '''错误示例2：
-    functionTest.testlocationFunction(10, 20, 30, d=40, e=50, f=60)     # e 必须使用关键字参数
+    functionTest.testlocationFunction(10, 20, 30, 40, 50, f=60)     # e 必须使用关键字参数
     Traceback (most recent call last):
       File "D:/AppDocument/Pycharm/PythonDemo/PythonFoundationDemo/BasicGrammar/FunctionTest.py", line 159, in <module>
         functionTest.testlocationFunction(10, 20, 30, 40, 50, f=60)
