@@ -11,5 +11,11 @@
 @Copyright: ©2019-2021 家灏信息科技有限公司
 """
 
+class TupleTest(object):
+    def testCaseA(self):
+        pass
+
+
 if __name__ == '__main__':
-    pass
+    tuple = TupleTest()
+    tuple.testCaseA()
