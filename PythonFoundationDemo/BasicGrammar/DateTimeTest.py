@@ -98,6 +98,8 @@ class DateTimeTest(object):
         time.struct_time(tm_year=2020, tm_mon=2, tm_mday=25, tm_hour=20, tm_min=20, tm_sec=18, tm_wday=1, tm_yday=56, tm_isdst=-1)
         '''
 
+        print(time.timezone)
+
 
 if __name__ == '__main__':
     dateTime = DateTimeTest()
