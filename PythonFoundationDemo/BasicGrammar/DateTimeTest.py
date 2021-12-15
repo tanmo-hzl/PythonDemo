@@ -15,6 +15,40 @@ import datetime
 """
 
 
+
+
+
+
+'''
+在 Python 中，日期和时间可能涉及好几种不同的数据类型和函数。下面回顾了
+表示时间的 3 种不同类型的值：
+ Unix 纪元时间戳（time 模块中使用）是一个浮点值或整型值，表示自 1970 年
+1 月 1 日午夜 0 点（UTC）以来的秒数。
+ datetime 对象（属于 datetime 模块）包含一些整型值，保存在 year、 month、 day、
+hour、 minute 和 second 等属性中。
+ timedelta 对象（属于 datetime 模块）表示的一段时间，而不是一个特定的时刻。
+下面回顾了时间函数及其参数和返回值：
+ time.time()函数返回一个浮点值，表示当前时刻的 Unix 纪元时间戳。
+ time.sleep(seconds)函数让程序暂停 seconds 参数指定的秒数。
+ datetime.datetime(year, month, day, hour, minute, second)函数返回参数指定的时
+本文档由Linux公社 www.linuxidc.com 整理第 15 章 保持时间、计划任务和启动程序
+刻的 datetime 对象。如果没有提供 hour、 minute 或 second 参数，它们默认为 0。
+ datetime.datetime.now()函数返回当前时刻的 datetime 对象。
+ datetime.datetime.fromtimestamp(epoch)函数返回 epoch 时间戳参数表示的时刻
+的 datetime 对象。
+ datetime.timedelta(weeks, days, hours, minutes, seconds, milliseconds, microseconds)函
+数返回一个表示一段时间的 timedelta 对象。该函数的关键字参数都是可选的，
+不包括 month 或 year。
+ total_seconds()方法用于 timedelta 对象，返回 timedelta 对象表示的秒数。
+ strftime(format)方法返回一个字符串，用 format 字符串中的定制格式来表示
+datetime 对象表示的时间。详细格式参见表 15-1。
+ datetime.datetime.strptime(time_string, format)函数返回一个 datetime 对象，它的
+时刻由 time_string 指定，利用 format 字符串参数来解析。详细格式参见表 15-1
+
+
+
+'''
+
 class DateTimeTest(object):
     def testCaseA(self):
         print(' A '.center(80, '='))
@@ -205,10 +239,87 @@ class DateTimeTest(object):
         date = datetime.datetime.fromtimestamp(time_stamp)
         print(date)     # 2020 - 07 - 17 10: 38:35
 
+    def testCaseF(self):
+        # datetime对象可以用比较操作符进行比较，弄清楚谁在前面。后面的datetime对象是“更大”的值。在交互式环境中输入以下代码：
+        halloween2015 = datetime.datetime(2015, 10, 31, 0, 0, 0)
+        newyears2016 = datetime.datetime(2016, 1, 1, 0, 0, 0)
+        oct31_2015 = datetime.datetime(2015, 10, 31, 0, 0, 0)
+        print(halloween2015 == oct31_2015)      # True
+        print(halloween2015 > newyears2016)     # False
+        print(newyears2016 > halloween2015)     # True
+        newyears2016 != oct31_2015              # True
+
+    def testCaseG(self):
+        # datetime 模块还提供了 timedelta 数据类型，它表示一段时间，而不是一个时刻。在交互式环境中输入以下代码：
+        delta = datetime.timedelta(days=11, hours=10, minutes=9, seconds=8)
+        print(delta.days, delta.seconds, delta.microseconds)    # 11     36548   0
+        print(delta.total_seconds())        # 986948.0
+        print(str(delta))       # 11 days, 10:09:08
+        '''
+            要创建 timedelta 对象，就用 datetime.timedelta()函数。 datetime.timedelta()函数
+        接受关键字参数 weeks、 days、 hours、 minutes、 seconds、 milliseconds 和 microseconds。
+        没有 month 和 year 关键字参数，因为“月”和“年”是可变的时间，依赖于特定月
+        份或年份。 timedelta 对象拥有的总时间以天、秒、微秒来表示。这些数字分别保存
+        在 days、 seconds 和 microseconds 属性中。 total_seconds()方法返回只以秒表示的时
+        间。将一个 timedelta 对象传入 str()，将返回格式良好的、人类可读的字符串表示。
+        '''
+        # 利用+和-运算符， timedelta 对象与 datetime 对象或其他 timedelta 对象相加或相
+        # 减。利用*和/运算符， timedelta 对象可以乘以或除以整数或浮点数。
+        oct21st = datetime.datetime(2015, 10, 21, 16, 29, 0)
+        aboutThirtyYears = datetime.timedelta(days=365 * 30)
+        print(oct21st)      # datetime.datetime(2015, 10, 21, 16, 29)
+        print(oct21st - aboutThirtyYears)       # datetime.datetime(1985, 10, 28, 16, 29)
+        print(oct21st - (2 * aboutThirtyYears))     # datetime.datetime(1955, 11, 5, 16, 29)
+
+    def testCaseH(self):
+        '''1、
+            Unix 纪元时间戳和 datetime 对象对人类来说都不是很友好可读。利用 strftime()方
+        法，可以将 datetime 对象显示为字符串。（strftime()函数名中的 f 表示格式， format）。
+        该的 strftime()方法使用的指令类似于 Python 的字符串格式化。
+
+        strftime 指令 含义:
+            %Y       带世纪的年份，例如'2014'
+            %y       不带世纪的年份， '00'至'99'（1970 至 2069）
+            %m       数字表示的月份, '01'至'12'
+            %B       完整的月份，例如'November'
+            %b       简写的月份，例如'Nov'
+            %d       一月中的第几天， '01'至'31'
+            %j       一年中的第几天， '001'至'366'
+            %w       一周中的第几天， '0'（周日）至'6'（周六）
+            %A       完整的周几，例如'Monday'
+            %a       简写的周几，例如'Mon'
+            %H       小时（24 小时时钟）， '00'至'23'
+            %I       小时（12 小时时钟）， '01'至'12'
+            %M       分， '00'至'59'
+            %S       秒， '00'至'59'
+            %p       'AM'或'PM'
+            %%       就是'%'字符
+        '''
+        oct21st = datetime.datetime(2015, 10, 21, 16, 29, 0)
+        print(oct21st)
+        print(type(oct21st))
+        print(oct21st.strftime('%Y/%m/%d %H:%M:%S'))    # '2015/10/21 16:29:00'
+        print(oct21st.strftime('%I:%M %p'))     # '04:29 PM'
+        print(oct21st.strftime("%B of '%y"))       # "October of '15"
+
+        '''
+            如果有一个字符串的日期信息，如'2015/10/21 16:29:00'或'October 21, 2015'，需
+        要将它转换为 datetime 对象，就用 datetime.datetime.strftime()函数。 strptime()函数与
+        strftime()方法相反。定制的格式字符串使用相同的指令，像 strftime()一样。必须将
+        格式字符串传入 strptime()，这样它就知道如何解析和理解日期字符串（ strptime()
+        函数名中 p 表示解析， parse）  
+        '''
+
+        a = datetime.datetime.strptime('October 21, 2015', '%B %d, %Y')
+        print(a)
+        print(type(a))
+
 
 if __name__ == '__main__':
     dateTime = DateTimeTest()
-    dateTime.testCaseA()
-    dateTime.testCaseB()
-    dateTime.testCaseC()
-    dateTime.testCaseD()
+    # dateTime.testCaseA()
+    # dateTime.testCaseB()
+    # dateTime.testCaseC()
+    # dateTime.testCaseD()
+    # dateTime.testCaseG()
+    dateTime.testCaseH()
