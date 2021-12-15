@@ -101,8 +101,52 @@ class DateTimeTest(object):
         print(time.timezone)
 
 
+    def testCaseD(self):
+        oday = time.time()
+        today2 = time.localtime(1639533997)
+        oneDayAgoBeginStamp = datetime.datetime.now() - datetime.timedelta(days=1)
+
+        # print(today)
+        # print(today2)
+        # print(round(1639544973.9041646,3))
+
+        # 获取系统当前时间
+        now_time = datetime.datetime.now()
+        print(now_time)  # 2021-12-15 00:40:06.878866
+        print(type(now_time))  # <class 'datetime.datetime'>
+        # 将时间戳格式化为时间格式的字符串
+        yesterdayStr = (now_time + datetime.timedelta(days=-1)).strftime("%Y-%m-%d")
+        print(yesterdayStr)  # 021-12-14
+        print(type(yesterdayStr))  # <class 'str'>
+        # 将字符串转化为结构化时间struct_time。注意：时间格式字符串要与格式化字符串能够匹配
+        yesterdayStructTime = time.strptime(yesterdayStr, '%Y-%m-%d')
+        print(
+            yesterdayStructTime)  # time.struct_time(tm_year=2021, tm_mon=12, tm_mday=14, tm_hour=0, tm_min=0, tm_sec=0, tm_wday=1, tm_yday=348, tm_isdst=-1)
+        # 将结构化时间转换为时间（float类型的时间）
+        yesterdayStamp = time.mktime(yesterdayStructTime)
+        print(yesterdayStamp)  # 1639461600.0
+        print(type(yesterdayStamp))  # <class 'float'>
+
+        # 将float类型的数字转换 成本 地时间戳
+        a = datetime.datetime.fromtimestamp(yesterdayStamp)
+        # 将时间戳格式化为日期字符
+        a.strftime("%Y-%m-%d %H:%M:%S")
+        print(a)  # 2021-12-14 00:00:00
+        print(type(a))  # <class 'datetime.datetime'>
+        print(a.strftime("%Y-%m-%d %H:%M:%S"))  # 2021-12-14 06:00:00
+
+        # 将float类型的数字转换成 格林尼治 时间戳
+        b = datetime.datetime.utcfromtimestamp(yesterdayStamp)
+        # 将时间戳格式化为日期字符
+        b.strftime("%Y-%m-%d %H:%M:%S")
+        print(b)  # 2021-12-14 06:00:00
+        print(type(b))  # <class 'datetime.datetime'>
+        print(b.strftime("%Y-%m-%d %H:%M:%S"))  # 2021-12-14 06:00:00
+
+
 if __name__ == '__main__':
     dateTime = DateTimeTest()
     dateTime.testCaseA()
     dateTime.testCaseB()
     dateTime.testCaseC()
+    dateTime.testCaseD()
