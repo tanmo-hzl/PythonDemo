@@ -69,15 +69,24 @@ class IOTest(object):
         # 如果同时需要一个路径的目录名称和基本名称， 就可以调用 os.path.split()，获得这两个字符串的元组
         print('split======= ',os.path.split(os.path.abspath('.')))    # ('D:\\AppDocument\\Pycharm\\PythonDemo\\PythonFoundationDemo', 'BasicGrammar')
 
-        # 调用 os.path.getsize(path)将返回 path 参数中文件的字节数
+        # 调用 os.path.getsize(path)将返回 path 参数中文件的字节数.当参数为文件夹时，返回4096.当参数为文件地址时，返回的是文件的真实大小
+        print('getsize=======',os.path.getsize('D:\\AppDocument'))
 
         # 调用 os.listdir(path)将返回文件名字符串的列表，包含 path 参数中的每个文件
+        print('listdir=========',os.listdir(r'D:\AppDocument'))        # ['AxureRP9', 'Bandizip', 'Idea', 'Jmeter', 'PPT', 'Pycharm', 'Python', 'RobotFramework', 'Selenium', 'WeChat', 'Xmind']
+        print('listdir=========',type(os.listdir(r'D:\AppDocument')))     # 返回的值是一个List列表  <class 'list'>
 
         # 如果 path 参数所指的文件或文件夹存在， 调用 os.path.exists(path)将返回 True，否则返回 False。
+        print('exists==========',os.path.exists(r'D:\AppDocument\de'))  # False
 
         # 如果 path 参数存在，并且是一个文件，调用 os.path.isfile(path)将返回 True，否则返回 False。
+        print('isfile============',os.path.isfile(r'D:\chrome插件\singlefile.crx'))   # True
+        print('isfile============',os.path.isfile(r'D:\chrome插件'))      # False
+
 
         # 如果 path 参数存在，并且是一个文件夹， 调用 os.path.isdir(path)将返回 True，否则返回 False。
+        print('isdir============', os.path.isdir(r'D:\chrome插件\singlefile.crx'))  # False
+        print('isdir============', os.path.isdir(r'D:\chrome插件'))  # True
 
     # 文件的读写
     def testCaseB(self):
