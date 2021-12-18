@@ -23,7 +23,6 @@ import os
 
 '''
 
-
 class IOTest(object):
 
     # 文件路径的处理
