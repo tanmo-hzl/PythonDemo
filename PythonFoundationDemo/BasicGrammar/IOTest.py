@@ -21,10 +21,9 @@ import os
 --hzl@hzl-PC:/dev$ 
 2、
 
-
-
-
 '''
+
+
 class IOTest(object):
 
     # 文件路径的处理
