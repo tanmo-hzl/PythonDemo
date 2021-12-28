@@ -1,6 +1,0 @@
-robotframework-seleniumlibrary==5.1.3
-robotframework-selenium2library==3.0.0
-PyUserInput
-pyperclip
-configparser
-pywin32
