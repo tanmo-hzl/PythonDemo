@@ -11,12 +11,3 @@
 """
 
 
-class __init__.py(object):
-    '''
-    @ClassName：__init__.py
-    @Description：$END$
-    '''
-
-
-if __name__ == '__main__':
-    ci = __init__.py()
