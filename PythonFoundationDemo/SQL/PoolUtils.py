@@ -57,5 +57,6 @@ if __name__ == '__main__':
     conne = ci.get_pool_connection()
     cursor  = conne.cursor()
     result = cursor.execute('select * from student')
-    print(result)
+    print(result)   # 查询结果的条数
+    print(cursor.fetchall())    # 查询结果的列表
 
