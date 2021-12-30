@@ -8,7 +8,7 @@ import os
 @Time: 2021/12/17 22:08
 @Website: hezhilv@126.com
 @project: PythonDemo
-@FileName: IOTest.py
+@FileName: OSTest.py
 @Copyright: ©2019-2021 家灏信息科技有限公司
 """
 
@@ -23,7 +23,7 @@ import os
 
 '''
 
-class IOTest(object):
+class OSTest(object):
 
     # 文件路径的处理
     def testCaseA(self):
@@ -90,6 +90,6 @@ class IOTest(object):
     def testCaseB(self):
         pass
 if __name__ == '__main__':
-    ioTest = IOTest()
-    ioTest.testCaseA()
+    osTest = OSTest()
+    osTest.testCaseA()
     pass
