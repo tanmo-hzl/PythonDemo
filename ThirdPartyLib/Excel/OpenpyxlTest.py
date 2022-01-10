@@ -11,6 +11,7 @@
 """
 
 import openpyxl
+import os
 
 
 class OpenpyxlTest(object):
@@ -20,7 +21,10 @@ class OpenpyxlTest(object):
     '''
     def test_a(self):
         wb = openpyxl.Workbook()
-        wb.save('test.xlsx')
+        file_name = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),'TestData','OutputData','test.xlsx')
+
+        # wb.save('test.xlsx')
+        wb.save(file_name)
 
 
 if __name__ == '__main__':

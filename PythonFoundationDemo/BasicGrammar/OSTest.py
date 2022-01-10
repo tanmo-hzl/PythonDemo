@@ -89,7 +89,16 @@ class OSTest(object):
     # 文件的读写
     def testCaseB(self):
         pass
+
+
+    def testCaseYY(self):
+        print(__file__)
+        print(os.path.dirname(os.path.dirname(__file__)))
+
+
+
+
 if __name__ == '__main__':
     osTest = OSTest()
-    osTest.testCaseA()
+    osTest.testCaseYY()
     pass
