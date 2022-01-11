@@ -71,7 +71,7 @@ class OSTest(object):
         print('getsize=======',os.path.getsize('D:\\AppDocument'))
 
         # 调用 os.listdir(path)将返回文件名字符串的列表，包含 path 参数中的每个文件
-        print('listdir=========',os.listdir(r'D:\AppDocument'))        # ['AxureRP9', 'Bandizip', 'Idea', 'Jmeter', 'PPT', 'Pycharm', 'Python', 'RobotFramework', 'Selenium', 'WeChat', 'Xmind']
+        print('listdir=========',os.listdir(r'D:\AppDocument'))        # ['Bandizip', 'Idea', 'Jmeter', 'PPT', 'Pycharm', 'Python', 'RobotFramework', 'Selenium', 'WeChat', 'Xmind']
         print('listdir=========',type(os.listdir(r'D:\AppDocument')))     # 返回的值是一个List列表  <class 'list'>
 
         # 如果 path 参数所指的文件或文件夹存在， 调用 os.path.exists(path)将返回 True，否则返回 False。
@@ -100,5 +100,6 @@ class OSTest(object):
 
 if __name__ == '__main__':
     osTest = OSTest()
-    osTest.testCaseYY()
-    pass
+    # osTest.testCaseYY()
+    for i in range(1,6):
+        print(i)

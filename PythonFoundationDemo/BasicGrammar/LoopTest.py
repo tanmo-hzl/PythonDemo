@@ -78,7 +78,9 @@ class LoopTest(object):
 
     # 深入条件控制
     def test_case_b(self):
-        pass
+        # range(i,k)方法包左不包右
+        for i in range(1,6):
+            print(i)    # 输出结果：1    2   3   4   5
 
 
 
