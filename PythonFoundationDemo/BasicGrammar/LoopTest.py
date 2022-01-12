@@ -78,14 +78,32 @@ class LoopTest(object):
 
     # 深入条件控制
     def test_case_b(self):
-        # range(i,k)方法包左不包右
+        # range(i,k)方法包左不包右,i为起始值，K为终止值
         for i in range(1,6):
-            print(i)    # 输出结果：1    2   3   4   5
+            print(i)
+        '''输出结果：
+        1
+        2
+        3
+        4
+        5
+        '''
+        print("".center(80,'='))
 
+        # range(i,k,m)方法包左不包右,i为起始值，K为终止值,m为步长；步长可以为负数
+        for i in  range(6,1,-1):
+            print(i)
+        '''输出结果：
+        6
+        5
+        4
+        3
+        2        
+        '''
 
 
 
 
 if __name__ == '__main__':
     loop_test= LoopTest()
-    loop_test.test_case_a()
+    loop_test.test_case_b()
