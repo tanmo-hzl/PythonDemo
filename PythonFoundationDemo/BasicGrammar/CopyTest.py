@@ -16,6 +16,7 @@ class CopyTest(object):
 
     def test_copy_deepCopy_list(self):
         spam = [[0,1,2,3],'A','B','C','D']
+        # 对于列表中包含列表的多元列表，使用copy.deepcopy()函数来复制列表。copy.deepcopy()函数将会同时复制内嵌的列表。
         cheese = copy.deepcopy(spam)
         print(id(spam))         # result: 27977352
         print(id(cheese))       # result: 27977320
@@ -23,7 +24,7 @@ class CopyTest(object):
         print(spam)             # result: [[0, 1, 2, 3], 'A', 'B', 'C', 'D']
         print(cheese)           # result: [['a', 1, 2, 3], 'A', 'B', 'C', 'D']
 
-        # 对于多重元列表，当使用copy.copy()函数对列表进行复制时，列表中内嵌的列表传递的是地址的引用
+        # 对于列表中包含列表的多元列表，当使用copy.copy()函数对列表进行复制时，列表中内嵌的列表传递的是地址的引用
         temp = copy.copy(spam)
         temp[0][0] = 'cccB'
         print(temp)             # result: [['cccB', 1, 2, 3], 'A', 'B', 'C', 'D']
