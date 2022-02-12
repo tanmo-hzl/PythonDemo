@@ -1,6 +1,8 @@
 #!usr/bin/ python3
 # -*- coding:utf-8 -*-
 
+import re
+
 """
 @Description:
 @Author: hzlvxln
@@ -13,10 +15,9 @@
 
 
 class RegexTest(object):
-    '''
-    @ClassName：RegularTest
-    @Description：
-    '''
+    def test_regex_compile(self):
+        # compile 函数根据一个模式字符串和可选的标志参数生成一个正则表达式对象Regex。该对象拥有一系列方法用于正则表达式匹配和替换。
+        phoneNumRegex = re.compile()
 
 
 if __name__ == '__main__':
