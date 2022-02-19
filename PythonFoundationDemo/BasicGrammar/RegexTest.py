@@ -27,7 +27,7 @@ class RegexTest(object):
 
 
 
-
+    # 分组 : ()
     def test_regex_group(self):
         # 正则表达式字符串中的第一对括号是第1 组。第二对括号是第2 组。
         phoneNumRegex = re.compile(r'(\d{3})-(\d{3}-\d{4})')
@@ -47,7 +47,7 @@ class RegexTest(object):
         print(areaCode)         # 415
         print(mainNumber)       # 555-5656
 
-
+    #  管道符匹配多个分组：    |
     def test_regex_pipe(self):
         batRegex = re.compile(r'Bat(man|mobile|copter|bat)')
         mo = batRegex.search('Batmobile lost a wheel, Batbat')
@@ -55,7 +55,7 @@ class RegexTest(object):
         print(mo.group(1))      # mobile
         # print(mo.group(2))    # 报错。
 
-
+    # 问号实现可选匹配（零次或一次）：    ？
     def test_regex_zero_or_one(self):
         '''
             字符？表明它前面的分组在这个模式中是可选的。表示匹配这个问号之前的分组零次或一次。
@@ -75,22 +75,35 @@ class RegexTest(object):
         print(mo4.group())      # 555-5656
 
 
-
+    # 用星号匹配零次或多次：    *
     def test_regex_zero_or_more(self):
         '''
             字符* 意味着“匹配零次或多次”
 
         '''
-        pass
+        batRegex = re.compile(r'Bat(wo)*man')
+        mo1 = batRegex.search('The Adventures of Batman')
+        print(mo1.group())      # Batman
+        mo2 = batRegex.search('The Adventures of Batwoman')
+        print(mo2.group())      # Batwoman
+        mo3 = batRegex.search('The Adventures of Batwowowowoman')
+        print(mo3.group())      # Batwowowowoman
 
 
 
+    # 用加号匹配一次或多次：    +
     def test_regex_one_or_more(self):
         '''
             字符+ 意味着匹配一次或多次
 
         '''
-        pass
+        batRegex = re.compile(r'Bat(wo)+man')
+        mo1 = batRegex.search('The Adventures of Batman')
+        print(mo1==None)  # True
+        mo2 = batRegex.search('The Adventures of Batwoman')
+        print(mo2.group())  # Batwoman
+        mo3 = batRegex.search('The Adventures of Batwowowowoman')
+        print(mo3.group())  # Batwowowowoman
 
 
 
@@ -99,4 +112,6 @@ if __name__ == '__main__':
     # ci.test_regex_one()
     # ci.test_regex_group()
     # ci.test_regex_pipe()
-    ci.test_regex_zero_or_one()
+    # ci.test_regex_zero_or_one()
+    # ci.test_regex_zero_or_more()
+    ci.test_regex_one_or_more()
