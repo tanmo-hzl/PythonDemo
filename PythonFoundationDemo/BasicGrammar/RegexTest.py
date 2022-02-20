@@ -105,6 +105,25 @@ class RegexTest(object):
         mo3 = batRegex.search('The Adventures of Batwowowowoman')
         print(mo3.group())  # Batwowowowoman
 
+    # 用花括号匹配特定的次数：    {}
+    def test_regex_definite_number(self):
+        '''
+            花括号{}   意味着匹配特定的次数。
+            1.(ha){3}           : 匹配ha这个字符串三次，既匹配hahaha这个字符串
+            2.(ha){0,3}         : 匹配ha这个字符串0次到3次。
+            3.(ha){,3}          : 匹配ha这个字符串0次到3次。
+            4.(ha){3,}          : 匹配ha这个字符串3次或更多次。
+        '''
+        batRegex  = re.compile(r'Bat(wo){3,}man')
+        mo1 = batRegex.search('The Adventures of Batwowoman')
+        print(mo1==None)        # True
+        mo2 = batRegex.search('The Adventures of Batwowowoman')
+        print(mo2.group())      # Batwowowoman
+        mo3 = batRegex.search('The Adventures of Batwowowowowowoman')
+        print(mo3.group())      # Batwowowowowowoman
+
+
+
 
 
 if __name__ == '__main__':
@@ -114,4 +133,5 @@ if __name__ == '__main__':
     # ci.test_regex_pipe()
     # ci.test_regex_zero_or_one()
     # ci.test_regex_zero_or_more()
-    ci.test_regex_one_or_more()
+    # ci.test_regex_one_or_more()
+    ci.test_regex_definite_number()
