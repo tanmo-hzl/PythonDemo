@@ -179,6 +179,28 @@ class RegexTest(object):
 
 
 
+    def test_regex_dotall(self):
+        '''
+            点-星将匹配除换行外的所有字符。通过传入re.DOTALL 作为re.compile()的第
+        二个参数，可以让句点字符匹配所有字符，包括换行字符
+        '''
+        noNewlineRegex = re.compile('.*')
+        mo1 = noNewlineRegex.search('Serve the public trust.\nProtect the innocent.\nUphold the law.')
+        print(mo1.group())      # result: Serve the public trust.
+
+        newLineRegex = re.compile('.*',re.DOTALL)
+        mo2 = newLineRegex.search('Serve the public trust.\nProtect the innocent.\nUphold the law.')
+        print(mo2.group())      # result:  'Serve the public trust.\nProtect the innocent.\nUphold the law.'
+        ''' 
+            正则表达式noNewlineRegex 在创建时没有向re.compile()传入re.DOTALL，它
+        将匹配所有字符，直到第一个换行字符。但是，newlineRegex 在创建时向re.compile()传
+        入了re.DOTALL，它将匹配所有字符。这就是为什么newlineRegex.search()调用匹配完
+        整的字符串，包括其中的换行字符。
+        '''
+
+
+
+
 
 
 
@@ -193,5 +215,6 @@ if __name__ == '__main__':
     # ci.test_regex_zero_or_more()
     # ci.test_regex_one_or_more()
     # ci.test_regex_definite_number()
-    ci.test_regex_greedy()
+    # ci.test_regex_greedy()
     # ci.test_regex_findall()
+    ci.test_regex_dotall()
