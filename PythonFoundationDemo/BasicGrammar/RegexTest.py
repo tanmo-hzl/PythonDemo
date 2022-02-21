@@ -142,6 +142,15 @@ class RegexTest(object):
 
 
     def test_regex_findall(self):
+        '''
+            作为 findall()方法的返回结果的总结，请记住下面两点：
+                1．如果调用在一个没有分组的正则表达式上，例如\d\d\d-\d\d\d-\d\d\d\d，方法
+            findall()将返回一个匹配字符串的列表，例如['415-555-9999', '212-555-0000']。
+                2．如果调用在一个有分组的正则表达式上，例如(\d\d\d)-(\d\d\d)-(\d\d\d\d)，方
+            法findall()将返回一个字符串的元组的列表（每个分组对应一个字符串），例如[('415',
+            '555', '1122'), ('212', '555', '0000')]。
+
+        '''
         # search()方法返回的Match对象只包含第一次出现的匹配文本
         phoneNumRegex1 = re.compile(r'\d\d\d-\d\d\d-\d\d\d\d')
         mo1 = phoneNumRegex1.search('Cell: 415-555-9999 Work: 212-555-0000')
