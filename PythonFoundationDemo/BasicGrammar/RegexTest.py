@@ -131,14 +131,24 @@ class RegexTest(object):
                 请注意，问号在正则表达式中可能有两种含义：申明非贪心匹配或表示可选的分组。这两种含义是完全无关的。
         '''
         # 贪婪匹配，表示在有二意的情况下，尽可以多的匹配最长的字符串。Python中默认是贪婪匹配。
-        greedyHaRegex = re.compile(r'(Ha){3,5}')
-        mo1 = greedyHaRegex.search('HaHaHaHaHaHa')
+        greedyHaRegex1 = re.compile(r'(Ha){3,5}')
+        mo1 = greedyHaRegex1.search('HaHaHaHaHaHa')
         print(mo1.group())      # result: HaHaHaHaHa
 
         # 非贪婪匹配，匹配尽可能最短的字符串。 格式：  {start,end}?
-        nongreedyHaRegex = re.compile(r'(Ha){3,5}?')
-        mo2 = nongreedyHaRegex.search('HaHaHaHaHaHa')
-        print(mo2.group())      # result:HaHaHa
+        nongreedyHaRegex1 = re.compile(r'(Ha){3,5}?')
+        mo2 = nongreedyHaRegex1.search('HaHaHaHaHaHa')
+        print(mo2.group())      # result: HaHaHa
+
+        nongreedyRegex2 = re.compile(r'<.*?>')
+        mo3 = nongreedyRegex2.search('<To serve man> for dinner.>')
+        print(mo3.group())      # result: <To serve man>
+
+        greedyRegex2 = re.compile(r'<.*>')
+        mo4 = greedyRegex2.search('<To serve man> for dinner.>')
+        print(mo4.group())      # result: <To serve man> for dinner.>
+
+
 
 
     def test_regex_findall(self):
@@ -183,5 +193,5 @@ if __name__ == '__main__':
     # ci.test_regex_zero_or_more()
     # ci.test_regex_one_or_more()
     # ci.test_regex_definite_number()
-    # ci.test_regex_greedy()
-    ci.test_regex_findall()
+    ci.test_regex_greedy()
+    # ci.test_regex_findall()
