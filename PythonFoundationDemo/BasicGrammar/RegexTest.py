@@ -141,6 +141,25 @@ class RegexTest(object):
         print(mo2.group())      # result:HaHaHa
 
 
+    def test_regex_findall(self):
+        # search()方法返回的Match对象只包含第一次出现的匹配文本
+        phoneNumRegex1 = re.compile(r'\d\d\d-\d\d\d-\d\d\d\d')
+        mo1 = phoneNumRegex1.search('Cell: 415-555-9999 Work: 212-555-0000')
+        print(mo1.group())      # result: 415-555-9999
+
+        # findall()方法将返回一个字符串列表，包含被查询字符串中的所有匹配。
+        allResult1 = phoneNumRegex1.findall('Cell: 415-555-9999 Work: 212-555-0000')
+        print(type(allResult1))      # result:   <class 'list'>
+        print(allResult1)            # result:   ['415-555-9999', '212-555-0000']
+
+        # 如果正则表达式中有分组，那么findall()方法将返回元组的列表。每个元祖表示一个找到的匹配，
+        # 其中的项就是正则表达式中每个分组的匹配字符串。
+        phoneNumRegex2 = re.compile(r'(\d\d\d)-(\d\d\d)-(\d\d\d\d)')
+        allResult2 = phoneNumRegex2.findall('Cell: 415-555-9999 Work: 212-555-0000')
+        print(allResult2)       # result: [('415', '555', '9999'), ('212', '555', '0000')]
+
+
+
 
 
 
@@ -155,4 +174,5 @@ if __name__ == '__main__':
     # ci.test_regex_zero_or_more()
     # ci.test_regex_one_or_more()
     # ci.test_regex_definite_number()
-    ci.test_regex_greedy()
+    # ci.test_regex_greedy()
+    ci.test_regex_findall()
