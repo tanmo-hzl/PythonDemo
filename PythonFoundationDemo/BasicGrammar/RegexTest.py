@@ -200,6 +200,23 @@ class RegexTest(object):
 
 
 
+    def test_regex_ignorecase(self):
+        '''
+        有时候我们只关心匹配字母，不关心他们是大写或是小写。要让正则表达式不区分大小写。
+        可以向re.compile()中传入re.IGNORECASE或re.I,作为第二个参数。
+        '''
+        robocop = re.compile(r'robocop',re.IGNORECASE)
+        mo1 = robocop.search('RoboCop is part man, part machine, all cop.')
+        print(mo1.group())      # result: RoboCop
+
+        mo2 = robocop.search('ROBOCOP protects the innocent')
+        print(mo2.group())      # result:  ROBOCOP
+
+        mo3 = robocop.search('Al, why does your programming book talk about robocop so much?')
+        print(mo3.group())      # result:  robocop
+
+
+
 
 
 
@@ -217,4 +234,6 @@ if __name__ == '__main__':
     # ci.test_regex_definite_number()
     # ci.test_regex_greedy()
     # ci.test_regex_findall()
-    ci.test_regex_dotall()
+    # ci.test_regex_dotall()
+    ci.test_regex_ignorecase()
+
