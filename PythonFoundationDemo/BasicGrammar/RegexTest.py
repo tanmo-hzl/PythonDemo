@@ -217,6 +217,13 @@ class RegexTest(object):
 
 
 
+    def test_regex_sub(self):
+        namesRegex = re.compile(r'Agent \w+')
+        resultString = namesRegex.sub('CENSORED','Agent Alice gave the secret documents to Agent Bob.')
+        print(resultString)     # result: CENSORED gave the secret documents to CENSORED.
+
+
+
 
 
 
@@ -235,5 +242,5 @@ if __name__ == '__main__':
     # ci.test_regex_greedy()
     # ci.test_regex_findall()
     # ci.test_regex_dotall()
-    ci.test_regex_ignorecase()
-
+    # ci.test_regex_ignorecase()
+    ci.test_regex_sub()
