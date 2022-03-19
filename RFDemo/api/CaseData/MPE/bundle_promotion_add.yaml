@@ -1,0 +1,154 @@
+Ba1Gb1_free:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131102","zyx2021131103","zyx2021131104","zyx2021131113","zyx2021131115"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0"
+      piece: 1
+      sku: [ "zyx20211224","zyx2021132103","zyx2021132104","zyx2021132113","zyx2021132115"]
+
+priority95_Ba1Gb1_free:
+  priority: 95
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131101"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0"
+      piece: 1
+      sku: ["zyx2021132101"]
+
+
+priority95_Ba1Gb1_50%:
+  priority: 95
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131401","zyx2021131402","zyx2021131403"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0.5"
+      piece: 1
+      sku: ["zyx2021132401","zyx2021132402","zyx2021132403"]
+
+Ba1Gb1_50%:
+  priority: 70
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131105","zyx2021131106"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0.5"
+      piece: 1
+      sku: [ "zyx2021132105","zyx2021132106"]
+
+
+
+Ba1Gb1_10%:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131114","zyx2021131115"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0.9"
+      piece: 1
+      sku: [ "zyx2021132114","zyx2021132115"]
+
+
+Ba1Gb1_fixed-amount5:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131107","zyx2021131108","zyx2021131109"]
+    - bundleClass: 2
+      bundleType: bundle_type_fix_amount
+      priceOrDiscount: "5"
+      piece: 1
+      sku: [ "zyx2021132107","zyx2021132108","zyx2021132109"]
+
+
+Ba1Gb1_price4.99:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 1
+      sku: ["zyx2021131110","zyx2021131111","zyx2021131112","zyx2021131116","zyx2021131117"]
+    - bundleClass: 2
+      bundleType: bundle_type_price
+      priceOrDiscount: "4.99"
+      piece: 1
+      sku: [ "zyx2021132110","zyx2021132111","zyx2021132112","zyx2021132116","zyx2021132117"]
+
+priority95_Ba2Gb1_free:
+  priority: 95
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 2
+      sku: ["zyx2021131301","zyx2021131302"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0"
+      piece: 1
+      sku: [ "zyx2021132301","zyx2021132302"]
+
+Ba2Gb1_free:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_discount
+      priceOrDiscount: "1"
+      piece: 2
+      sku: ["zyx2021131303"]
+    - bundleClass: 2
+      bundleType: bundle_type_discount
+      priceOrDiscount: "0"
+      piece: 1
+      sku: ["zyx2021132303"]
+
+
+bundle_price_3item_100:
+  excludeCouponItem: False
+  promotionBundle:
+    - bundleClass: 1
+      bundleType: bundle_type_price
+      priceOrDiscount: "75.75"
+      piece: 1
+      sku: ["zyx20220102","zyx20220104"]
+    - bundleClass: 2
+      bundleType: bundle_type_price
+      priceOrDiscount: "15.90"
+      piece: 1
+      sku: [ "zyx20220103","zyx20220105"]
+    - bundleClass: 3
+      bundleType: bundle_type_price
+      priceOrDiscount: "8.35"
+      piece: 1
+      sku: [ "zyx20220101","zyx20220106"]

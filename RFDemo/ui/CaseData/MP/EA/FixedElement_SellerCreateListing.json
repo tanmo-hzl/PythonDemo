@@ -1,0 +1,117 @@
+{
+  "step1": {
+    "@placeholder": [
+      "Enter listing title",
+      "Search listing category, such as Art Supplies, Christmas",
+      "Enter Seller SKU",
+      "Enter brand name",
+      "Enter manufacturer name",
+      "Please enter a description for your listing.",
+      "Add listing tags",
+      "YYYY-MM-DD"
+    ],
+    "h3": [
+      "Listing Date Range"
+    ],
+    "h4": [
+      "Product Description",
+      "Tags"
+    ],
+    "p": [
+      "Download Listing Category/Taxonomy",
+      "Start with a brief overview that describes your item’s finest features, such as item dimensions (length, width, height). Shoppers will only see the first few lines of your description at first, so make it count! This will be an overview of the key selling points of the item, marketing content, and highlights in paragraph form. For SEO purposes, repeat the product name and relevant keywords here.",
+      "Tags help your listing get indexed in search and appear to more shoppers.",
+      "Select the date you want your item to go live on Michaels.com, and the date you want it to be unpublished (optional). Items will go live or become unpublished at 12:00 AM CT on the dates provided. Delays might happen due to the item tax code assignment."
+    ],
+    "div": [
+      "Click here to learn more details"
+    ]
+  },
+  "step2": {
+    "h1": [
+      "Inventory, Pricing and Photos"
+    ],
+    "h3": [
+      "Photos",
+      "Video (Optional)",
+      "Pricing and Inventory"
+    ],
+    "p": [
+      "You can upload photos for your main listing in this section. Most of the sellers have at least 3 photos in their listing. You can start with just 1 photo and come back later to add more.",
+      " to learn more about photos.",
+      "We only accept video links from Vimeo and YouTube. Only one video is allowed per listing.",
+      "Do you want to create variants for this listing?"
+    ],
+    "!contains": [
+      "Add price and inventory on a product below if it has only one item. If there are multiple variants, such as color, size, or pattern, switch toggle to yes. All variants will appear on the main listing, giving customers options on which to purchase."
+    ],
+    "span": [
+      "Click here for more details"
+    ],
+    "!remove": [
+      "Subscription",
+      "Does this listing have subscription discounts?",
+      "If you select yes for this question, Michaels shoppers can repurchase your products through weekly or monthly subscriptions. You can provide discounts for repeat deliveries. ",
+      "to learn more about offering subscription discounts to customers"
+    ]
+  },
+  "step3": {
+    "h1": [
+      "Shipping and Return"
+    ],
+    "@placeholder": [
+      "Enter primary color display name",
+      "Enter global trade item number"
+    ],
+    "h4": [
+      "Item Attributes",
+      "Shipping Rate Table",
+      "Override Shipping Rate",
+      "Return Location"
+    ],
+    "p": [
+      "Item volume is the product measurements using the following formula length × width × height (Ex: 15 × 25 × 5 = 1875). You can enter 1875 in the item volume section.",
+      "Here are the requirements for standard shipping.",
+      "Is the item ground shipping only?",
+      "Is this item being shipped to AK and/or HI? ",
+      "Does the package reveal the contents of the item?",
+      "Item ships in original packaging and may reveal contents.",
+      "Does the listing include hazardous items?",
+      "Does the listing include flammable items?",
+      "These are the default shipping rates set up for your storefront. If you want to make changes to the shipping rate table, please do so",
+      "Set up a custom shipping rate for this listing by enabling the toggle below. You may assign a shipping cost to all shipping methods you’d like to offer.",
+      "We have autofilled your store default return policy. You can manage your return policies under",
+      "My Store - Store Setting - Return.",
+      "Address",
+      "Return Center Hours",
+      "Observed Holidays",
+      "The return center will not open in the following holidays.",
+      "Your current store return policy:",
+      "The “No Returns” policy keeps customers from returning this item even if this purchase doesn’t meet their standards. To ensure customer satisfaction, we recommend allowing users to return items. If you’d like to change your return policy for this item, you may do so by toggling the question below to “yes.”",
+      "Would you like to override your shipping return policy for this item?"
+    ],
+    "a": [
+      "in My Store - Store Setting - Fulfillment"
+    ],
+    "!remove": [
+      "Is the item restricted to AK and HI Shipping?",
+      "If you’re shipping to Alaska or Hawaii, add any additional fees below.",
+      "They’ll be added to the shipping rates at checkout."
+    ]
+  },
+  "step4": {
+    "h2": [
+      "Listing Confirmation"
+    ],
+    "h3": [
+      "Description",
+      "Shipping & Returns",
+      "Store Information"
+    ],
+    "button": [
+      "DESCRIPTION",
+      "SHIPPING & RETURNS",
+      "STORE INFORMATION"
+    ]
+  }
+}

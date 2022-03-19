@@ -1,0 +1,32 @@
+{
+    "orderNumber": "ORDERe4",
+    "buyer": {
+        "id": "555"
+    },
+    "coupon": [],
+    "promotion": [],
+    "codes": "",
+    "subOrder": [
+        {
+            "orderNumber": "ORDERe4-0",
+            "channel": "michaels.com",
+            "store": "0",
+            "item": [
+                {
+                    "sku": "10659459",
+                    "piece": 1,
+                    "price": 19.99,
+                    "amount": 19.99,
+                    "itemType": "REGULAR",
+                    "scheduleId": null,
+
+                    "promotion": [],
+                    "coupon": []
+                }
+            ],
+            "coupon": [],
+            "promotion": []
+        }
+    ],
+    "preview": true
+}

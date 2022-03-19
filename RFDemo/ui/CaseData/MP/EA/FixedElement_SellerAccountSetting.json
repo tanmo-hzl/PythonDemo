@@ -1,0 +1,25 @@
+{
+  "h2": [
+    "Account Settings"
+  ],
+  "h4": [
+    "Two Step Verification",
+    "Change Password",
+    "Device History"
+  ],
+  "p": [
+    "By leaving this additional security measure disabled, your Michaels account will not be protected from unauthorized access. Select Enable below to activate this Two Step Verification security option. Then simply enter your mobile phone number and email address below. After that we will send you a text message with a XX-digit verification code to enter on this screen, and an email with a link to verify.",
+    "Enter your current password then you can reset your password by entering a new one below, then select Change Password. Please adhere to the following requirements:",
+    "You can see computers, phones, and other mobile devices that are currently using or have recently used your Michaels Account. Check the below account sign in, information to make sure no one else has signed into your account. If you identify an unauthorized account entry, select Logout to the right, which will sign your account out on that device."
+  ],
+  "label": [
+    "Enter Current Password",
+    "Email",
+    "New Password",
+    "Confirm Password"
+  ],
+  "div": [
+    "CONTINUE VERIFICATION",
+    "CHANGE PASSWORD"
+  ]
+}

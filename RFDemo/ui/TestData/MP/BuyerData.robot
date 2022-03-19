@@ -1,0 +1,5 @@
+*** Variables ***
+${BUYER_EMAIL}
+${BUYER_NAME}
+${BUYER_PWD}
+${BUYER_PWD_NEW}

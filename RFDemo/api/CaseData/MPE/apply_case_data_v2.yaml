@@ -1,0 +1,922 @@
+defect: &item
+  [ { "sku": "zyx10593749","piece": 1,"price": 13.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 }]
+
+item: &item1
+  [ { "sku": zyx12341111111,"piece": 1,"price": 5.00 },
+    { "sku": zyx20211223,"piece": 1,"price": 20.00 },
+    { "sku": zyx12341111113,"piece": 1,"price": 2.00,"tag": [ clearanceitem ] },
+    { "sku": zyx88888883,"piece": 1,"price": 25.00 },
+    { "sku": zyx12341111114,"piece": 1,"price": 6.00 },
+    { "sku": zyx20211222,"piece": 1,"price": 16.00 } ]
+
+ERPPvsAorpivsEntire_item: &item2
+  [ { "sku": "zyx20211226","piece": 1,"price": 39.98 },
+    { "sku": "zyx20211225","piece": 1,"price": 39.98 },
+    { "sku": "zyx20211300","piece": 1,"price": 19.99 },
+    { "sku": "zyx20211301","piece": 1,"price": 15.99 },
+    { "sku": "zyx20211302","piece": 1,"price": 18.00 }]
+
+
+
+Percent50%OffvsPrice5–price5winning(uc1):
+  order: ["item": [ { "sku": "zyx10593749","piece": 1,"price": 13.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 }]]
+  expect: { "order1":"8.99","zyx10593749":"5.00","zyx99999":"9.99"}
+
+50%Offvs$5Off–50%Offwinning:
+  order: [ "item": [ { "sku": "zyx10404931","piece": 1,"price": 9.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+  expect: { "order1": "5.00","zyx10404931": "4.99","zyx99999": "9.99" }
+
+50%OffvsPrice3–50%winning(uc1a):
+  expect: { "order1":"2.50","zyx10420076":"2.49","zyx99999":"9.99"}
+  order: ["item": [ { "sku": "zyx10420076","piece": 1,"price": 4.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 }]]
+
+PercentOffvs$4Off–$4winning:
+  expect: { "order1": "4.00","zyx10051503": "2.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10051503","piece": 1,"price": 6.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+50%OffvsPrice14.99vs$15–AnyoneOfferCouldWin(uc3):
+  expect: { "order1": "15.00","zyx10194861": "14.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10194861","piece": 1,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsPrice17.99vs$10–17.99AnyoneOfferCouldwin(uc3a):
+  expect: { "order1": "12.00","zyx10274416": "17.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10274416","piece": 1,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%vsPrice15.99vs$10–15.99priceWin(uc3b):
+  expect: { "order1": "28.00","zyx10603259": "31.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10603259","piece": 2,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+60%OffvsBOGOFree(1item)–60%offwin(uc4):
+  expect: { "order1": "19.80","zyx10573460": "13.19","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10573460","piece": 1,"price": 32.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+60%OffvsBOGOFree(2item)–60%offwin(uc4a):
+  expect: { "order1": "39.60","zyx10573460": "26.38","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10573460","piece": 2,"price": 32.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+30%OffvsBOGOFree(1item)–30%offwin(uc5):
+  expect: { "order1": "9.00","zyx10542589": "20.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10542589","piece": 1,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+30%OffvsBOGOFree(2item)–BOGOFreewin(uc5a):
+  expect: { "order1": "29.99","zyx10542589": "29.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10542589","piece": 2,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO50%(1item)–40%offwin(uc6):
+  expect: { "order1": "16.00","zyx10400212": "23.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10400212","piece": 1,"price": 39.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO50%(2item)–40%offwin(uc6a):
+  expect: { "order1": "32.00","zyx10400212": "47.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10400212","piece": 2,"price": 39.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO50%(1item)–20%offwin(uc7):
+  expect: { "order1": "6.00","zyx10514716": "23.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10514716","piece": 1,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO50%(2item)–BOGO50%win(uc7a):
+  expect: { "order1": "15.00","zyx10514716": "44.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10514716","piece": 2,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO$10(1item)–40%offwin(uc8):
+  expect: { "order1": "12.00","zyx10547599": "17.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10547599","piece": 1,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO$10(2item)–40%offwin(uc8a):
+  expect: { "order1": "24.00","zyx10547599": "35.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10547599","piece": 2,"price": 29.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO$10(1item)–20%offwin(uc9):
+  expect: { "order1": "2.70","zyx10530930": "10.79","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10530930","piece": 1,"price": 13.49 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO$10(2item)–BOGO$10win(uc9a):
+  expect: { "order1": "10.00","zyx10530930": "16.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10530930","piece": 2,"price": 13.49 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO$15.99(1item)–40%win(uc17):
+  expect: { "order1": "10.00","zyx10665936": "14.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10665936","piece": 1,"price": 24.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+40%OffvsBOGO$15.99(2item)–40%win(uc17a):
+  expect: { "order1": "20.00","zyx10665936": "29.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10665936","piece": 2,"price": 24.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO$15.99Off(1item)–20%offwin(uc17b):
+  expect: { "order1": "7.00","zyx10665940": "27.99","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10665940","piece": 1,"price": 34.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+20%OffvsBOGO$15.99Off(2item)–BOGO$15.99win(uc17c):
+  expect: { "order1": "19.00","zyx10665940": "50.98","zyx99999": "9.99" }
+  order: [ "item": [ { "sku": "zyx10665940","piece": 2,"price": 34.99 },{ "sku": "zyx99999","piece": 1,"price": 9.99 } ] ]
+
+
+AORPI40%Vs50%Off–50%_win(uc18):
+  codes: zyx2022666aorpi40
+  expect: { "order1": "4.75","zyx10414178": "4.74" }
+  order: [ "item": [ { "sku": "zyx10414178","piece": 1,"price": 9.49 } ] ]
+
+AORPI40%Vs$price3_Off–price3_win(uc18a):
+  codes: zyx2022666aorpi40
+  expect: { "order1": "1.49","zyx10547590": "3.00" }
+  order: [ "item": [ { "sku": "zyx10547590","piece": 1,"price": 4.49 } ] ]
+
+AORPI40%Vs$4_Off–$4_win(uc18b):
+  codes: zyx2022666aorpi40
+  expect: { "order1": "4.00","zyx10058220": "3.49" }
+  order: [ "item": [ { "sku": "zyx10058220","piece": 1,"price": 7.49 } ] ]
+
+AORPI60%Vs50%Off–50%_win(uc18c):
+  codes: zyx2022666aorpi60
+  expect: { "order1": "4.75","zyx10414178": "4.74" }
+  order: [ "item": [ { "sku": "zyx10414178","piece": 1,"price": 9.49 } ] ]
+
+AORPI60%Vsprice3–price3_win(uc18d):
+  codes: zyx2022666aorpi60
+  expect: { "order1": "1.49","zyx10547590": "3.00" }
+  order: [ "item": [ { "sku": "zyx10547590","piece": 1,"price": 4.49 } ] ]
+
+AORPI60%Vs$4_Off–$4_win(uc18e):
+  codes: zyx2022666aorpi60
+  expect: { "order1": "4.00","zyx10058220": "3.49" }
+  order: [ "item": [ { "sku": "zyx10058220","piece": 1,"price": 7.49 } ] ]
+
+AORPI60%Vs_BOGOFree(1item)–AORPI60%_win(uc19):
+  codes: zyx2022666aorpi60
+  expect: { "order1": "12.00","zyx10635804": "7.99" }
+  order: [ "item": [ { "sku": "zyx10635804","piece": 1,"price": 19.99 } ] ]
+
+AORPI50%Vs_BOGOFree(2item)–BOGOFree_win(uc19a):
+  codes: zyx2022666aorpi50
+  expect: { "order1": "19.99","zyx10635804": "19.99" }
+  order: [ "item": [ { "sku": "zyx10635804","piece": 2,"price": 19.99 } ] ]
+
+AORPI50%Vs_Buy3andAboveGet50%(2item)–AORPI50%_win(uc19b):
+  codes: zyx2022666aorpi50
+  expect: { "order1": "5.00","zyx10603257": "15.00" }
+  order: [ "item": [ { "sku": "zyx10603257","piece": 2,"price": 10.00 } ] ]
+
+AORPI50%Vs_Buy3andAboveGet50%(3item)–Buy3andAboveGet50%_win(uc19c):
+  codes: zyx2022666aorpi50
+  expect: { "order1": "15.00","zyx10603257": "15.00" }
+  order: [ "item": [ { "sku": "zyx10603257","piece": 3,"price": 10.00 } ] ]
+
+Aorpi50%OffvsBAGB50%(buyA)-Aorpi50%: #uc20
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131401,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "10.00","zyx2021131401": "9.99" }
+
+Aorpi50%OffvsBAGB50%(buyB)-Aorpi50%: #uc21
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021132401,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021132401": "4.99" }
+
+Aorpi50%OffvsBAGB50%(buyA+B)-BAGB50%: #uc22
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131401,"piece": 1,"price": 19.99 },{ "sku": zyx2021132401,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131401": "19.99","zyx2021132401":"4.99" }
+
+Aorpi50%OffvsBAGB$5(buyA)-Aorpi50%: #uc20a
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131109,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "10.00","zyx2021131109": "9.99" }
+
+Aorpi50%OffvsBAGB$5(buyB)-Aorpi50%: #uc21a
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021132109,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021132109": "4.99" }
+
+Aorpi50%OffvsBAGB$5(buyA+B)-BAGB$5: #uc22a
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131109,"piece": 1,"price": 19.99 },{ "sku": zyx2021132109,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131109": "19.99","zyx2021132109":"4.99" }
+
+Aorpi50%OffvsBAGBprice4.99(buyA)-Aorpi50%: #uc20b
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131110,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "10.00","zyx2021131110": "9.99" }
+
+Aorpi50%OffvsBAGBprice4.99(buyB)-Aorpi50%: #uc21b
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021132110,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021132110": "4.99" }
+
+Aorpi50%OffvsBAGBprice4.99(buyA+B)-BAGBprice4.99: #uc22b
+  codes: zyx2022666aorpi50
+  order: [ "item": [ { "sku": zyx2021131110,"piece": 1,"price": 19.99 },{ "sku": zyx2021132110,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131110": "19.99","zyx2021132110":"4.99" }
+
+40%OffvsBAGBfor$4.99(buyB)-40%win: #uc23
+  order: [ "item": [ { "sku": zyx2021132111,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "4.00","zyx2021132111": "5.99" }
+
+40%OffvsBAGBfor$4.99(buyA+B)-BAGBfor$4.99: #uc23a
+  order: [ "item": [ { "sku": zyx2021131111,"piece": 1,"price": 19.99 },{ "sku": zyx2021132111,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131111": "19.99","zyx2021132111": "4.99" }
+
+60%OffvsBAGBfor$4.99(buyB)-60%win: #uc24
+  order: [ "item": [ { "sku": zyx2021132112,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021132112": "3.99" }
+
+60%OffvsBAGBfor$4.99(buyA+B)-60%win: #uc24a
+  order: [ "item": [ { "sku": zyx2021131112,"piece": 1,"price": 19.99 },{ "sku": zyx2021132112,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021131112": "19.99","zyx2021132112": "3.99" }
+
+50%OffvsBAGBfree(stacking)-BAGBfree+50%: #uc25
+  order: [ "item": [ { "sku": zyx2021131101,"piece": 1,"price": 19.99 },{ "sku": zyx2021132101,"piece": 1,"price": 9.99 } ] ]
+  expect: { "order1": "19.99","zyx2021131101": "9.99","zyx2021132101": "0.00" }
+
+40%OffVsB2G1Free(3item)–40%win(uc28):
+  order: [ "item": [ { "sku": zyx20211229,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "36.00","zyx20211229": "53.97" }
+
+15%OffVsB2G150%(3item)–B2G150%win(uc28a):
+  order: [ "item": [ { "sku": zyx2021132,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "15.00","zyx2021132": "74.97" }
+
+40%OffVsB2G1$15(3item)–40%(uc28b):
+  order: [ "item": [ { "sku": zyx20211228,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "36.00","zyx20211228": "53.97" }
+
+15%OffVsB2G1for14.99(3item)–B2G1for14.99win(uc28c):
+  order: [ "item": [ { "sku": zyx2021140,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "15.00","zyx2021140": "74.97" }
+
+50%OffvsBAGB50%(stacking)-BAGB50%+50%: #uc29
+  order: [ "item": [ { "sku": zyx2021131402,"piece": 1,"price": 19.99 },{ "sku": zyx2021132402,"piece": 1,"price": 9.99 } ] ]
+  expect: { "order1": "17.50","zyx2021131402": "9.99","zyx2021132402": "2.49" }
+
+50%OffvsB2AG1Bfree(stacking)-B2AG1Bfree+50%: #uc29a
+  order: [ "item": [ { "sku": zyx2021131301,"piece": 1,"price": 19.99 },
+                     { "sku": zyx2021131302,"piece": 1,"price": 19.99 },
+                     { "sku": zyx2021132301,"piece": 1,"price": 9.99 } ] ]
+  expect: { "order1": "29.99","zyx2021131301": "9.99","zyx2021131302":"9.99","zyx2021132301": "0.00" }
+
+17.99VsB2G1Free(3item)–17.99win(uc30):
+  order: [ "item": [ { "sku": zyx2021130,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "36.00","zyx2021130": "53.97" }
+
+25.49VsB2G150%(3item)–B2G150%win(uc30a):
+  order: [ "item": [ { "sku": zyx2021133,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "15.00","zyx2021133": "74.97" }
+
+17.99VsB2G1$15(3item)–17.99win(uc31):
+  order: [ "item": [ { "sku": zyx2021136,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "36.00","zyx2021136": "53.97" }
+
+25.49VsB2G1for14.99(3item)–B2G1for14.99win(uc31a):
+  order: [ "item": [ { "sku": zyx2021138,"piece": 3,"price": 29.99 }  ] ]
+  expect: { "order1": "15.00","zyx2021138": "74.97" }
+
+price5vsBAGBfor$4.99(buyB)-price5win: #uc32
+  order: [ "item": [ { "sku": zyx2021132116,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "4.99","zyx2021132116": "5.00" }
+
+price5vsBAGBfor$4.99(buyA+B)-BAGBfor$4.99win: #uc32a
+  order: [ "item": [ { "sku": zyx2021131116,"piece": 1,"price": 19.99 },{ "sku": zyx2021132116,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131116": "19.99","zyx2021132116": "4.99" }
+
+price3vsBAGBfor$4.99(buyB)-price3win: #uc33
+  order: [ "item": [ { "sku": zyx2021132117,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.99","zyx2021132117": "3.00" }
+
+price3vsBAGBfor$4.99(buyA+B)-price3win: #uc33a
+  order: [ "item": [ { "sku": zyx2021131117,"piece": 1,"price": 19.99 },{ "sku": zyx2021132117,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.99","zyx2021131117": "19.99","zyx2021132117": "3.00" }
+
+BOGOFreeVsBOGO40%(2item)–BOGOFreewin(uc34):
+  order: [ "item": [ { "sku": zyx10550020,"piece": 2,"price": 8.00 }] ]
+  expect: { "order1": "8.00","zyx10550020": "8.00" }
+
+BOGOFreeVsBOGO$15.99(2item)–BOGOFreewin(uc34a):
+  order: [ "item": [ { "sku": zyx10112248,"piece": 2,"price": 29.99 }] ]
+  expect: { "order1": "29.99","zyx10112248": "29.99" }
+
+BOGOFreeVsBOGO6$(2item)–BOGOFreewin(uc34b):
+  order: [ "item": [ { "sku": zyx10467103,"piece": 2,"price": 9.99 }] ]
+  expect: { "order1": "9.99","zyx10467103": "9.99" }
+
+ERPP50%VsBuy3andAboveGet50%(2item)–ERPP50%_win(uc35):
+  codes: zyx2022666erpp50
+  order: [ "item": [ { "sku": zyx10603257,"piece": 2,"price": 4.99 } ] ]
+  expect: { "order1": "5.00","zyx10603257": "4.98" }
+
+ERPP50%VsBuy3andAboveGet50%(3item)–Buy3andAboveGet50%_win(uc35a):
+  codes: zyx2022666erpp50
+  order: [ "item": [ { "sku": zyx10603257,"piece": 3,"price": 4.99 } ] ]
+  expect: { "order1": "7.50","zyx10603257": "7.47" }
+
+ERPP60%VsBuy3andAboveGet50%(3item)–Buy3andAboveGet50%_win(uc35b):
+  codes: zyx2022666erpp60
+  order: [ "item": [ { "sku": zyx10603257,"piece": 3,"price": 4.99 } ] ]
+  expect: { "order1": "7.50","zyx10603257": "7.47" }
+
+ERPP40%VsBuy3andAboveGet50%(3item)–Buy3andAboveGet50%_win(uc35c):
+  codes: zyx2022666erpp40
+  order: [ "item": [ { "sku": zyx10603257,"piece": 3,"price": 4.99 } ] ]
+  expect: { "order1": "7.50","zyx10603257": "7.47" }
+
+CouponvsCoupon(AORPI40%)–AORPI40%_e(uc36):
+  codes: zyx2022666aorpi40
+  order: [ "item": *item1 ]
+  expect: { "order1": "20.40","zyx12341111111": "5.00","zyx20211223":"10.00",
+            "zyx12341111113":"2.00", "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+CouponvsCoupon(ERPP25%)–ERPP25%_a+e(uc36a):
+  codes: zyx2022666erpp25
+  order: [ "item": *item1 ]
+  expect: { "order1": "20.75","zyx12341111111": "3.75","zyx20211223": "10.00",
+            "zyx12341111113": "2.00", "zyx88888883": "25.00","zyx12341111114": "4.50",
+            "zyx20211222": "8.00" }
+
+CouponvsCoupon(Entire20%)–Entire20%_a+b+e+f(uc36b):
+  codes: zyx2022666entire20
+  order: [ "item": *item1 ]
+  expect: { "order1": "23.80","zyx12341111111": "4.00","zyx20211223": "8.00",
+            "zyx12341111113": "2.00", "zyx88888883": "25.00","zyx12341111114": "4.80",
+            "zyx20211222": "6.40" }
+
+CouponvsCoupon(AORPI40%+ERPP25%)–ERPP25%_a,AORPI40%_e(uc36c):
+  codes: zyx2022666aorpi40,zyx2022666erpp25
+  order: [ "item": *item1 ]
+  expect: { "order1": "21.65","zyx12341111111": "3.75","zyx20211223": "10.00",
+            "zyx12341111113": "2.00", "zyx88888883": "25.00","zyx12341111114": "3.60",
+            "zyx20211222": "8.00" }
+
+CouponvsCoupon(AORPI40%+Entire20%)–Entire20%_a+b+f,AORPI40%_e(uc36d):
+  codes: zyx2022666aorpi40,zyx2022666entire20
+  order: [ "item": *item1 ]
+  expect: { "order1": "25.00","zyx12341111111": "4.00","zyx20211223": "8.00",
+            "zyx12341111113": "2.00", "zyx88888883": "25.00","zyx12341111114": "3.60",
+            "zyx20211222": "6.40" }
+
+CouponvsCoupon(AORPI40%+Entire20%+ERPP25%)–Entire20%_b+f,AORPI40%_e,ERPP25%_a(uc36e):
+  codes: zyx2022666aorpi40,zyx2022666entire20,zyx2022666erpp25
+  order: [ "item": *item1 ]
+  expect: { "order1": "25.25","zyx12341111111": "3.75","zyx20211223": "8.00",
+            "zyx12341111113": "2.00", "zyx88888883": "25.00","zyx12341111114": "3.60",
+            "zyx20211222": "6.40" }
+
+ERpp25%OffvsB2AG1Bfree(buyA)-ERpp25%Off(uc37): #uc37
+  codes: zyx2022666erpp25
+  order: [ "item": [ { "sku": zyx2021131303,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131303": "14.99" }
+
+ERpp25%OffvsB2AG1Bfree(buyA+B)-B2AG1Bfree(uc37a): #uc37a
+  codes: zyx2022666erpp25
+  order: [ "item": [ { "sku": zyx2021131303,"piece": 2,"price": 19.99 },{ "sku": zyx2021132303,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "9.99","zyx2021131303": "39.98","zyx2021132303":"0.00" }
+
+ERPP40%VsBOGOFree(1item)–ERPP40%_win(uc38):
+  codes: zyx2022666erpp40
+  order: [ "item": [ { "sku": zyx10270657,"piece": 1,"price": 10.99 }] ]
+  expect: { "order1": "4.40","zyx10270657": "6.59" }
+
+ERPP40%VsBOGOFree(2item)–BOGOFree_win(uc38a):
+  codes: zyx2022666erpp40
+  order: [ "item": [ { "sku": zyx10270657,"piece": 2,"price": 10.99 }] ]
+  expect: { "order1": "10.99","zyx10270657": "10.99" }
+
+ERPP60%VsBOGOFree(1item)–ERPP60%_win(uc38b):
+  codes: zyx2022666erpp60
+  order: [ "item": [ { "sku": zyx10270657,"piece": 1,"price": 10.99 }] ]
+  expect: { "order1": "6.60","zyx10270657": "4.39" }
+
+ERPP60%VsBOGOFree(2item)–BOGOFree_win(uc38c):
+  codes: zyx2022666erpp60
+  order: [ "item": [ { "sku": zyx10131569,"piece": 2,"price": 19.99 }] ]
+  expect: { "order1": "19.99","zyx10131569": "19.99" }
+
+AORPI40%VsBOGOFree(2item)–two_offApplied(uc39):
+  codes: zyx2022666aorpi60
+  order: [ "item": [ { "sku": zyx10131570,"piece": 2,"price": 8.99 },
+                    { "sku": zyx23411111,"piece": 1,"price": 10.00 }] ]
+  expect: { "order1": "14.99","zyx10131570": "8.99","zyx23411111":"4.00" }
+
+AORPI30%VsERPP40%–AORPI30%-win(uc39a):
+  codes: zyx2022666aorpi30,zyx2022666erpp40
+  order: [ "item": [ { "sku": zyx234111111,"piece": 1,"price": 10.99 }] ]
+  expect: { "order1": "4.40","zyx234111111":"6.59" }
+
+ERPP20%,Entire40%vsprice11.99–Price11.99,entire40%_B,entire40%_A(uc39b):
+  codes: zyx2022666entire40,zyx2022666erpp20
+  order: [ "item": [ { "sku": zyx12341111111,"piece": 1,"price": 19.99 },
+                    { "sku": zyx10270658,"piece": 1,"price": 15.99 }] ]
+  expect: { "order1": "16.80","zyx12341111111":"11.99","zyx10270658":"7.19" }
+
+ERPP20%,Entire40%vsBoGo50%–BoGo50%,entire40%_B,entire40%_A(uc39c):
+  codes: zyx2022666entire40,zyx2022666erpp20
+  order: [ "item": [ { "sku": zyx12341111111,"piece": 1,"price": 19.99 },
+                    { "sku": zyx10270654,"piece": 2,"price": 15.99 }] ]
+  expect: { "order1": "25.60","zyx12341111111":"11.99","zyx10270654":"14.38" }
+
+ERPP30%,Entire40%,AORPI20%vsBoGo50%–BoGo50%,entire40%_B,Entire40%_A,entire40%_c(uc39d):
+  codes: zyx2022666entire40,zyx2022666erpp30,zyx2022666aorpi30
+  order: [ "item": [ { "sku": zyx12341111111,"piece": 1,"price": 19.99 },
+                    { "sku": zyx10270652,"piece": 2,"price": 16.99 },
+                    { "sku": zyx10270654,"piece": 1,"price": 8.99 }] ]
+  expect: { "order1": "30.30","zyx12341111111":"11.99","zyx10270652":"15.28","zyx10270654":"5.39" }
+
+Entire40%vsERPP30%vsAORPI20%–Entire40%_A+b+c(uc40):
+  codes: zyx2022666entire40,zyx2022666erpp30,zyx2022666aorpi20
+  order: [ "item": [ { "sku": zyx12341111111,"piece": 1,"price": 20.00 },
+                    { "sku": zyx12341111112,"piece": 1,"price": 10.00 },
+                    { "sku": zyx12341111113,"piece": 1,"price": 8.00 }] ]
+  expect: { "order1": "15.20","zyx12341111111":"12.00","zyx12341111112":"6.00","zyx12341111113":"4.80" }
+
+Entire40%vsERPP30%vsAORPI30%–Entire40%_A+b+c(uc40a):
+  codes: zyx2022666entire40,zyx2022666erpp30,zyx2022666aorpi30
+  order: [ "item": [ { "sku": zyx12341111111,"piece": 1,"price": 20.00 },
+                    { "sku": zyx12341111112,"piece": 1,"price": 10.00 },
+                    { "sku": zyx12341111113,"piece": 1,"price": 8.00 }] ]
+  expect: { "order1": "15.20","zyx12341111111":"12.00","zyx12341111112":"6.00","zyx12341111113":"4.80" }
+
+item(uc41): &item_uc41
+  [ { "sku": zyx12341111111,"piece": 1,"price": 5.00 },
+    { "sku": zyx20211221,"piece": 1,"price": 20.00 },
+    { "sku": zyx12341111113,"piece": 1,"price": 2.00,"tag": [ clearanceitem ] },
+    { "sku": zyx88888883,"piece": 1,"price": 25.00 },
+    { "sku": zyx12341111114,"piece": 1,"price": 6.00 },
+    { "sku": zyx20211222,"piece": 1,"price": 16.00 } ]
+
+PCvsPPvsAORPI40%–AORPI40%_e(uc41):
+  codes: zyx2022666aorpi40
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "22.41","zyx12341111111":"5.00",
+            "zyx20211221":"7.99","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsPPvsERPP25%–ERPP25%_a+e(uc41a):
+  codes: zyx2022666erpp25
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "22.76","zyx12341111111":"3.75",
+            "zyx20211221":"7.99","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.50",
+            "zyx20211222":"8.00" }
+
+PCvsPPvsEntire20%–Entire20%_a+b+e+f(uc41b):
+  codes: zyx2022666entire20
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "25.41","zyx12341111111":"4.00",
+            "zyx20211221":"6.39","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.80",
+            "zyx20211222":"6.40" }
+
+PCvsPPvsAORPI40%+ERPP25%–ERPP25%_a,AORPI40%_e(uc41c):
+  codes: zyx2022666erpp25,zyx2022666aorpi40
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "23.66","zyx12341111111":"3.75",
+            "zyx20211221":"7.99","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsPPvsAORPI40%+Entire20%–Entire20%_a+b+f,AORPI40%_e(uc41d):
+  codes: zyx2022666entire20,zyx2022666aorpi40
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "26.61","zyx12341111111":"4.00",
+            "zyx20211221":"6.39","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"6.40" }
+
+PCvsPPvsAORPI40%+Entire20%+ERPP25%–Entire20%_b+f,AORPI40%_e,ERPP25%_a(uc41e):
+  codes: zyx2022666entire20,zyx2022666aorpi40,zyx2022666erpp25
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "26.86","zyx12341111111":"3.75",
+            "zyx20211221":"6.39","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"6.40" }
+
+PCvsPPvsSpend_$25_Get_$5_Spend_$25_Get_$5_a+b+e+f(uc41f):
+  codes: zyx20211230S25g5
+  order: ["item": *item_uc41 ]
+  expect: { "order1": "25.01","zyx12341111111":"4.07",
+            "zyx20211221":"6.50","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.88",
+            "zyx20211222":"6.54" }
+
+item(uc46): &item_uc46
+  [ { "sku": zyx12341111111,"piece": 1,"price": 5.00 },
+    { "sku": zyx20211227,"piece": 1,"price": 20.00 },
+    { "sku": zyx12341111113,"piece": 1,"price": 2.00,"tag": [ clearanceitem ] },
+    { "sku": zyx88888883,"piece": 1,"price": 25.00 },
+    { "sku": zyx12341111114,"piece": 1,"price": 6.00 },
+    { "sku": zyx20211222,"piece": 1,"price": 16.00 } ]
+
+PCvsBOGOvsAORPI40%–AORPI40%_e(uc46):
+  codes: zyx2022666aorpi40
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "18.40","zyx12341111111":"5.00",
+            "zyx20211227":"12.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsBOGOvsERPP25%–ERPP25%_a+e(uc46a):
+  codes: zyx2022666erpp25
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "18.75","zyx12341111111":"3.75",
+            "zyx20211227":"12.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.50",
+            "zyx20211222":"8.00" }
+
+PCvsBOGOvsEntire20%–Entire20%_a+b+e+f(uc46b):
+  codes: zyx2022666entire20
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "22.20","zyx12341111111":"4.00",
+            "zyx20211227":"9.60","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.80",
+            "zyx20211222":"6.40" }
+
+PCvsBOGOvsAORPI40%+ERPP25%–ERPP25%_a,AORPI40%_e(uc46c):
+  codes: zyx2022666erpp25,zyx2022666aorpi40
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "19.65","zyx12341111111":"3.75",
+            "zyx20211227":"12.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsBOGOvsAORPI40%+Entire20%–Entire20%_a+b+f,AORPI40%_e(uc46d):
+  codes: zyx2022666entire20,zyx2022666aorpi40
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "23.40","zyx12341111111":"4.00",
+            "zyx20211227":"9.60","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"6.40" }
+
+PCvsBOGOvsAORPI40%+Entire20%+ERPP25%–Entire20%_b+f,AORPI40%_e,ERPP25%_a(uc46e):
+  codes: zyx2022666entire20,zyx2022666aorpi40,zyx2022666erpp25
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "23.65","zyx12341111111":"3.75",
+            "zyx20211227":"9.60","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"6.40" }
+
+PCvsBOGOvsSpend_$25_Get_$5_Spend_$25_Get_$5_a+b+e+f(uc46f):
+  codes: zyx20211230S25g5
+  order: ["item": *item_uc46 ]
+  expect: { "order1": "21.00","zyx12341111111":"4.19",
+            "zyx20211227":"10.08","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"5.03",
+            "zyx20211222":"6.70" }
+
+item(uc49): &item_uc49
+  [ { "sku": zyx12341111111,"piece": 1,"price": 5.00 },
+    { "sku": zyx20211227,"piece": 2,"price": 20.00 },
+    { "sku": zyx12341111113,"piece": 1,"price": 2.00,"tag": [ clearanceitem ] },
+    { "sku": zyx88888883,"piece": 1,"price": 25.00 },
+    { "sku": zyx12341111114,"piece": 1,"price": 6.00 },
+    { "sku": zyx20211222,"piece": 1,"price": 16.00 } ]
+
+PCvsBOGO(2item)vsAORPI40%–AORPI40%_e(uc49):
+  codes: zyx2022666aorpi40
+  order: ["item": *item_uc49 ]
+  expect: { "order1": "26.40","zyx12341111111":"5.00",
+            "zyx20211227":"24.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsBOGO(2item)vsERPP25%–ERPP25%_a+e(uc49a):
+  codes: zyx2022666erpp25
+  order: ["item": *item_uc49 ]
+  expect: { "order1": "26.75","zyx12341111111":"3.75",
+            "zyx20211227":"24.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.50",
+            "zyx20211222":"8.00" }
+
+PCvsBOGO(2item)vsEntire20%–Entire20%_a+b+e+f(uc49b):
+  codes: zyx2022666entire20
+  order: ["item": *item_uc49 ]
+  expect: { "order1": "32.60","zyx12341111111":"4.00",
+            "zyx20211227":"19.20","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"4.80",
+            "zyx20211222":"6.40" }
+
+PCvsBOGO(2item)vsAORPI40%+ERPP25%–ERPP25%_a,AORPI40%_e(uc49c):
+  codes: zyx2022666erpp25,zyx2022666aorpi40
+  order: ["item": *item_uc49 ]
+  expect: { "order1": "27.65","zyx12341111111":"3.75",
+            "zyx20211227":"24.00","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"8.00" }
+
+PCvsBOGO(2item)vsAORPI40%+Entire20%–Entire20%_a+b+f,AORPI40%_e(uc49d):
+  codes: zyx2022666entire20,zyx2022666aorpi40
+  order: ["item": *item_uc49 ]
+  expect: { "order1": "33.80","zyx12341111111":"4.00",
+            "zyx20211227":"19.20","zyx12341111113":"2.00",
+            "zyx88888883":"25.00","zyx12341111114":"3.60",
+            "zyx20211222":"6.40" }
+
+PCvsBOGO(2item)vsAORPI40%+Entire20%+ERPP25%–Entire20%_b+f,AORPI40%_e,ERPP25%_a(uc49e):
+  codes: zyx2022666entire20,zyx2022666aorpi40,zyx2022666erpp25
+  order: [ "item": *item_uc49 ]
+  expect: { "order1": "34.05","zyx12341111111": "3.75",
+            "zyx20211227": "19.20","zyx12341111113": "2.00",
+            "zyx88888883": "25.00","zyx12341111114": "3.60",
+            "zyx20211222": "6.40" }
+
+PCvsBOGO(2item)vsSpend_$25_Get_$5_Spend_$25_Get_$5_a+b+e+f(uc49f):
+  codes: zyx20211230S25g5
+  order: [ "item": *item_uc49 ]
+  expect: { "order1": "29.00","zyx12341111111": "4.41",
+            "zyx20211227": "21.23","zyx12341111113": "2.00",
+            "zyx88888883": "25.00","zyx12341111114": "5.30",
+            "zyx20211222": "7.06" }
+
+ERPP40%VSAORPI30%VSEntire50%-Entire50%_a+b+c+d+f(uc62):     #uc62
+  codes: zyx2022666erpp40,zyx2022666aorpi30,zyx2022666entire50
+  order: [ "item": *item2]
+  expect: {"order1": "86.98","zyx20211226":"9.99","zyx20211225":"9.99",
+           "zyx20211300":"9.99","zyx20211301":"7.99","zyx20211302":"9.00"}
+
+AORPI30%VSERPP40%VSEntire50%-Entire50%_a+b+c+d+f(uc61):  #uc61
+  codes: zyx2022666aorpi30,zyx2022666erpp40,zyx2022666entire50
+  order: [ "item": *item2]
+  expect: {"order1": "86.98","zyx20211226":"9.99","zyx20211225":"9.99",
+           "zyx20211300":"9.99","zyx20211301":"7.99","zyx20211302":"9.00"}
+
+ERPP40%VSAORPI40%VSEntire50%-AORPI40%_c,Entire50%_a+b+d+f:     #uc60   # expect :11.98xxxx
+  codes: zyx2021erpp40p120,zyx2022666aorpi40,zyx20211230Entire40n
+  order: [ "item": *item2]
+  expect: {"order1": "77.58","zyx20211226":"11.99","zyx20211225":"11.99","zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+AORPI40%VSERPP40%VSEntire40%-AORPI40%_c,Entire40%_a+b+d+f:     #uc59   # expect :11.98xxxx
+  codes: zyx2022666aorpi40,zyx2021erpp40p120,zyx20211230Entire40n
+  order: [ "item": *item2]
+  expect: {"order1": "77.58","zyx20211226":"11.99","zyx20211225":"11.99","zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+ERPP30%vsERPP40%-ERPP40%_c+d+f:     #uc58
+  codes: zyx2022666erpp30,zyx2022666erpp40
+  order: [ "item": *item2]
+  expect: {"order1": "61.58","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+ERPP40%vsERPP30%-ERPP40%_c+d+f:     #uc57
+  codes: zyx2022666erpp40,zyx2022666erpp30
+  order: [ "item": *item2]
+  expect: {"order1": "61.58","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+AORPI30%vsAORPI40%-AORPI40%_c:     #uc56
+  codes: zyx2022666aorpi30,zyx2022666aorpi40
+  order: [ "item": *item2]
+  expect: {"order1": "53.38","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"15.99","zyx20211302":"12.60"}
+
+AORPI40%vsAORPI30%-AORPI40%_c:     #uc55
+  codes: zyx2022666aorpi40,zyx2022666aorpi30
+  order: [ "item": *item2]
+  expect: {"order1": "53.38","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"15.99","zyx20211302":"12.60"}
+
+ERPP30%vsAORPI40%-AORPI40%_c,ERPP30%_d+f(uc54):     #uc54
+  codes: zyx2022666erpp30,zyx2022666aorpi40
+  order: [ "item": *item2]
+  expect: {"order1": "58.18","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"11.19","zyx20211302":"12.60"}
+
+AORPI40%vsERPP30%-AORPI40%_c,ERPP30%_d+f(uc53):     #uc53  zyx20211226: 19.98xxxxx
+  codes: zyx2022666aorpi40,zyx2022666erpp30
+  order: [ "item": *item2]
+  expect: {"order1": "58.18","zyx20211226":"19.99","zyx20211225":"19.99","zyx20211300":"11.99","zyx20211301":"11.19","zyx20211302":"12.60"}
+
+ERPP40%vsAORPI30%-ERPP40%_c+d+f(uc52):     #uc52
+  codes: zyx2022666erpp40,zyx2022666aorpi30
+  order: [ "item": *item2]
+  expect: {"order1": "61.58","zyx20211226":"19.99","zyx20211225":"19.99",
+           "zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+AORPI30%vsERPP40%-ERPP40%_c+d+f(uc51):     #uc51
+  codes: zyx2022666aorpi30,zyx2022666erpp40
+  order: [ "item": *item2]
+  expect: {"order1": "61.58","zyx20211226":"19.99","zyx20211225":"19.99",
+           "zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+
+AORPI60%vsSpend40Get10_Spend40Get10_notApply(uc50):  #uc50
+  codes: zyx20211230Spend40g10,zyx2022666aorpi60
+  order: [ "item": [ { "sku": zyx20211303,"piece": 1,"price": 199.99 }]]
+  expect: {"order1": "120.00","zyx20211303":"79.99"}
+
+50%OffvsBOGOFree–stacking:
+  order: [ "item": [ { "sku": zyx20211259,"piece": 2,"price": 19.99 } ] ]
+  expect: { "order1": "29.99","zyx20211259": "9.99" }
+
+50%OffvsBOGOfor$15.99–stacking:
+  order: [ "item": [ { "sku": zyx20211213,"piece": 2,"price": 40.00 } ] ]
+  expect: { "order1": "44.01","zyx20211213": "35.99" }
+
+50%OffvsBOGO50%–stacking:
+  order: [ "item": [ { "sku": zyx20211201,"piece": 2,"price": 19.99 } ] ]
+  expect: { "order1": "25.00","zyx20211201": "14.98" }
+
+50%OffvsBOGO$10–stacking:
+  order: [ "item": [ { "sku": zyx20211208,"piece": 2,"price": 30.00 } ] ]
+  expect: { "order1": "40.00","zyx20211208": "20.00" }
+
+
+Tiered_offer_with_3_tiers-buy2item:
+  order: [ "item": [ { "sku": zyx20211306,"piece": 2,"price": 30.00 } ] ]
+  expect: { "order1": "10.00","zyx20211306": "50.00" }
+
+Tiered_offer_with_3_tiers-buy3item:
+  order: [ "item": [ { "sku": zyx20211306,"piece": 3,"price": 30.00 } ] ]
+  expect: { "order1": "20.00","zyx20211306": "70.00" }
+
+Tiered_offer_with_3_tiers-buy4item:
+  order: [ "item": [ { "sku": zyx20211306,"piece": 4,"price": 30.00 } ] ]
+  expect: { "order1": "30.00","zyx20211306": "90.00" }
+
+Tiered_offer_with_reward_in_future_transaction-buy2item:
+  order: [ "item": [ { "sku": zyx20211309,"piece": 2,"price": 50.00 } ] ]
+  expect: { "order1": "10.00","zyx20211306": "90.00" }
+
+Tiered_offer_with_reward_in_future_transaction-buy3item:
+  order: [ "item": [ { "sku": zyx20211309,"piece": 3,"price": 50.00 } ] ]
+  expect: { "order1": "30.00","zyx20211306": "120.00" }
+
+Tiered_offer_with_reward_in_future_transaction-buy4item:
+  order: [ "item": [ { "sku": zyx20211309,"piece": 4,"price": 50.00 } ] ]
+  expect: { "order1": "60.00","zyx20211306": "140.00" }
+
+Buy_More_Save_More-buy4item:
+  order: [ "item": [ { "sku": zyx20211312,"piece": 4,"price": 10.00 } ] ]
+  expect: { "order1": "2.00","zyx20211312": "38.00" }
+
+Buy_More_Save_More-buy5item:
+  order: [ "item": [ { "sku": zyx20211312,"piece": 5,"price": 10.00 } ] ]
+  expect: { "order1": "5.00","zyx20211312": "45.00" }
+
+Buy_More_Save_More-buy12item:
+  order: [ "item": [ { "sku": zyx20211312,"piece": 12,"price": 10.00 } ] ]
+  expect: { "order1": "18.00","zyx20211312": "102.00" }
+
+Tiered_offer_stacked_with_Percent_off-buy3item:
+  order: [ "item": [ { "sku": zyx20211313,"piece": 3,"price": 10.00 } ] ]
+  expect: { "order1": "10.05","zyx20211313": "19.95" }
+
+Tiered_offer_stacked_with_Percent_off-buy5item:
+  order: [ "item": [ { "sku": zyx20211313,"piece": 5,"price": 10.00 } ] ]
+  expect: { "order1": "18.50","zyx20211313": "31.50" }
+
+Tiered_offer_stacked_with_Percent_off-buy12item:
+  order: [ "item": [ { "sku": zyx20211313,"piece": 12,"price": 10.00 } ] ]
+  expect: { "order1": "48.60","zyx20211313": "71.40" }
+
+50%OffvsBAGBFree(buyB)-50%win: #uc10
+  order: [ "item": [ { "sku": zyx20211224,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx20211224": "4.99" }
+
+50%OffvsBAGBFree(buyA+B)-BAGBFree: #uc10a
+  order: [ "item": [ { "sku": zyx2021131102,"piece": 1,"price": 19.99 },{ "sku": zyx20211224,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "9.99","zyx2021131102": "19.99","zyx20211224": "0.00" }
+
+40%OffvsBAGBFree(buyA)-40%win: #uc11
+  order: [ "item": [ { "sku": zyx2021131103,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "8.00","zyx2021131103": "11.99" }
+
+40%OffvsBAGBFree(buyA+B)-BAGBFree: #uc11a
+  order: [ "item": [ { "sku": zyx2021131103,"piece": 1,"price": 19.99 },{ "sku": zyx2021132103,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "9.99","zyx2021131103": "19.99","zyx2021132103": "0.00" }
+
+40%OffvsBAGBFree(buyAorB-A)-40%win: #uc12
+  order: [ "item": [ { "sku": zyx2021131104,"piece": 1,"price": 19.99 }  ] ]
+  expect: { "order1": "8.00","zyx2021131104": "11.99" }
+
+40%OffvsBAGBFree(buyAorB-B)-40%win: #uc12-1
+  order: [ "item": [ { "sku": zyx2021132104,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "4.00","zyx2021132104": "5.99" }
+
+40%Off(A+B)vsBAGBFree(buyA+B)-40%Off: #uc12a
+  order: [ "item": [ { "sku": zyx2021131104,"piece": 1,"price": 19.99 },{ "sku": zyx2021132104,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "12.00","zyx2021131104": "11.99","zyx2021132104": "5.99" }
+
+40%Off(A+B)vsBAGBFree(buyA+B)-BAGBFree: #uc12b
+  order: [ "item": [ { "sku": zyx2021131104,"piece": 1,"price": 19.99 },{ "sku": zyx2021132104,"piece": 1,"price": 13.99 }  ] ]
+  expect: { "order1": "13.99","zyx2021131104": "19.99","zyx2021132104": "0.00" }
+
+40%OffvsBAGB50%(buyB)-40%win: #uc13
+  order: [ "item": [ { "sku": zyx2021132105,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "4.00","zyx2021132105": "5.99" }
+
+40%OffvsBAGB50%(buyA+B)-BAGB50%: #uc13a
+  order: [ "item": [ { "sku": zyx2021131105,"piece": 1,"price": 19.99 },{ "sku": zyx2021132105,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131105": "19.99","zyx2021132105": "4.99" }
+
+60%OffvsBAGB50%(buyB)-60%win: #uc14
+  order: [ "item": [ { "sku": zyx2021132106,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021132106": "3.99" }
+
+60%OffvsBAGB50%(buyA+B)-BAGB50%: #uc14a
+  order: [ "item": [ { "sku": zyx2021131106,"piece": 1,"price": 19.99 },{ "sku": zyx2021132106,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021131106": "19.99","zyx2021132106": "3.99" }
+
+40%OffvsBAGB$5(buyB)-40%win: #uc15
+  order: [ "item": [ { "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "4.00","zyx2021132107": "5.99" }
+
+40%OffvsBAGB$5(buyA+B)-BAGB$5: #uc15a
+  order: [ "item": [ { "sku": zyx2021131107,"piece": 1,"price": 19.99 },{ "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "5.00","zyx2021131107": "19.99","zyx2021132107": "4.99" }
+
+60%OffvsBAGB$5(buyB)-60%win: #uc16
+  order: [ "item": [ { "sku": zyx2021132108,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021132108": "3.99" }
+
+60%OffvsBAGB$5(buyA+B)-60%Off: #uc16a
+  order: [ "item": [ { "sku": zyx2021131108,"piece": 1,"price": 19.99 },{ "sku": zyx2021132108,"piece": 1,"price": 9.99 }  ] ]
+  expect: { "order1": "6.00","zyx2021131108": "19.99","zyx2021132108": "3.99" }
+
+
+
+Bundle-Pricing(all3items)$100:
+  order: [ "item": [ { "sku": zyx20220102,"piece": 1,"price": 99.99 },{ "sku": zyx20220103,"piece": 1,"price": 20.99 },{ "sku": zyx20220101,"piece": 1,"price": 10.99 }  ] ]
+  expect: { "order1": "31.97","zyx20220102": "75.75","zyx20220103": "15.90","zyx20220101":"8.35" }
+
+30%vsBundle-Pricing(all3items)$100-stacking:
+  order: [ "item": [ { "sku": zyx20220104,"piece": 1,"price": 99.99 },{ "sku": zyx20220105,"piece": 1,"price": 20.99 },{ "sku": zyx20220106,"piece": 1,"price": 10.99 }  ] ]
+  expect: { "order1": "59.47","zyx20220104": "53.02","zyx20220105": "11.13","zyx20220106":"8.35" }
+
+bagbfree:
+  order: [ "item": [ { "sku": zyx2021131113,"piece": 1,"price": 19.99 } ,{ "sku": zyx2021132113,"piece": 1,"price": 9.99 }] ]
+  expect: { "order1": "9.99","zyx2021131113": "19.99","zyx2021132113":"0.00" }
+
+bagb10%:
+  order: [ "item": [ { "sku": zyx2021131114,"piece": 1,"price": 19.99 } ,{ "sku": zyx2021132114,"piece": 1,"price": 9.99 }] ]
+  expect: { "order1": "1.00","zyx2021131114": "19.99","zyx2021132114":"8.99" }
+
+bagbfreevsbagb10%-bagbfreewin:
+  order: [ "item": [ { "sku": zyx2021131115,"piece": 1,"price": 19.99 } ,{ "sku": zyx2021132115,"piece": 1,"price": 9.99 }] ]
+  expect: { "order1": "9.99","zyx2021131115": "19.99","zyx2021132115":"0.00" }
+
+multiple_promotion_performance_tests:
+  codes: zyx2022666erpp30,zyx2022666entire20,zyx2022666aorpi30,
+  order: [ "item": [ { "sku": zyx2021131115,"piece": 1,"price": 19.99 } ,
+                     { "sku": zyx20211213,"piece": 1,"price": 29.99 } ,
+                     { "sku": zyx20211217,"piece": 1,"price": 29.99 } ,
+                     { "sku": zyx10593749,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10274416,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10542589,"piece": 2,"price": 29.99 },
+                     { "sku": zyx10514716,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10270658,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10603259,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10404931,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10194861,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10573460,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10400212,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10550020,"piece": 2,"price": 59.98 },
+                     { "sku": zyx10547599,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10467103,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10665936,"piece": 1,"price": 29.99 },
+                     { "sku": zyx10603257,"piece": 3,"price": 29.99 },
+                     { "sku": zyx20211229,"piece": 3,"price": 29.99 },
+                     { "sku": zyx2021132,"piece": 3,"price": 29.99 },
+                     { "sku": zyx20211228,"piece": 3,"price": 29.99 },
+                     { "sku": zyx2021140,"piece": 3,"price": 29.99 },
+                     { "sku": zyx2021131302,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021132302,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021131108,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021132108,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021131106,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021132106,"piece": 2,"price": 29.99 },
+                     { "sku": zyx2021132115,"piece": 2,"price": 29.99 }]]
+  expect: { "order1": "764.16","zyx2021131115": "15.99","zyx20211213":"11.99",
+            "zyx20211217":"9.59","zyx10593749":"4.00","zyx10274416":"14.39",
+            "zyx10542589":"23.99","zyx10514716":"19.19","zyx10270658":"9.59",
+            "zyx10603259":"12.79","zyx10404931":"11.99","zyx10194861":"11.99",
+            "zyx10573460":"9.59","zyx10400212":"14.39","zyx10550020":"23.99",
+            "zyx10547599":"14.39","zyx10467103":"20.99",}
+
+
+multiple_order_tests1:
+  order: [ {"item": [ { "sku": zyx2021131107,"piece": 1,"price": 19.99 },{ "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ]},
+          {"item": [ { "sku": zyx2021131107,"piece": 1,"price": 19.99 },{ "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ]}]
+  expect: { "order1": "5.00","zyx2021131107": "19.99","zyx2021132107": "4.99", "order2":"5.00" }
+
+
+multiple_order_tests2:
+  order: [ {"item": [ { "sku": zyx2021131107,"piece": 1,"price": 19.99 },{ "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ]},
+          {"item": [ { "sku": zyx2021131104,"piece": 1,"price": 19.99 },{ "sku": zyx2021132104,"piece": 1,"price": 13.99 }  ] }]
+  expect: { "order1": "5.00","zyx2021131107": "19.99","zyx2021132107": "4.99",
+            "order2":"13.99","zyx2021131104": "19.99","zyx2021132104": "0.00" }
+
+multiple_order_tests3:
+  codes: zyx2022666aorpi30,zyx2022666erpp40,zyx2022666entire20
+  order: [ {"item": [ { "sku": zyx2021131107,"piece": 1,"price": 19.99 },{ "sku": zyx2021132107,"piece": 1,"price": 9.99 }  ]},
+          {"item": [ { "sku": zyx2021131104,"piece": 1,"price": 19.99 },{ "sku": zyx2021132104,"piece": 1,"price": 13.99 }  ] },
+           {"item": *item2 }]
+  expect: { "order1": "10.00","zyx2021131107": "15.99","zyx2021132107": "3.99",
+            "order2":"17.99","zyx2021131104": "15.99","zyx2021132104": "0.00",
+            "order3": "69.58","zyx20211226":"15.99","zyx20211225":"15.99",
+            "zyx20211300":"11.99","zyx20211301":"9.59","zyx20211302":"10.80"}
+
+BOGOfreevsAORPI60%-AORPI60%win(uc63):
+  codes: zyx2022666aorpi60
+  order: [ "item": [ { "sku": zyx20211260,"piece": 1,"price": 10.00 }] ]
+  expect: { "order1": "6.00","zyx20211260": "4.00" }
+
+BOGOfreevsAORPI60%(2item)-BOGOfreewin(uc63a):
+  codes: zyx2022666aorpi60
+  order: [ "item": [ { "sku": zyx20211260,"piece": 2,"price": 10.00 }] ]
+  expect: { "order1": "10.00","zyx20211260": "10.00" }
+
+BOGOfreevsAORPI60%(3item)-BOGOfreewin(uc63b):
+  codes: zyx2022666aorpi60
+  order: [ "item": [ { "sku": zyx20211260,"piece": 2,"price": 20.00 }, { "sku": zyx20211261,"piece": 1,"price": 10.00 }] ]
+  expect: { "order1": "26.00","zyx20211260": "20.00","zyx20211261": "4.00" }

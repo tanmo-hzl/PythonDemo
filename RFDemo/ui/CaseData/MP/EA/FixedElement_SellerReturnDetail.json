@@ -1,0 +1,33 @@
+{
+  "p": [
+    "Return Details",
+    "each",
+    "Status",
+    "Reason for Return",
+    "Condition of Item",
+    "Additional Information",
+    "Payment Method",
+    "Shipping & Handling",
+    "Tax",
+    "Return Total",
+    "Need Help?",
+    "Go to our Help Center for questions or concerns about your order."
+  ],
+  "a": [
+    "Contact Buyer"
+  ],
+  "!contains": [
+    "Return ID: ",
+    "Order # ",
+    "Return Initiated on ",
+    "QTY ",
+    "Subtotal ("
+  ],
+  "div": [
+    "SUBMIT REFUND DECISION",
+    ""
+  ],
+  "h4": [
+    "Return Summary"
+  ]
+}

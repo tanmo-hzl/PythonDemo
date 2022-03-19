@@ -1,0 +1,1368 @@
+priority70_discount_0.5_-1_1:
+  priority: 70
+  applyTime: '2021-06-13 10:28:31'
+  expiredTime: '2025-03-17 10:28:31'
+  product:
+    - type: Item sku
+      value: zyx20211201
+    - type: Item sku
+      value: zyx20211213
+    - type: Item sku
+      value: zyx20211259
+    - type: Item sku
+      value: zyx20211208
+    - type: Item sku
+      value: zyx20211304
+    - type: Item sku
+      value: zyx20211305
+    - type: Item sku
+      value: zyx2021131101
+    - type: Item sku
+      value: zyx2021131402
+    - type: Item sku
+      value: zyx2021132402
+    - type: Item sku
+      value: zyx2021131301
+    - type: Item sku
+      value: zyx2021131302
+    - type: Item sku
+      value: zyx2021132301
+  benefit: [ { "type": "discount","value": 0.5,"amount": -1,"pieces": 1 }]
+
+test:
+  product:
+    - type: Item sku
+      value: 10002287
+  benefit: [ { "type": "discount","value": 0.8,"amount": -1,"pieces": 1 }]
+
+discount_0.4_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10573460
+    - type: Item sku
+      value: zyx20211217
+    - type: Item sku
+      value: zyx20211218
+    - type: Item sku
+      value: zyx20211219
+    - type: Item sku
+      value: zyx20211220
+    - type: Item sku
+      value: zyx2021132106
+    - type: Item sku
+      value: zyx2021132108
+    - type: Item sku
+      value: zyx2021132112
+  benefit: [ { "type": "discount","value": 0.4,"amount": -1,"pieces": 1 }]
+
+discount_0.5_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10593749
+    - type: Item sku
+      value: zyx10420076
+    - type: Item sku
+      value: zyx10404931
+    - type: Item sku
+      value: zyx10051503
+    - type: Item sku
+      value: zyx10194861
+    - type: Item sku
+      value: zyx10414178
+    - type: Item sku
+      value: zyx20211221
+    - type: Item sku
+      value: zyx20211222
+    - type: Item sku
+      value: zyx20211223
+    - type: Item sku
+      value: zyx20211224
+    - type: Item sku
+      value: zyx20211225
+    - type: Item sku
+      value: zyx20211226
+  benefit: [{amount: -1, pieces: 1, type: "discount", value: 0.5}]
+
+discount_0.6_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10274416
+    - type: Item sku
+      value: zyx10603259
+    - type: Item sku
+      value: zyx10400212
+    - type: Item sku
+      value: zyx10547599
+    - type: Item sku
+      value: zyx10665936
+    - type: Item sku
+      value: zyx20211227
+    - type: Item sku
+      value: zyx20211228
+    - type: Item sku
+      value: zyx20211229
+    - type: Item sku
+      value: zyx2021131103
+    - type: Item sku
+      value: zyx2021132104
+    - type: Item sku
+      value: zyx2021131104
+    - type: Item sku
+      value: zyx2021132105
+    - type: Item sku
+      value: zyx2021132107
+    - type: Item sku
+      value: zyx2021132111
+  benefit: [{amount: -1, pieces: 1, type: "discount", value: 0.6}]
+
+discount_0.7_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10542589
+    - type: Item sku
+      value: zyx20211230
+    - type: Item sku
+      value: zyx20211231
+    - type: Item sku
+      value: zyx20211232
+  benefit: [{amount: -1, pieces: 1, type: "discount", value: 0.7}]
+
+discount_0.8_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10514716
+    - type: Item sku
+      value: zyx10530930
+    - type: Item sku
+      value: zyx10665940
+    - type: Item sku
+      value: zyx20211233
+  benefit: [{amount: -1, pieces: 1, type: "discount", value: 0.8}]
+
+price_17.99_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10274416
+    - type: Item sku
+      value: zyx20211234
+    - type: Item sku
+      value: zyx2021130
+    - type: Item sku
+      value: zyx2021136
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 17.99}]
+
+price_5_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10593749
+    - type: Item sku
+      value: zyx20211235
+    - type: Item sku
+      value: zyx2021132116
+    - type: Item sku
+      value: zyx2021132210
+    - type: Item sku
+      value: zyx2021132211
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 5}]
+
+price_3_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10420076
+    - type: Item sku
+      value: zyx10547590
+    - type: Item sku
+      value: zyx10404887
+    - type: Item sku
+      value: zyx2021132117
+    - type: Item sku
+      value: zyx2021132212
+    - type: Item sku
+      value: zyx2021132213
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 3}]
+
+price_11.99_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10270658
+    - type: Item sku
+      value: zyx20211236
+    - type: Item sku
+      value: zyx20211237
+    - type: Item sku
+      value: zyx20211238
+    - type: Item sku
+      value: zyx20211239
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 11.99}]
+
+price_15.99_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10603259
+    - type: Item sku
+      value: zyx20211240
+    - type: Item sku
+      value: zyx20211241
+    - type: Item sku
+      value: zyx20211242
+    - type: Item sku
+      value: zyx20211243
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 15.99}]
+
+price_14.99_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10194861
+    - type: Item sku
+      value: zyx20211244
+    - type: Item sku
+      value: zyx20211245
+    - type: Item sku
+      value: zyx20211246
+    - type: Item sku
+      value: zyx20211247
+  benefit: [{amount: -1, pieces: 1, type: "price", value: 14.99}]
+
+
+fixed-amount_4_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10404931
+    - type: Item sku
+      value: zyx10051503
+    - type: Item sku
+      value: zyx10058220
+    - type: Item sku
+      value: zyx10584500
+    - type: Item sku
+      value: zyx20211248
+    - type: Item sku
+      value: zyx20211249
+    - type: Item sku
+      value: zyx20211250
+  benefit: [{amount: -1, pieces: 1, type: "fixed-amount", value: 4}]
+
+fixed-amount_10_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10603259
+    - type: Item sku
+      value: zyx10274416
+    - type: Item sku
+      value: zyx20211251
+    - type: Item sku
+      value: zyx20211252
+    - type: Item sku
+      value: zyx20211253
+  benefit: [{amount: -1, pieces: 1, type: "fixed-amount", value: 10}]
+
+fixed-amount_15_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10194861
+    - type: Item sku
+      value: zyx20211254
+    - type: Item sku
+      value: zyx20211255
+    - type: Item sku
+      value: zyx20211256
+    - type: Item sku
+      value: zyx20211257
+  benefit: [{amount: -1, pieces: 1, type: "fixed-amount", value: 15}]
+
+buy&get discount_0,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10573460
+    - type: Item sku
+      value: zyx10542589
+    - type: Item sku
+      value: zyx10635804
+    - type: Item sku
+      value: zyx10550020
+    - type: Item sku
+      value: zyx10112248
+    - type: Item sku
+      value: zyx10467103
+    - type: Item sku
+      value: zyx10270657
+    - type: Item sku
+      value: zyx10131569
+    - type: Item sku
+      value: zyx10131570
+    - type: Item sku
+      value: zyx20211258
+    - type: Item sku
+      value: zyx20211260
+    - type: Item sku
+      value: zyx20211261
+    - type: Item sku
+      value: zyx20211262
+  benefit: [{"type":"buy&get discount","value":"0,1","amount":-1,"pieces": 1}]
+
+priority95_buy&get discount_0,1_-1_1:
+  priority: 95
+  product:
+    - type: Item sku
+      value: zyx20211259
+  benefit: [{"type":"buy&get discount","value":"0,1","amount":-1,"pieces": 1}]
+
+
+
+buy&get discount_0.5,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10400212
+    - type: Item sku
+      value: zyx10514716
+    - type: Item sku
+      value: zyx10270654
+    - type: Item sku
+      value: zyx10270652
+    - type: Item sku
+      value: zyx20211200
+    - type: Item sku
+      value: zyx20211227
+  benefit: [ { "type": "buy&get discount","value": "0.5,1","amount": -1,"pieces": 1 }]
+
+priority95_buy&get discount_0.5,1_-1_1:
+  priority: 95
+  product:
+    - type: Item sku
+      value: zyx20211201
+  benefit: [ { "type": "buy&get discount","value": "0.5,1","amount": -1,"pieces": 1 }]
+
+
+buy&get discount_0.6,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10550020
+    - type: Item sku
+      value: zyx20211202
+    - type: Item sku
+      value: zyx20211203
+    - type: Item sku
+      value: zyx20211204
+    - type: Item sku
+      value: zyx20211205
+  benefit: [ { "type": "buy&get discount","value": "0.6,1","amount": -1,"pieces": 1 }]
+
+buy&get fixed-amount_10,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10547599
+    - type: Item sku
+      value: zyx10530936
+    - type: Item sku
+      value: zyx20211207
+    - type: Item sku
+      value: zyx20211206
+    - type: Item sku
+      value: zyx10530930
+  benefit: [{"type":"buy&get fixed-amount","value":"10,1","amount":-1,"pieces": 1}]
+
+priority_95_buy&get fixed-amount_10,1_-1_1:
+  priority: 95
+  product:
+    - type: Item sku
+      value: zyx20211208
+  benefit: [{"type":"buy&get fixed-amount","value":"10,1","amount":-1,"pieces": 1}]
+
+
+
+buy&get fixed-amount_6,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10467103
+    - type: Item sku
+      value: zyx20211209
+    - type: Item sku
+      value: zyx20211210
+    - type: Item sku
+      value: zyx20211211
+    - type: Item sku
+      value: zyx20211212
+  benefit: [{"type":"buy&get fixed-amount","value":"6,1","amount":-1,"pieces": 1}]
+
+buy&get price_15.99,1_-1_1:
+  product:
+    - type: Item sku
+      value: zyx10665936
+    - type: Item sku
+      value: zyx10665940
+    - type: Item sku
+      value: zyx10112248
+    - type: Item sku
+      value: zyx20211214
+  benefit: [{"type":"buy&get price","value":"15.99,1","amount":-1,"pieces": 1}]
+
+priority95_buy&get price_15.99,1_-1_1:
+  priority: 95
+  product:
+    - type: Item sku
+      value: zyx20211213
+  benefit: [{"type":"buy&get price","value":"15.99,1","amount":-1,"pieces": 1}]
+
+
+discount_0.5_-1_3:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx10603257
+    - type: Item sku
+      value: zyx20211215
+    - type: Item sku
+      value: zyx20211216
+  "benefit":
+    - type:  discount
+      value: 0.5
+      amount: -1
+      pieces: 3
+
+buy&get discount_0,1_-1_2:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx20211229
+    - type: Item sku
+      value: zyx2021130
+    - type: Item sku
+      value: zyx2021131
+  "benefit":
+    - type: buy&get discount
+      value: 0,1
+      amount: -1
+      pieces: 2
+
+
+buy&get discount_0.5,1_-1_2:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx2021132
+    - type: Item sku
+      value: zyx2021133
+    - type: Item sku
+      value: zyx2021134
+  "benefit":
+    - type: buy&get discount
+      value: 0.5,1
+      amount: -1
+      pieces: 2
+
+buy&get fixed-amount_15,1_-1_2:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx20211228
+    - type: Item sku
+      value: zyx2021136
+    - type: Item sku
+      value: zyx2021137
+  "benefit":
+    - type: buy&get fixed-amount
+      value: 15,1
+      amount: -1
+      pieces: 2
+
+buy&get price_14.99,1_-1_2:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx2021140
+    - type: Item sku
+      value: zyx2021138
+    - type: Item sku
+      value: zyx2021139
+  "benefit":
+    - type: buy&get price
+      value: 14.99,1
+      amount: -1
+      pieces: 2
+
+
+discount_0.85_-1_1:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx2021132
+    - type: Item sku
+      value: zyx2021140
+  "benefit":
+    - type: discount
+      value: 0.85
+      amount: -1
+      pieces: 1
+
+price_7.99_-1_1:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx20211221
+    - type: Item sku
+      value: zyx20211331
+  "benefit":
+    - type: price
+      value: 7.99
+      amount: -1
+      pieces: 1
+
+price_25.49_-1_1:
+  priority: 70
+  acrossItem: True
+  channel:  michaels.com
+  type: product
+  autoApply: Promotion
+  product:
+    - type: Item sku
+      value: zyx2021133
+    - type: Item sku
+      value: zyx2021138
+  "benefit":
+    - type: price
+      value: 25.49
+      amount: -1
+      pieces: 1
+
+Non_Disc:
+  priority: 75
+  acrossStore: True
+  acrossItem: False
+  excludeCouponItem: True
+  channel: michaels.com
+  type: PPA
+  autoApply: Exclusion
+  product:
+    - type: Item sku
+      value: zyx88888883
+#    - type: Item sku
+#      value: zyx66666662
+  "benefit":
+    - type: discount
+      value: 1.00
+      amount: -1
+      pieces: 1
+
+AORPI_20%:
+  priority: 80
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 20%
+    - attribute: trigger_code
+      value: zyx20211230aorpi20
+    - attribute: offer_type
+      value: AROPI 20%
+    - attribute: exclusions
+      value: AORPI
+
+priority_240_AORPI_20%:
+  priority: 240
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 20%
+    - attribute: trigger_code
+      value: zyx2022666aorpi20
+    - attribute: offer_type
+      value: AROPI 20%
+    - attribute: exclusions
+      value: AORPI
+
+
+priority_220_AORPI_30%:
+  priority: 220
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.7
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 30%
+    - attribute: trigger_code
+      value: zyx2022666aorpi30
+    - attribute: offer_type
+      value: AROPI 30%
+    - attribute: exclusions
+      value: AORPI
+
+priority_200_AORPI_40%:
+  priority: 200
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 40%
+    - attribute: trigger_code
+      value: zyx2022666aorpi40
+    - attribute: offer_type
+      value: AROPI 40%
+    - attribute: exclusions
+      value: AORPI
+
+priority_160_AORPI_60%:
+  priority: 160
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.4
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 60%
+    - attribute: trigger_code
+      value: zyx2022666aorpi60
+    - attribute: offer_type
+      value: AROPI 60%
+    - attribute: exclusions
+      value: AORPI
+
+priority_180_AORPI_50%:
+  priority: 180
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: Reverse threshold discount
+      value: 0.5
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: AROPI 50%
+    - attribute: trigger_code
+      value: zyx2022666aorpi50
+    - attribute: offer_type
+      value: AROPI 50%
+    - attribute: exclusions
+      value: AORPI
+
+priority_160_ERPP_60%:
+  priority: 160
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.4
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 60% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp60
+    - attribute: offer_type
+      value: ERPP 60%
+
+priority_180_ERPP_50%:
+  priority: 180
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.5
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 50% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp50
+    - attribute: offer_type
+      value: ERPP 50%
+
+priority_200_ERPP_40%:
+  priority: 200
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp40
+    - attribute: offer_type
+      value: ERPP 40%
+
+priority_220_ERPP_30%:
+  priority: 220
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.7
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 30% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp30
+    - attribute: offer_type
+      value: ERPP 30%
+
+priority_230_ERPP_25%:
+  priority: 230
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.75
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 25% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp25
+    - attribute: offer_type
+      value: ERPP 25%
+
+priority_240_ERPP_20%:
+  priority: 240
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.80
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 20% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2022666erpp20
+    - attribute: offer_type
+      value: ERPP 20%
+
+priority_185_Entire_50%:
+  priority: 185
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.5
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 50% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx2022666entire50
+    - attribute: offer_type
+      value: Entire - 50%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+priority_205_Entire_40%:
+  priority: 205
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx2022666entire40
+    - attribute: offer_type
+      value: Entire - 40%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+priority_245_Entire_20%:
+  priority: 245
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 20% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx2022666entire20
+    - attribute: offer_type
+      value: Entire - 20%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+
+Non-Coupon_ERPP_20%:
+  priority: 90
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: True
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 20% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx20211230erpp20
+    - attribute: offer_type
+      value: ERPP 20%
+
+Non-Coupon_ERPP_40%:
+  priority: 90
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx20211230erpp41
+    - attribute: offer_type
+      value: ERPP 40%
+
+Non-Coupon_ERPP_priority120_40%:
+  priority: 120
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx2021erpp40p120
+    - attribute: offer_type
+      value: ERPP 40%
+
+
+Non-Coupon_ERPP_30%:
+  priority: 90
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: True
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.7
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 30% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx20211230erpp30
+    - attribute: offer_type
+      value: ERPP 30%
+
+Non-Coupon_ERPP_25%:
+  priority: 90
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: True
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  "benefit":
+    - type: discount
+      value: 0.75
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 25% Off All Regular Price Purchases
+    - attribute: trigger_code
+      value: zyx20211230erpp25
+    - attribute: offer_type
+      value: ERPP 25%
+
+Non-Coupon_Entire_50%:
+  priority: 100
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.5
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 50% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire50
+    - attribute: offer_type
+      value: Entire - 50%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+Non-Coupon_Entire_40%:
+  priority: 100
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire40
+    - attribute: offer_type
+      value: Entire - 40%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+Non-Coupon_Entire_priority95_50%:
+  priority: 95
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.5
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 50% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire50n
+    - attribute: offer_type
+      value: Entire - 50%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+Non-Coupon_Entire_priority95_40%:
+  priority: 95
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.6
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 40% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire40n
+    - attribute: offer_type
+      value: Entire - 40%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+Non-Coupon_Entire_priority95_20%:
+  priority: 95
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 20% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire20n
+    - attribute: offer_type
+      value: Entire - 20%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+Non-Coupon_Entire_20%:
+  priority: 100
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: discount
+      value: 0.8
+      amount: -1
+      pieces: 1
+  promotionExtensions:
+    - attribute: statement
+      value: 20% Off Entire Purchase Including Sale Items
+    - attribute: trigger_code
+      value: zyx20211230Entire20
+    - attribute: offer_type
+      value: Entire - 20%
+    - attribute: exclusions
+      value: DB-Entire
+    - attribute: exclusions
+      value: GC-Entire
+    - attribute: exclusions
+      value: Adhoc-EntireSTK
+    - attribute: exclusions
+      value: CLRPRM-Entire
+
+
+Non-Coupon_Spend_$40_Get_$10:
+  priority: 300
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: fixed-amount
+      value: 10
+      amount: 40
+      pieces: -1
+  promotionExtensions:
+    - attribute: statement
+      value: Spend $40 and Get $10
+    - attribute: trigger_code
+      value: zyx20211230Spend40g10
+    - attribute: offer_type
+      value: Spend $40 and Get $10
+    - attribute: exclusions
+      value: EDV-SPGE
+    - attribute: exclusions
+      value: GC-SPGE
+    - attribute: exclusions
+      value: Adhoc-SPGE
+    - attribute: exclusions
+      value: DB-SPGE
+    - attribute: exclusions
+      value: CLRPRM-SPGE
+
+Non-Coupon_Spend_$25_Get_$5:
+  priority: 300
+  acrossStore: True
+  acrossItem: True
+  excludeCouponItem: False
+  channel: michaels.com
+  type: PPA
+  onlineTag: 3
+  autoApply: Non-Serialized Coupon
+  product: []
+  buyer: []
+  "benefit":
+    - type: fixed-amount
+      value: 5
+      amount: 25
+      pieces: -1
+  promotionExtensions:
+    - attribute: statement
+      value: Spend $40 and Get $10
+    - attribute: trigger_code
+      value: zyx20211230S25g5
+    - attribute: offer_type
+      value: Spend $25 and Get $5
+    - attribute: exclusions
+      value: EDV-SPGE
+    - attribute: exclusions
+      value: GC-SPGE
+    - attribute: exclusions
+      value: Adhoc-SPGE
+    - attribute: exclusions
+      value: DB-SPGE
+    - attribute: exclusions
+      value: CLRPRM-SPGE
+
+fixed-amount_10_50_-1_fixed-amount_20_70_-1_fixed-amount_30_100_-1:
+  benefit: [ {amount: "50", pieces: -1, type: "fixed-amount", value: 10},
+             {amount: "70", pieces: -1, type: "fixed-amount", value: 20},
+             {amount: "100", pieces: -1, type: "fixed-amount", value: 30}]
+  product: [{"type":"Item sku","value":"zyx20211306"},{"type":"Item sku","value":"zyx20211307"},{"type":"Item sku","value":"zyx20211308"}]
+
+
+discount_0.9_100_-1_discount_0.8_150_-1_discount_0.7_200_-1:
+  benefit: [ {amount: "100", pieces: -1, type: "discount", value: 0.9},
+             {amount: "150", pieces: -1, type: "discount", value: 0.8},
+             {amount: "200", pieces: -1, type: "discount", value: 0.7}]
+  product: [{"type":"Item sku","value":"zyx20211309"},{"type":"Item sku","value":"zyx20211310"},{"type":"Item sku","value":"zyx20211311"}]
+
+discount_0.95_-1_3_discount_0.9_-1_5_discount_0.85_-1_10:
+  benefit: [ {amount: -1, pieces: 3, type: "discount", value: 0.95},
+             {amount: -1, pieces: 5, type: "discount", value: 0.9},
+             {amount: -1, pieces: 10, type: "discount", value: 0.85}]
+  product: [{"type":"Item sku","value":"zyx20211312"},{"type":"Item sku","value":"zyx20211313"},{"type":"Item sku","value":"zyx20211314"},{"type":"Item sku","value":"zyx20211315"},{"type":"Item sku","value":"zyx20211316"}]
+
+priority95_discount_0.7_-1_1:
+  priority: 95
+  benefit: [ {amount: -1, pieces: 1, type: "discount", value: 0.7}]
+  product: [#{"type":"Item sku","value":"zyx20211313"},
+            {"type":"Item sku","value":"zyx20220105"},
+            {"type":"Item sku","value":"zyx20220104"}]
+
+default:
