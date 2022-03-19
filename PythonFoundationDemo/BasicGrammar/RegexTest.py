@@ -244,3 +244,4 @@ if __name__ == '__main__':
     # ci.test_regex_dotall()
     # ci.test_regex_ignorecase()
     ci.test_regex_sub()
+    # gets
