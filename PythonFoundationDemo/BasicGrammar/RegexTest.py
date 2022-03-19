@@ -239,6 +239,12 @@ class RegexTest(object):
 
 
     def test_manage_complex_regex(self):
+        '''
+        如果要匹配的文本模式很简单，正则表达式就很好。但匹配复杂的文本模式，
+        可能需要长的、费解的正则表达式。你可以告诉 re.compile()， 忽略正则表达式字符
+        串中的空白符和注释， 从而缓解这一点。 要实现这种详细模式， 可以向 re.compile()
+        传入变量 re.VERBOSE， 作为第二个参数
+        '''
         phoneRegex = re.compile(r'((\d{3}|\(\d{3}\))?(\s|-|\.)?\d{3}(\s|-|\.)\d{4}(\s*(ext|x|ext.)\s*\d{2,5})?)')
         phoneRegexComment = re.compile(r'''(
                             (\d{3}|\(\d{3}\))?                  # area code
@@ -247,7 +253,20 @@ class RegexTest(object):
                             (\s|-|\.)                           # separator
                             \d{4}                               # last 4 digits
                             (\s*(ext|x|ext.)\s*\d{2,5})?        # extension
-                            )''', re.VERBOSE)                   
+                            )''', re.VERBOSE)
+
+
+        '''
+            如果你希望在正则表达式中使用 re.VERBOSE 来编写注释，还希望使用
+        re.IGNORECASE 来忽略大小写，该怎么办？遗憾的是， re.compile()函数只接受一
+        个值作为它的第二参数。可以使用管道字符（|）将变量组合起来，从而绕过这个限
+        制。管道字符在这里称为“按位或”操作符。
+            所以，如果希望正则表达式不区分大小写，并且句点字符匹配换行，就可以这
+        样构造 re.compile()调用
+        '''
+        someRegexValue1 = re.compile('foo', re.IGNORECASE | re.DOTALL)
+        # 使用第二个参数的全部 3 个选项， 看起来像这样：
+        someRegexValue2 = re.compile('foo', re.IGNORECASE | re.DOTALL | re.VERBOSE)
 
 
 
