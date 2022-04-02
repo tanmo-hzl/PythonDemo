@@ -314,6 +314,19 @@ class DateTimeTest(object):
         print(a)
         print(type(a))
 
+    def testCaseI(self):
+        time_str = '2021-12-30T02:30:00.501+00:00'
+        a = datetime.datetime.fromisoformat(time_str)
+        a = a.astimezone()
+        print(a)
+        b = datetime.datetime.now().astimezone()
+        print(b)
+        print(b-a)
+        time.sleep(1)
+        c = datetime.datetime.now()
+        print(c.astimezone()-b.astimezone())
+
+
 
 if __name__ == '__main__':
     dateTime = DateTimeTest()
@@ -322,4 +335,5 @@ if __name__ == '__main__':
     # dateTime.testCaseC()
     # dateTime.testCaseD()
     # dateTime.testCaseG()
-    dateTime.testCaseH()
+    # dateTime.testCaseH()
+    dateTime.testCaseI()
