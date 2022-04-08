@@ -314,17 +314,33 @@ class DateTimeTest(object):
         print(a)
         print(type(a))
 
+    def get_begin_datatime_by_input(self, num):
+        '''
+        Gets the start timestamp of how many days before or after the current time
+        (获得当前时间前多少天或后多少天的开始时间)
+        :param num:
+        :return:
+        '''
+        now_time = datetime.datetime.now()
+        pastManyDayStr = (now_time + datetime.timedelta(days=num)).strftime("%Y-%m-%d")
+        pastManyDay = datetime.datetime.strptime(pastManyDayStr, '%Y-%m-%d').astimezone()
+        return pastManyDay
+
+
     def testCaseI(self):
-        time_str = '2021-12-30T02:30:00.501+00:00'
+        time_str = '2022-04-08T03:30:00.501+00:00'
         a = datetime.datetime.fromisoformat(time_str)
-        a = a.astimezone()
+        print('type(a) :',type(a))
         print(a)
+        a2 = a.astimezone()
+        print(a2)
+        print(a==a2)
         b = datetime.datetime.now().astimezone()
         print(b)
-        print(b-a)
-        time.sleep(1)
-        c = datetime.datetime.now()
-        print(c.astimezone()-b.astimezone())
+        print('type(b) :', type(b))
+        print(a>b)
+        # print((a-b).seconds)
+        # print(type((a-b).seconds))
 
 
 
