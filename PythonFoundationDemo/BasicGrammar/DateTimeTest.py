@@ -326,22 +326,14 @@ class DateTimeTest(object):
         pastManyDay = datetime.datetime.strptime(pastManyDayStr, '%Y-%m-%d').astimezone()
         return pastManyDay
 
-
-    def testCaseI(self):
+    def test_date(self):
         time_str = '2022-04-08T03:30:00.501+00:00'
         a = datetime.datetime.fromisoformat(time_str)
-        print('type(a) :',type(a))
-        print(a)
-        a2 = a.astimezone()
-        print(a2)
-        print(a==a2)
-        b = datetime.datetime.now().astimezone()
-        print(b)
-        print('type(b) :', type(b))
-        print(a>b)
-        # print((a-b).seconds)
-        # print(type((a-b).seconds))
-
+        print('type(a) :', type(a))
+        print('a:', a)
+        c = self.get_begin_datatime_by_input(0).astimezone()
+        print('c:', c)
+        print(a > c)
 
 
 if __name__ == '__main__':
