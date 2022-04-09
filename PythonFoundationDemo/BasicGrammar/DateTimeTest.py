@@ -327,13 +327,13 @@ class DateTimeTest(object):
         return pastManyDay
 
     def test_date(self):
-        time_str = '2022-04-08T03:30:00.501+00:00'
+        time_str = '2022-04-08T00:00:00.000+00:00'
         a = datetime.datetime.fromisoformat(time_str)
         print('type(a) :', type(a))
         print('a:', a)
         c = self.get_begin_datatime_by_input(0).astimezone()
         print('c:', c)
-        print(a > c)
+        print(a <= c)
 
 
 if __name__ == '__main__':
@@ -344,4 +344,4 @@ if __name__ == '__main__':
     # dateTime.testCaseD()
     # dateTime.testCaseG()
     # dateTime.testCaseH()
-    dateTime.testCaseI()
+    dateTime.test_date()
