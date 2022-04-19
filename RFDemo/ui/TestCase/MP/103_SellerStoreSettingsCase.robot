@@ -33,7 +33,7 @@ Test Check Store Settings - Fulfillment Info Page Fixed Element text
     [Tags]  mp    mp-ea    ea-store-setting    ea-store-setting-ele
     Store Left Meun - Store Settings - Fulfillment Info
     ${fixed_ele}    Get Ea Fixed Element    FixedElement_SellerStoreSettings.json
-    Common - Check Page Contain Fixed Element    ${fixed_ele}    fulfillmentInfo
+    Common - Check Page Contain Fixed Element    ${fixed_ele}    fulfillment
 
 Test Check Store Settings - Return Policy Page Fixed Element text
     [Documentation]   Check Return Policy page fixed element text
@@ -43,14 +43,14 @@ Test Check Store Settings - Return Policy Page Fixed Element text
     Common - Check Page Contain Fixed Element    ${fixed_ele}    returnPolicy
 
 Test Update Store Photos
-    [Documentation]    Seller update store address and Description
+    [Documentation]    [MKP-6436],Seller update store address and Description
     [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Store Profile
     Store Profile - Show Photo Documentation
     Store Profile - Change Store Photo
 
 Test Update Store Address And Description
-    [Documentation]    Seller update store address and Description
+    [Documentation]    [MKP-6436],Seller update store address and Description
     [Tags]   mp    mp-ea    ea-store-setting
     ${address}    Get Address Info
     Store Left Meun - Store Settings - Store Profile
@@ -84,7 +84,7 @@ Test Update Customer Service Primary Contact Information
     Sotre Settings - Click Button SAVE
 
 Test Update Customer Service Michael Contact Info
-    [Documentation]    Seller update Customer Service Michael Contact Info
+    [Documentation]    [MKP-6451],Seller update Customer Service Michael Contact Info
     [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Customer Service
     Customer Service - Remove Another Michael Contact
@@ -98,9 +98,10 @@ Test Update Customer Service Michael Contact Info
     Customer Service - Update Privacy Policy
     Sotre Settings - Click Button SAVE
 
+#[MKP-6475], 不编辑，直接保存
 Test Update Seller Fulfillment Info
-    [Documentation]    Seller Update Fulfillment Address
-    [Tags]   mp    mp-ea    ea-store-setting1
+    [Documentation]    [MKP-6474],Seller Update Fulfillment Address
+    [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Fulfillment Info
     ${ful_info}     Get Fulfillment Info
     Fulfillment Info - Rename Fulfillment    ${ful_info}[name]
@@ -126,32 +127,27 @@ Test Update Seller Fulfillment Info
     Fulfillment Info - Update Observed Holidays - Observed Holidays    0    0    ${holiday1}
     Sotre Settings - Click Button SAVE
 
-
 Test Update Shipping Rate Table
     [Documentation]    Update store shipping reate
     [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Fulfillment Info
     Fulfillment Info - Update Shipping Rate Table - Delete Threshold
-    Fulfillment Info - Offer Expedited Shipping To Customers - Close
-    Fulfillment Info - Offer Expedited Shipping To Customers - Open
-    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Open
-    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Close
+    Fulfillment Info - Offer Expedited Shipping To Customers Open    ${True}
+    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping Open    ${False}
     ${shipping_rate}    Get Shipping Rate Info
     ${standard}   Set Variable    ${shipping_rate}[Standard]
     ${expedited}   Set Variable    ${shipping_rate}[Expedited]
-#    {'Standard': ['3.30', '30.28', '4.99', '47.66', '1.79'], 'Expedited': ['6.93', '8.94', '0.19']}
     Fulfillment Info - Update Shipping Rate Table - Add Threshold    1    1    ${standard[0]}    ${standard[1]}    ${standard[2]}    ${expedited[0]}
     Sotre Settings - Click Button SAVE
-    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Close
-    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Open
+    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping Open    ${True}
     Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Add Threshold    1    ${standard[0]}   ${expedited[0]}
     Sotre Settings - Click Button SAVE
-    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Close
+    Fulfillment Info - Offer Different Price Threshold For Expedited Shipping Open    ${False}
     Sotre Settings - Click Button SAVE
 
 Test Add Another Fulfillment Center
     [Documentation]    Add another fulfillment center to store
-    [Tags]   mp    mp-ea    ea-store-setting   debug
+    [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Fulfillment Info
     Fulfillment Info - Add another Fulfillment Center - Delete
     Fulfillment Info - Add another Fulfillment Center
@@ -179,14 +175,21 @@ Test Add Another Fulfillment Center
     Sotre Settings - Click Button SAVE
     Fulfillment Info - Add another Fulfillment Center - Delete
 
-Test Return Policy
-    [Documentation]    Set return policy to store
+Test Return Policy - Update Return Policy
+    [Documentation]    [MKP-6486],Set return policy to store
     [Tags]   mp    mp-ea    ea-store-setting
     Store Left Meun - Store Settings - Return Policy
     Return Policy - Update Return Center Location By Index    1
-    Return Policy - Update Return Policy    60 Days Return
-    Return Policy - Return Shipping Service - Close
-    Return Policy - Return Shipping Service - Open
+    ${returns}    Create List    30 Day Returns    60 Day Returns
+    ${policy}    Evaluate    random.choice(${returns})
+    Return Policy - Update Return Policy    ${policy}
+    Return Policy - Set Return Shipping Service Open    ${False}
+    Sotre Settings - Click Button SAVE
+
+Test Return Policy - Update UPS Account
+    [Documentation]    [MKP-7039],Set return shipping service to store
+    [Tags]   mp    mp-ea    ea-store-setting
+    Return Policy - Set Return Shipping Service Open    ${True}
     Return Policy - Input UPS User Info    ${UPC_ID}    ${UPC_PWD}    ${UPC_KEY}
     Return Policy - Select Agree To Add Accept The Trems
     Return Policy - Unselect Agree To Add Accept The Trems

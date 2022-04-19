@@ -38,9 +38,7 @@
     },
     "Partially Shipped": {
       "!remove": [
-        "Waiting for shipment",
-        "Cancel Order",
-        "Ship Item"
+        "Waiting for shipment"
       ]
     }
   }

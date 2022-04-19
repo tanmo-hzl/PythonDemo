@@ -35,6 +35,8 @@ Go To Seller Order And Shipments
     Click On The Element And Wait  //p[text()='Image']/parent::th/preceding-sibling::th/*
     Click On The Element And Wait  //div[contains(text(), 'Ship Item')]
     Click On The Element And Wait  //p[text()='Expand']/parent::button
+    Sleep  0.2
+    Select From List By Value    //select[@id="carrier"]   ups
     ${trackingNumber}  Generate Random String	 10  [NUMBERS]
     Input Text And Wait  //input[@id="trackingNumber"]  ${trackingNumber}
     Click On The Element And Wait  //div[text()='Add Tracking Number']/parent::button
@@ -76,7 +78,7 @@ Buyer Return Reason
     Click On The Element And Wait  //span[text()='Submit']/parent::button
     Click On The Element And Wait  //span[text()='View Return Details']/parent::button
     Wait Until Page Contains  ${order_num}
-    ${return_order}  Get Text And Extraction Data  //h4[starts-with(text(), 'Return Order #')]  15
+    ${return_order}  Get Text And Extraction Data  //h4/p[starts-with(text(), 'Return Order #')]  15
     Set Suite Variable  ${return_order}
 
 Seller First Time Handle Disputes
@@ -85,6 +87,8 @@ Seller First Time Handle Disputes
     Click On The Element And Wait  //p[text()='Returns / Disputes']
     Wait Until Page Contains  ${return_order}
     Click On The Element And Wait  //div[text()='Take action on the return requests']/parent::button
+    Wait Until Page Contains Element  //span[text()='Next']/parent::button
+    Scroll To The Bottom Of The Page
     Click On The Element And Wait  //button[@title="Please Select an Option"]
     Click On The Element And Wait  //button[text()='${return_reason}']
     IF  '${return_reason}'=='Reject Refund'
@@ -94,18 +98,17 @@ Seller First Time Handle Disputes
         Input Text And Wait  //input[@placeholder="Enter Text"]      ${RejectReason}
         Input Text And Wait  //input[@data-testid="Refund Amount"]   ${Refund Amount}
     END
-    Scroll Last Button Into View
     Scroll Element And Wait And Click  //span[text()='Next']/parent::button
     Sleep  1
-    Scroll Last Button Into View
-    Click On The Element And Wait  //span[text()='Submit']/parent::button
+    Scroll To The Bottom Of The Page
+    Click On The Element And Wait   //span[text()='Submit']/parent::button
     Click On The Element And Wait  //span[text()='Returns & Disputes']/parent::button
 
 Buyer Confirms Status of Disputes
     [Arguments]  ${Dispute_Status}=Return Declined
     Switch Browser  mikLandingUrl
     Go To  ${URL_MIK}
-    Go To Order History
+    Go To personal information  Orders  summer
     Click On The Element And Wait  (//p[text()='Return and Dispute'])[2]
     Reload Page
     Wait Until Page Contains  ${return_order}  30
@@ -158,7 +161,7 @@ Buyer second time Handle Disputes
     [Arguments]  ${Reject_Accept}=Accept
     Switch Browser  mikLandingUrl
     Reload Page
-    Wait Until Element Is Visible  //div[text()='View Dispute']/parent::button
+    Wait Until Page Contains  Return Order
     Click On The Element And Wait  //div[text()='View Dispute']/parent::button
     Click On The Element And Wait  //p[starts-with(text(),'I acknowledge')]
     Click On The Element And Wait  //a[text()='${Reject_Accept} Offer']
@@ -212,7 +215,7 @@ Check Out FGM And Go To Order
     Wait Until Page Contains  ADD TO CART  60
     Add Shopping Cart  ${buy_num}
     Check Out
-    Go To Order History
+    Go To personal information  Orders  summer
     Reload Page
     Wait Until Element Is Visible  //p[text()='Order Number']  30
     Go To Order Details Page
@@ -221,7 +224,7 @@ Check Out FGM And Go To Order
     Set Suite Variable  ${order_num}
 
 Seller Goods shelves
-    Go To personal information  Storefront  summer
+    Go To  ${URL_MIK}/fgm/sellertools/dashboard
     Click On The Element And Wait  //p[text()='My Product Listings']
     ${result}   Run Keyword And Ignore Error  wait until page contains  Active  3
     IF  '${result[0]}'=='FAIL'

@@ -1,8 +1,7 @@
 *** Settings ***
 Library    Collections
 Library    ../../Libraries/Checkout/BuyerKeywords.py
-Resource    ../../TestData/Checkout/config.robot
-
+Resource     Common.robot
 
 
 *** Variables ***
@@ -30,14 +29,13 @@ Get order no from order confirmation
     log    ck_order_number:${ORDER_NO}
 
 
+
 Get order no from order history
     sleep    1
     go to    ${Home URL}/buyertools/order-history
     Sleep    2
-#    Run Keyword And Warn On Failure    Wait Until Page Contains Element     //h2/div[text()="Order History"]    ${Long Waiting Time}
-#    Run Keyword And Warn On Failure    wait until element is visible    //h2/div[text()="Order History"]    ${Long Waiting Time}
-    Run Keyword And Warn On Failure    Wait Until Page Contains Element     //input[@id="searchOrders"]     ${Long Waiting Time}
-    Run Keyword And Warn On Failure    Wait Until Element Is Visible    //input[@id="searchOrders"]    ${Long Waiting Time}
+    Wait Until Page Contains Element     //input[@id="searchOrders"]
+    Wait Until Element Is Visible    //input[@id="searchOrders"]
     ${orderNo_text}    get text    (//p[text()="Order Number"]/following-sibling::p)[1]
     ${orderNo}    Set Variable    ${orderNo_text[1:]}
     [Return]     ${orderNo}
@@ -89,7 +87,7 @@ check order summary
         ${other_fee}   Get Text   //p[text()="Other Fees"]/following-sibling::p
         ${other_fee}   Set Variable   ${other_fee[1:]}
     END
-    ${A_total}   Get Text    //p[text()="Total:"]/parent::div/h4
+    ${A_total}   Get Text    //*[text()="Total:"]/following-sibling::h4
     ${A_subtotal}    Set Variable    ${A_subtotal[1:]}
     IF   "${page}"=="cart"
         ${E_total}   Evaluate    float(${A_subtotal})-float(${saving})+float(${SDD_fee})+float(${other_fee})
@@ -338,7 +336,7 @@ Get Skus Info From GYO or OR Page
     [Return]    ${SDD_sku_dict}   ${MIK_STH_sku_dict}   ${PIS_sku_dict}    ${class_sku_dict}    ${MKR_sku_dict}    ${MKP_sku_dict}    ${total_items}
 
 Get product subtotal fee
-    ${product_eles}    Set Variable     (//img[contains(@src,"http")]/following-sibling::div)
+    ${product_eles}    Set Variable     //img[contains(@alt,"thumbnail")]/../following-sibling::div
     ${count}    Get Element Count     ${product_eles}
     @{skus_amount}     Create List
     FOR   ${i}    IN RANGE    ${count}

@@ -11,8 +11,7 @@
         "Available Balance",
         "Weekly",
         "Net Sales Year-to-Date",
-        "Your total completed net sales deducts the total refund,",
-        "starting from Jan 1 this year",
+        "Your total completed net sales deducts the total refund, starting from Jan 1 this year",
         "Date",
         "Description",
         "Status",
@@ -34,13 +33,14 @@
       "h2": [
         "Payments"
       ],
+      "h3": [
+        "Credit Cards"
+      ],
       "h4": [
-        "Credit Cards",
         "Bank Details"
       ],
       "p": [
         "Add payment methods to pay off account balance.",
-        "Default Payment Method",
         "Add Additional Card",
         "Expiration",
         "Edit",
@@ -77,17 +77,20 @@
       "h2": [
         "Tax Information"
       ],
-      "h4": [
-        "Your Yearly Tax "
+      "!contains": [
+        "Your Yearly Tax"
       ],
       "h3": [
         "Business Information"
       ],
       "p": [
+        "Company Name",
+        "Employer Identification Number (EIN)"
+      ],
+      "!remove": [
         "Edit",
         "Company Name Mobile",
-        "Seller Name",
-        "Employer Identification Number (EIN)"
+        "Seller Name"
       ]
     }
   }

@@ -1,29 +1,26 @@
 *** Settings ***
-Library     Selenium2Library
 Library     ../../Libraries/FGM/SellerListingLib.py
+Library     ../../Libraries/CommonLibrary.py
 Resource    ../../Keywords/FGM/CommonKeywords.robot
 
 
-Suite Setup     Run Keywords    Environ Browser Selection And Setting    ${ENV}    Firefox
-...                AND    Set Selenium Timeout    ${Waiting_Time}
-...                AND    User Sign In            ${SellerEmail}    ${Password}    ${FirstName}
-Test Setup        Store Left Menu - Listing Management
-Suite Teardown    Close Browser
+Suite Setup         Run Keywords    Environ Browser Selection And Setting    ${ENV}    Firefox
+...                 AND    User Sign In - FGM   ${SellerEmail}    ${Password}    ${FirstName}
+Suite Teardown      Close All Browsers
+Test Setup          Store Left Menu - Listing Management
+Test Teardown       Go To Expect Url Page    ${TEST_STATUS}    ${User_Type}    ${Page_Name}
 
 
 *** Variables ***
-${SellerEmail}      Makerplace@snapmail.cc
-${Password}         Password123
-${FirstName}        Seller
-${URL_Listings}                ${URL_MIK}/fgm/sellertools/my-product-listings
-#${URL_Listings_Image}          ${URL_MIK}/fgm/seller/createlisting/photos-and-video?returnUrl=/fgm/sellertools/my-product-listings
-${URL_Listings_Inventory}      ${URL_MIK}/fgm/seller/createlisting/inventory-and-pricing?returnUrl=/fgm/sellertools/my-product-listings
-${URL_Listings_Shipping}       ${URL_MIK}/fgm/seller/createlisting/shipping?returnUrl=/fgm/sellertools/my-product-listings
-#${URL_Listings_Confirmation}   ${URL_MIK}/fgm/seller/createlisting/preview?returnUrl=/fgm/sellertools/my-product-listings
+${SellerEmail}    Makerplace@snapmail.cc
+${Password}       Password123
+${FirstName}      Seller
+${User_Type}      seller
+${Page_Name}      lst
 
 
 *** Test Cases ***
-Test Create Listing Without Variants
+Test Create New Listing - No Variants
     [Documentation]    Create new Listing without variants
     [Tags]     mkr    mkr-smoke    mkr-lst
     Listing Details - No Variants
@@ -32,32 +29,46 @@ Test Create Listing Without Variants
     Shipping - No Variants
     Listing Confirmation - No Variants
 
-Test Create Listing With Variants
+
+Test Repeated Tags for Listing
+    [Documentation]    Test the repeated tags for Listing
+    [Tags]     mkr    mkr-smoke    mkr-lst
+    Listing Details - Repeated Tags
+
+
+Test Create New Listing - Have Variants
     [Documentation]    Create new Listing with variants
     [Tags]     mkr    mkr-smoke    mkr-lst
-    ${ListingDetails}    Listing Details - With Variants    art    D220734S    15    90
-    Photos and Videos - With Variants
-    Inventory and Pricing - With Variants
-    Shipping - With Variants
-    Listing Confirmation - With Variants
+    ${ListingDetails}    Listing Details - Have Variants    Art    10525736    15    90
+    Photos and Videos - Have Variants
+    Inventory and Pricing - Have Variants
+    Shipping - Have Variants
+    Listing Confirmation - Have Variants
+    Listing PDP - Have Variants
 
 
 *** Keywords ***
 Store Left Menu - Listing Management
-    Wait Until Element Is Visible    //p[text()="My Product Listings"]
-    Click Element                    //p[text()="My Product Listings"]
-    Wait Until Element Is Visible    //h1[text()="My Product Listings"]
+    Wait Until Element Is Visible         //p[text()="My Product Listings"]
+    Click Element                         //p[text()="My Product Listings"]
+    Wait Until Element Is Visible         //h1[text()="My Product Listings"]
 
 Listing Details - No Variants
     Wait Until Element Is Enabled         //div[text()="Create Listing"]/..
     Click Element                         //div[text()="Create Listing"]/..
     Wait Until Element Is Visible         //h1[text()="Listing Details"]
-    Input Text                            //input[@id="skuDisplayName"]          AU Without Variants
+    ${ListingTitle}                       listing_title
+    Set Test Variable                     ${Title}                               ${ListingTitle}
+    Input Text                            //input[@id="skuDisplayName"]          AU No Variants ${Title}
     Input Text                            //input[@id="category"]                art
     Click Element                         //button[@aria-label="Category Search Icon"]
-    Wait Until Element Is Visible         //p[text()="Art / Fiber Arts / Rug Hooking"]
-    Set Focus To Element                  //p[text()="Art / Fiber Arts / Rug Hooking"]
-    Click Element                         //p[text()="Art / Fiber Arts / Rug Hooking"]
+    ${Verify Category}      Run Keyword And Ignore Error      Wait Until Page Contains Element      //p[text()="Art / Drawing / Charcoal"]
+    IF  '${Verify Category}[0]' == 'FAIL'
+        Click Element                         //button[@aria-label="Category Search Icon"]
+        Wait Until Page Contains Element      //p[text()="Art / Drawing / Charcoal"]
+    END
+    Click Element                         //p[text()="Art / Drawing / Charcoal"]
+    Wait Until Page Contains Element      //textarea[@id="longDescription"]
     Input Text                            //textarea[@id="longDescription"]      This is the Description for the Listing.
     Execute Javascript                    document.getElementsByTagName('footer')[0].scrollIntoView();
     Wait Until Element Is Visible         //div[text()="Save as Draft"]
@@ -71,26 +82,19 @@ Listing Details - No Variants
 
 Photos and Videos - NO Variants
     Wait Until Element Is Visible         //h1[text()="Photos and Video"]
-    Choose File                           //input[@id="ListingImage upload"]      ${CURDIR}/../../CaseData/FGM/IMG/ListingPicture.jpeg
+    ${file_path}    Get Random Img By Project Name    FGM
+    Choose File                           //input[@id="ListingImage upload"]      ${file_path}
     Sleep    2
-    Wait Until Element Is Visible         //button[@class="css-5rj6vi"]
-    Click Button                          //button[@class="css-5rj6vi"]
+    Wait Until Page Contains Element      (//div[@class="css-1c8ckg8"])[5]/..
+    Click Button                          (//div[@class="css-1c8ckg8"])[5]/..
 
 Inventory and Pricing - No Variants
     Wait Until Element Is Visible        //div[text()="Inventory and Pricing"]
     Set Focus To Element                 //input[@name="price"]
     Input Text                           //input[@name="price"]                   7.88
     Sleep    1
-#    ${Enter Price}    Run Keyword And Ignore Error     Wait Until Element Is Visible     //p[text()="Enter Amount"]
-#    IF  '${Enter Price}[0]' == 'PASS'
-#        Input Text    //input[@name="price"]       7.88
-#    END
     Set Focus To Element                 //input[@name="inventory"]
     Input Text                           //input[@name="inventory"]               100
-#    ${Enter Quantity}    Run Keyword And Ignore Error     Wait Until Element Is Visible     //p[text()="Enter Quantity"]
-#    IF  '${Enter Quantity}[0]' == 'PASS'
-#        Input Text    //input[@name="inventory"]   100
-#    END
     Sleep  1
     Click Element                        //div[text()="Save and Continue"]
 
@@ -104,12 +108,13 @@ Shipping - No Variants
     Execute Javascript                   document.getElementsByTagName('footer')[0].scrollIntoView();
     Wait Until Element Is Visible        //div[text()="Back"]
     Click Element                        //p[text()="What you will charge"]
-    Sleep    1
+    Sleep    1.5
     Click Element                        //span[text()="Priority Mail 2-Day™; Flat Rate Envelope"]
-    Sleep    1
+    Wait Until Page Contains             Priority Mail 2-Day™; Flat Rate Envelope
     Click Element                        //p[text()="What you will charge"]
     Sleep    1
     Click Element                        //button[text()="Free Shipping"]
+    Wait Until Page Contains             Free Shipping
     Click Element                        //div[text()="Save and Continue"]
 
 Listing Confirmation - No Variants
@@ -117,43 +122,58 @@ Listing Confirmation - No Variants
     Click Element                        //div[text()="Submit to Publish"]
     Wait Until Element Is Visible        //h3[text()="Congrats! You Added a Product Listing!"]
     Click Element                        //div[text()="GO TO LISTING MANAGEMENT"]
-    Wait Until Page Contains             AU Without Variants
+    Wait Until Page Contains             AU No Variants ${Title}
 
 
-Listing Details - With Variants
+Listing Details - Repeated Tags
+    Wait Until Element Is Visible         //div[text()="Create Listing"]
+    Click Element                         //div[text()="Create Listing"]
+    Wait Until Element Is Visible         //h1[text()="Listing Details"]
+    @{tags}    Create List    AT    Automation    Test    Test
+    FOR    ${item}    IN    @{tags}
+        Input Text                        //input[@id="tagInput"]      ${item}
+        Click Button                      //p[text()="Add Tags"]/..
+        Sleep    0.5
+    END
+    Wait Until Page Contains              Test is already added!
+    Click Element                         //a[@aria-label="Close and return to Michaels.com"]
+
+
+Listing Details - Have Variants
     [Arguments]   ${Category}    ${SKU}    ${LeadTime}    ${Timeframe}
-    Go To                                 ${URL_Listings}
+    Store Left Menu - Listing Management
     Wait Until Element Is Visible         //div[text()="Create Listing"]
     Click Element                         //div[text()="Create Listing"]
     Wait Until Element Is Visible         //h1[text()="Listing Details"]
     ${ListingTitle}                       listing_title
-    Set Suite Variable                    ${Title}                               ${ListingTitle}
-    Input Text                            //input[@id="skuDisplayName"]          AU With Variants ${Title}
+    Set Test Variable                     ${Title}                               ${ListingTitle}
+    Input Text                            //input[@id="skuDisplayName"]          AU have Variants ${Title}
     Input Text                            //input[@id="category"]                ${Category}
     Click Element                         //button[@aria-label="Category Search Icon"]
+    ${Verify Category}      Run Keyword And Warn On Failure      Wait Until Page Contains Element      //p[text()="Art / Drawing / Charcoal"]
+    IF  '${Verify Category}[0]' == 'FAIL'
+        Click Element                         //button[@aria-label="Category Search Icon"]
+        Wait Until Page Contains Element      //p[text()="Art / Drawing / Charcoal"]
+    END
     Execute Javascript                    document.getElementsByTagName('div')[19].scrollIntoView();
     Wait Until Page Contains Element      //p[text()="Don't see your listing category? You may add them manually."]
-    Sleep    2
+    ${Verify Click here}    Run Keyword And Warn On Failure      Wait Until Page Contains      Click here
+    IF  '${Verify Click here}[0]' == 'FAIL'
+        Execute Javascript                    document.getElementsByTagName('div')[19].scrollIntoView();
+        Wait Until Page Contains Element      //p[text()="Don't see your listing category? You may add them manually."]
+    END
+    Wait Until Page Contains Element      //button[text()="Click here"]
+    Wait Until Element Is Enabled         //button[text()="Click here"]
+
     Click Button                          //button[text()="Click here"]
-    Select From List By Index             //select[@id="primaryCategory"]        3
+    Select From List By Index             //select[@id="primaryCategory"]        0
     Select From List By Index             //select[@id="secondaryCateogry"]      2
-    Select From List By Index             //select[@id="tertiaryCategory"]       1
+    Select From List By Index             //select[@id="tertiaryCategory"]       3
     Wait Until Element Is Visible         //div[text()="SAVE"]/..
     Click Button                          //div[text()="SAVE"]/..
-    Wait Until Element Is Visible         //p[text()="Decor, Candles & Fragrances, Candles"]
-    Input Text                            //input[@id="tagInput"]                AT
+    Wait Until Page Contains              Art, Glass, Suncatchers
+    Input Text                            //input[@id="tagInput"]      Automation
     Click Button                          //p[text()="Add Tags"]/..
-    Wait Until Page Contains              AT
-    Input Text                            //input[@id="tagInput"]                Automation
-    Click Button                          //p[text()="Add Tags"]/..
-    Wait Until Page Contains              Automation
-    Input Text                            //input[@id="tagInput"]                Test
-    Click Button                          //p[text()="Add Tags"]/..
-    Wait Until Page Contains              Test
-    Input Text                            //input[@id="tagInput"]                Test
-    Click Button                          //p[text()="Add Tags"]/..
-    Wait Until Page Contains              Test is already added!
-    Clear Element Text                    //input[@id="tagInput"]
     Execute Javascript                    document.getElementsByTagName('textarea')[0].scrollIntoView();
     Wait Until Page Contains Element      //textarea[@id="longDescription"]
     Input Text                            //textarea[@id="longDescription"]     This is the Description for the Listing.
@@ -161,9 +181,8 @@ Listing Details - With Variants
     Click Element                         //input[@placeholder="Search for an item by name or SKU"]
     Input Text                            //input[@placeholder="Search for an item by name or SKU"]            ${SKU}
     Click Button                          //button[@class="css-13ezjph"]
-    Sleep    1
-    Set Focus To Element                  //label[@class="chakra-checkbox e32j4ln0 css-l0e1pb"]
-    Click Element                         //label[@class="chakra-checkbox e32j4ln0 css-l0e1pb"]
+    Sleep    1.5
+    Click Element                         //p[text()="$2.99"]/preceding-sibling::label
     Click Button                          //div[text()="Add These Products"]/..
     Wait Until Page Contains              Item # ${SKU}
     Click Element                         (//p[text()=" Days"])[1]
@@ -183,32 +202,30 @@ Listing Details - With Variants
     ELSE IF    "${Timeframe}" == "10"
         ${Listing_Timeframe}   Set Variable    10 Days
     END
-    Wait Until Page Contains              ${Listing_Timeframe}
+    Wait Until Page Contains               ${Listing_Timeframe}
+    Set Task Variable    ${e_timeframe}    ${Listing_Timeframe}
     Click Element                         //div[text()="Save and Continue"]
-
-    ${ListingDetails}   Create Dictionary    Category=${Category}   SKU = ${SKU}    LeadTime = ${LeadTime}    Timeframe = ${Timeframe}
-    ...    Listing_Timeframe=${Listing_Timeframe}   Title = AU With Variants ${Title}
+    ${ListingDetails}   Create Dictionary    Category=${Category}   SKU=${SKU}    LeadTime=${LeadTime}    Timeframe=${Timeframe}
+    ...    Listing_Timeframe=${Listing_Timeframe}   Listing_Title=AU have Variants ${Title}
     [Return]      ${ListingDetails}
-    Set Suite Variable    ${Listing_Details}    ${ListingDetails}
+    Set Test Variable    ${Details}    ${ListingDetails}
 
 
-Photos and Videos - With Variants
+Photos and Videos - Have Variants
     Wait Until Element Is Visible         //h1[text()="Photos and Video"]
-    Choose File                           //input[@id="ListingImage upload"]      ${CURDIR}/../../CaseData/FGM/IMG/ListingPicture2.jpeg
-    Sleep    2
-    Element Should Be Visible             //div[@class="evh9c3z4 css-zdc080"]     # upload image successfully
-    Choose File                           //input[@id="ListingImage upload"]      ${CURDIR}/../../CaseData/FGM/IMG/ListingPicture.jpeg
-    Sleep    2
-    Element Should Be Visible             //div[@class="evh9c3z4 css-zdc080"][2]       # upload image successfully
+    ${file_path}    Get Random Img By Project Name    FGM    2
+    Choose File                           //input[@id="ListingImage upload"]      ${file_path}[0]
+    Sleep    3
+    Choose File                           //input[@id="ListingImage upload"]      ${file_path}[1]
+    Sleep    3
     Wait Until Element Is Visible         //button[@class="css-5rj6vi"]                # Save and Continue - button
     Click Button                          //button[@class="css-5rj6vi"]
 
-Inventory and Pricing - With Variants
-#    Go To                                ${URL_Listings_Inventory}
-    Wait Until Element Is Visible        //div[text()="Inventory and Pricing"]
+Inventory and Pricing - Have Variants
+    Wait Until Page Contains Element     //div[text()="Inventory and Pricing"]
     Click Element                        //div[text()="Add Variant"]
     Click Element                        //p[text()="Add variant type"]
-    Wait Until Element Is Visible        //button[@value="Size"]
+    Wait Until Page Contains Element     //button[@value="Size"]
     Click Button                         //button[@value="Size"]
     Click Element                        //p[text()="Select Size options"]
     Click Button                         //button[@value="S"]
@@ -216,11 +233,11 @@ Inventory and Pricing - With Variants
     Click Button                         //button[@value="M"]
     Click Element                        //p[text()="Select Size options"]
     Click Button                         //button[@value="L"]
-    Wait Until Element Is Visible        //p[text()="Price is same for each variation"]
+    Wait Until Page Contains Element     //p[text()="Price is same for each variation"]
     Click Element                        //p[text()="Price is same for each variation"]
     Click Element                        //div[text()="Save"]
     Execute Javascript                   document.getElementsByTagName('footer')[0].scrollIntoView();
-    Wait Until Element Is Visible        //div[text()="Save as Draft"]
+    Wait Until Page Contains Element     //div[text()="Save as Draft"]
     Set Focus To Element                 //input[@name="subSkus[0].inventory"]
     Input Text                           //input[@name="subSkus[0].inventory"]    10
     Sleep    2
@@ -235,25 +252,28 @@ Inventory and Pricing - With Variants
     Sleep    2
     Click Element                        //p[text()=" Photos"]
     Select From List By Value            //select[@id="selectvariant"]            Size
-    Wait Until Element Is Visible        //p[text()="Add photos to your product options."]
-    Choose File                          (//input[@id="upload-photo"])[1]         ${CURDIR}/../../CaseData/FGM/IMG/VariantsPicture1.jpeg
+    Wait Until Page Contains Element     //p[text()="Add photos to your product options."]
+    ${file_path}    Get Random Img By Project Name    FGM   3
+    Choose File                          (//input[@id="upload-photo"])[1]      ${file_path}[0]
     Sleep    2
-    Choose File                          (//input[@id="upload-photo"])[2]         ${CURDIR}/../../CaseData/FGM/IMG/VariantsPicture2.jpeg
+    Choose File                          (//input[@id="upload-photo"])[2]      ${file_path}[1]
     Sleep    2
-    Choose File                          (//input[@id="upload-photo"])[3]         ${CURDIR}/../../CaseData/FGM/IMG/VariantsPicture3.jpeg
+    Choose File                          (//input[@id="upload-photo"])[3]      ${file_path}[2]
+    Sleep    2
+    Wait Until Page Contains Element     //div[text()="Save"]
+    Set Focus To Element                 //div[text()="Save"]
     Sleep    2
     Click Element                        //div[text()="Save"]
-    Wait Until Element Is Visible        //span[text()="Off"]
+    Wait Until Page Contains Element     //span[text()="Off"]
     Click Element                        //span[text()="Off"]
     Execute Javascript                   document.getElementsByTagName('footer')[0].scrollIntoView();
-    Wait Until Element Is Visible        //div[text()="Save as Draft"]
+    Wait Until Page Contains Element     //div[text()="Save as Draft"]
     Input Text                           //input[@name="personalization.personalizationTitle"]       Would you like to leave some message?
-    Input Text                           //input[@name="personalization.personalizationText"]        Yimmy
+    Input Text                           //input[@name="personalization.personalizationText"]        Test for Personalization Text
     Click Element                        //p[text()="Click here if personlization is optional for buyers"]
     Click Element                        //div[text()="Save and Continue"]
 
-Shipping - With Variants
-#    Go To                                ${URL_Listings_Shipping}
+Shipping - Have Variants
     Wait Until Element Is Visible        //h1[text()="Shipping and Returns"]
     Input Text                           //input[@id="shipInfo.weightLb"]         1
     Input Text                           //input[@id="shipInfo.weightOz"]         1
@@ -263,12 +283,13 @@ Shipping - With Variants
     Execute Javascript                   document.getElementsByTagName('footer')[0].scrollIntoView();
     Wait Until Element Is Visible        //div[text()="Back"]
     Click Element                        //p[text()="What you will charge"]
-    Sleep    1
+    Sleep    2
     Click Element                        //span[text()="Priority Mail 2-Day™; Flat Rate Envelope"]
-    Sleep    1
+    Wait Until Page Contains             Priority Mail 2-Day™; Flat Rate Envelope
     Click Element                        //p[text()="What you will charge"]
     Sleep    1
     Click Element                        //button[text()="Free Shipping"]
+    Wait Until Page Contains             Free Shipping
     Input Text                           //input[@id="shipping.handlingRate"]    2.88
     Wait Until Element Is Visible        //span[@class="chakra-switch__thumb css-13yl9wn"]
     Click Element                        //span[@class="chakra-switch__thumb css-13yl9wn"]
@@ -278,17 +299,60 @@ Shipping - With Variants
     Click Element                        //p[text()="30 Days Return"]
     Click Element                        //div[text()="Save and Continue"]
 
-Listing Confirmation - With Variants
+Listing Confirmation - Have Variants
     Wait Until Element Is Visible        //h1[text()="Listing Confirmation"]
     ${a_title}       Get Text            //p[text()="Makerplace Seller"]/following-sibling::div/h3[1]
-    ${e_title}       Set Variable        ${Listing_Details}[Title]
+    ${e_title}       Set Variable        ${Details}[Listing_Title]
     Run Keyword And Warn On Failure      Should Be Equal As Strings    ${a_title}    ${e_title}     Wrong Title in Listing Confirmation
-    ${Primary_img}    Get Element Attribute    (//h3[text()="Preview"]/following-sibling::div//img)[1]     src
-    Run Keyword And Warn On Failure      Should Not Be Empty    ${Primary_img}     Primary image is missing in Listing Confirmation
+    ${primary_img}    Get Element Attribute    (//h3[text()="Preview"]/following-sibling::div//img)[1]     src
+    Run Keyword And Warn On Failure      Should Not Be Empty    ${primary_img}     Primary image is missing in Listing Confirmation
+    ${dic}    Create Dictionary     Product Category=${Details}[Category]      Lead Time=${Details}[LeadTime]    Listing Timeframe=${Details}[Timeframe]
+    FOR    ${key}   ${value}   IN ZIP   ${dic.keys()}    ${dic.values()}
+        ${a_value}    Get Text            //h4[text()="${key}"]/following-sibling::p
+        IF  '${key}' == 'Product Category'
+            Run Keyword And Warn On Failure      Should Start With      ${a_value}    ${value}    Wrong ${key} in Listing Confirmation
+        ELSE
+            Run Keyword And Warn On Failure      Should Be Equal As Strings     ${a_value}    ${value}    Wrong ${key} in Listing Confirmation
+        END
+    END
+    Execute Javascript                   document.getElementsByTagName('footer')[0].scrollIntoView();
+    Wait Until Element Is Visible        //div[text()="Back"]
+    ${a_sku}         Get Text            //p[@class="css-1giiycw"]/following-sibling::p
+    ${e_sku}         Set Variable        ${Details}[SKU]
+    Run Keyword And Warn On Failure      Should Contain         ${a_sku}    ${e_sku}         Wrong sku in Listing Confirmation
+    ${QTY}   Create List    10  20  30
+    FOR  ${e_qty}  IN  @{QTY}
+        ${a_qty}        Get Text            //div[text()="${e_qty}"]
+        Run Keyword And Warn On Failure      Should Contain           ${a_qty}    ${e_qty}    Wrong inventory in Listing Confirmation
+    END
+    ${a_price}       Get Text            //p[text()="$8.88"]
+    Run Keyword And Warn On Failure      Should Be Equal As Strings     ${a_price}     Price: $8.88    Wrong price in Listing Confirmation
+    Click Element                        //div[text()="Submit to Publish"]
+    Wait Until Element Is Visible        //h3[text()="Congrats! You Added a Product Listing!"]
+    Click Element                        //div[text()="GO TO LISTING MANAGEMENT"]
+
+Listing PDP - Have Variants
+    Wait Until Page Contains             ${Details}[Listing_Title]
+    Click Element                        //img[@alt="${Details}[Listing_Title] image"]
+    Wait Until Page Contains             ${Details}[Listing_Title]
+    ${variants}   Create List    S  M  L
+    FOR  ${e_variants}  IN  @{variants}
+        Select From List By Value            //select[@aria-label="Size"]    ${e_variants}
+        ${a_price}        Get Text           //div[text()="$8.88"]
+        Run Keyword And Warn On Failure      Should Be Equal As Strings      ${a_price}    $8.88    Wrong price in PDP
+    END
+    ${a_shippolicy}       Get Text       (//h4[text()="Return Policy"]/following-sibling::p)[1]
+    Run Keyword And Warn On Failure      Should Start With    ${a_shippolicy}    30 days return     Wrong shipping policy in PDP
 
 
 
-#    Click Element                        //div[text()="Submit to Publish"]
-#    Wait Until Element Is Visible        //h3[text()="Congrats! You Added a Product Listing!"]
-#    Click Element                        //div[text()="GO TO LISTING MANAGEMENT"]
-#    Wait Until Page Contains             AU With Variants ${Title}
+
+
+
+
+
+
+
+
+
+

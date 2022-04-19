@@ -27,14 +27,14 @@ Test Clear Shipping Cart
 Test Search Product By Sku
     [Tags]    mp-demo
     Product - Search Product By Sku    ${PRODUCT_SKU}    ${PRODUCT_NAME}
-    Product - Enter Product Detail Page     ${PRODUCT_NAME}
+    Product - Enter PDP     ${PRODUCT_NAME}
 
 Test Add Item To Shipping Cart
     [Tags]    mp-demo
-    Product - Quantity Increate On Product Detail Page    2
-    Product - Quantity Reduce On Product Detail Page    1
-    Product - Quantity Update On Product Detail Page    5
-    Product - Add Item To Cart On Product Detail Page
+    Product - Quantity Increate On PDP    2
+    Product - Quantity Reduce On PDP    1
+    Product - Quantity Update On PDP    5
+    Product - Add Item To Cart On PDP
     Product - Eneter Cart Page After Add Item To Cart
     User Sign Out
 

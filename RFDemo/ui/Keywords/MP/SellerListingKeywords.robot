@@ -3,7 +3,7 @@ Library        ../../Libraries/MP/SellerListingLib.py
 Library        ../../Libraries/CommonLibrary.py
 Library        ../../Libraries/RwXlsxFile.py
 Resource       ../../Keywords/Common/CommonKeywords.robot
-Resource       ../../Keywords/MP/EAInitialDataAPiKeywords.robot
+Resource       ../../Keywords/MP/EAInitialSellerDataAPiKeywords.robot
 
 *** Variables ***
 ${Selected_Item_Name}
@@ -20,6 +20,8 @@ ${Cur_Listing_Info}
 ${Export_Listing_Have_Variants}    ${None}
 ${Export_Listing_No_Variants}    ${None}
 ${Export_Listing_Required_Keys}    ${None}
+${Download_Dir}    ${None}
+${Catefory_Need_Update}     ${False}
 
 *** Keywords ***
 Listing - Click Create A Listing Button
@@ -31,9 +33,10 @@ Create - Input Listing Title
 
 Create - Select Listing Category
     Click Element    //input[@name="category-search"]
+    Wait Until Element Is Visible    //*[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]   ${MAX_TIME_OUT}
     Input Text    //input[@name="category-search"]    ${Listing_Info}[category]
-    Wait Until Element Is Visible    //*[@name="category-search"]/parent::div/following-sibling::div/div    ${MAX_TIME_OUT}
-    Click Element    //input[@name="category-search"]/parent::div/following-sibling::div/div
+    Sleep    1
+    Click Element    //input[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]
 
 Create - Input Seller Sku
     Input Text    //*[@name="sellerSkuNumber"]    ${Listing_Info}[sellerSku]
@@ -42,10 +45,13 @@ Create - Automatically Generate Seller Sku
     Click Element    //div[text()="Automatically generate"]/parent::button
 
 Create - Input Barand And Manufacturer
+    Clear Element Value    //input[@name="brandName"]
     Input Text    //input[@name="brandName"]    ${Listing_Info}[bandName]
+    Clear Element Value    //input[@name="manufactureName"]
     Input Text    //input[@name="manufactureName"]    ${Listing_Info}[manufacturer]
 
 Create - Input Description
+    Clear Element Value    //textarea[@name="description"]
     Input Text    //textarea[@name="description"]    ${Listing_Info}[description]
 
 Create&Update - Select Optional Info
@@ -74,7 +80,12 @@ Create - Input Listing Tags
     END
 
 Create - Input Date Range - Availabel
+    [Arguments]    ${add_from_days}=0
     Scroll Element Into View    //input[@name="availableFrom"]
+    ${availableFrom}    Get Current Date     result_format=%Y-%m-%d
+    ${availableFrom}    Add Time To Date     ${availableFrom}    ${add_from_days} days
+    ${fromDate}    Evaluate    '${availableFrom}'\[:10\]
+    Set To Dictionary    ${Listing_Info}     fromDate=${fromDate}
 #    Click Element    //input[@name="availableFrom"]
     Common - Select Date By Element   ${Listing_Info}[fromDate]    //input[@name="availableFrom"]
 #    Click Element    //input[@name="availableTo"]
@@ -140,7 +151,9 @@ Create - Wait Photos Uploaded For Single Sku
 
 Create - Input Price And Quantity
     Set Suite Variable    ${Single_Sku}    ${Listing_Info}[singleSku]
+    Clear Element Value    //*[@name="price"]
     Input Text    //*[@name="price"]    ${Single_Sku}[price]
+    Clear Element Value    //*[@name="quantity"]
     Input Text    //*[@name="quantity"]    ${Single_Sku}[quantity]
 
 Create&Update - Open Add Variations Pop-up Windows
@@ -234,17 +247,17 @@ Create - Wait Photos Uploaded For Vaiantions
     Wait Until Page Does Not Contain Element    (//*[contains(@id,"chakra-modal")]//*[@id="upload-swatch"])
     Wait Until Page Contains Element    (//div[contains(text(),"Upload Photos")]/../preceding-sibling::div//button)[${count}]
 
-Create - Set One Variant Is Not Visible
-#    Click Element    (//table//tbody//tr//td[7]//label)[${Variants}[unVisible]]
-    Execute Javascript    document.querySelectorAll("#variation-visible")[${Variants}[unVisible]].scrollIntoView()
+Create - Set One Variant Is Not Visible    ${ele_id}    Set Variable    ${Variants}[unVisible]
+    Execute Javascript    document.querySelector("#variation-${ele_id}-visible").scrollIntoView()
     Sleep    1
-#    Click Element    //input[@name="variationsTable[${Variants}[unVisible]].visible"]
-    Execute Javascript     document.querySelectorAll("#variation-visible")[${Variants}[unVisible]].click()
+    Execute Javascript     document.querySelector("#variation-${ele_id}-visible").click()
     Sleep    0.5
 
 Create&Update - Select All To Update Variant Inventory And Price
     Wait Until Element Is Visible    //p[contains(text(),"Select All")]/../parent::button
-    Sleep  0.5
+    Scroll Element Into View    //*[@name="variationsTable[0].inventory"]
+    Scroll Element Into View    //p[contains(text(),"Select All")]/../parent::button
+    Sleep    1
     Click Element    //p[contains(text(),"Select All")]/../parent::button
     Wait Until Element Is Enabled    //*[text()="Update Price"]/../parent::button
     Create&Update - Update Price For All Variants
@@ -321,10 +334,9 @@ Create&Update - Set Variants Info
             Create - Add Value To Variant - Count   ${item}
         END
     END
-    Click Element    (//p[contains(text(),"Inventory varies for each variation")]/../parent::label)[1]
-    Click Element    (//p[contains(text(),"Price varies for each variation")]/../parent::label)[1]
+    Create&Update - Set Inventory varies for each variation Selected
+    Create&Update - Set Price Varies For Each Variation Selected
     Create&Update - Save Add Variations
-
 
 Create - Remove Added Variant Type
     [Arguments]    ${sure}=${True}
@@ -396,14 +408,14 @@ Create - Add Value To Variant - Other Color
     Wait Until Element Is Visible    //p[text()="${name}"]/../following-sibling::*[starts-with(@aria-label,"Remove Tag")]
     Sleep    0.5
 
-Create - Set Inventory varies for each variation Selected
+Create&Update - Set Inventory varies for each variation Selected
     [Arguments]    ${selected}=${True}
     ${count}    Get Element Count    //p[text()=" Inventory varies for each variation"]/parent::span[@data-checked]
     ${element}    Set Variable    //p[text()=" Inventory varies for each variation"]/parent::span
     Run Keyword If    '${selected}'=='${True}' and '${count}'=='0'    Click Element    ${element}
     Run Keyword If    '${selected}'=='${False}' and '${count}'=='1'    Click Element    ${element}
 
-Create - Set Price varies for each variation Selected
+Create&Update - Set Price varies for each variation Selected
     [Arguments]    ${selected}=${True}
     ${element_selected}    Set Variable    //p[text()=" Price varies for each variation"]/parent::span[@data-checked]
     ${count}    Get Element Count    ${element_selected}
@@ -412,17 +424,17 @@ Create - Set Price varies for each variation Selected
     Run Keyword If    '${selected}'=='${False}' and '${count}'=='1'    Click Element    ${element}
 
 
-Create - Subscription Setting
-    ${subscription}    Set Variable    ${Listing_Info}[subscription]
-    IF    '${subscription}[status]'!='${None}'
-        IF    '${subscription}[status]'=='${True}'
-            Create&Update - Set Item Have Subscription
-            Input Text    //*[@name="percentOffOnPrice"]    ${subscription}[firstOff]
-            Input Text    //*[@name="percentOffOnRepeatDeliveries"]    ${subscription}[repeatOff]
-        ELSE
-            Create&Update - Set Item Don't Have Subscription
-        END
-    END
+#Create - Subscription Setting
+#    ${subscription}    Set Variable    ${Listing_Info}[subscription]
+#    IF    '${subscription}[status]'!='${None}'
+#        IF    '${subscription}[status]'=='${True}'
+#            Create&Update - Set Item Have Subscription
+#            Input Text    //*[@name="percentOffOnPrice"]    ${subscription}[firstOff]
+#            Input Text    //*[@name="percentOffOnRepeatDeliveries"]    ${subscription}[repeatOff]
+#        ELSE
+#            Create&Update - Set Item Don't Have Subscription
+#        END
+#    END
 
 Create - Update Variant Items Attributes
     Wait Until Element Is Visible    //table//p[text()="Update"]
@@ -482,33 +494,32 @@ Create&Update - Set Shipping Policy
     ${index}    Set Variable
     IF    '${Listing_Info}[shippingPolicy]'=='${True}'
         FOR    ${index}    IN RANGE    4    -1    -1
-            ${text_one}    Get Text   //*[@name="${switch_name[${index}]}"]/parent::label/following-sibling::p
+            ${text_one}    Get Text   //*[@name="${switch_name[${index}]}"]//following-sibling::span/p
             IF   "${text_one}"=="No"
                 Click Element  //*[@name="${switch_name[${index}]}"]/parent::label
-                Sleep  0.5
+                Wait Until Element Is Visible    //*[@name="${switch_name[${index}]}"]//following-sibling::span/p[text()="Yes"]
             END
         END
     ELSE
-        FOR    ${index}    IN RANGE    4    -1    -1
-            ${text_one}    Get Text    //*[@name="${switch_name[${index}]}"]/parent::label/following-sibling::p
+        FOR    ${index}    IN RANGE    4
+            ${text_one}    Get Text    //*[@name="${switch_name[${index}]}"]//following-sibling::span/p
             IF   "${text_one}"=="Yes"
                 Click Element    //*[@name="${switch_name[${index}]}"]/parent::label
-                Sleep  0.5
+                Wait Until Element Is Visible    //*[@name="${switch_name[${index}]}"]//following-sibling::span/p[text()="No"]
             END
         END
     END
 
 Create&Update - Override Shipping Rate
     Scroll Element Into View    //*[text()="Return Location"]
-    ${text}    Get Text    //*[text()="Override Shipping Rate"]/following-sibling::label/following-sibling::p
+    ${text}    Get Text    //*[text()="Override Shipping Rate"]/following-sibling::label//p
     ${shipping_rate}    Set Variable    ${Listing_Info}[overShippingRate]
     IF    '${shipping_rate}[status]'=='${True}' and '${text}'=='No'
-        Click Element    //*[text()="Override Shipping Rate"]/following-sibling::label
+        Click Element    //*[@name="overrideShippingRate"]/parent::label
         Wait Until Element Is Visible    //*[@name="standardRate"]
         Input Text    //*[@name="standardRate"]    ${shipping_rate}[standard]
         IF   '${Listing_Info}[shippingPolicy]'=='${False}'
             Input Text    //*[@name="expeditedRate"]    ${shipping_rate}[expedited]
-#            Input Text    //*[@name="ltlFreightRate"]    ${shipping_rate}[freight]
         END
     ELSE IF  '${shipping_rate}[status]'=='${True}' and '${text}'=='Yes'
         Clear Element Value    //*[@name="standardRate"]
@@ -516,39 +527,35 @@ Create&Update - Override Shipping Rate
         IF   '${Listing_Info}[shippingPolicy]'=='${False}'
             Clear Element Value    //*[@name="expeditedRate"]
             Input Text    //*[@name="expeditedRate"]    ${shipping_rate}[expedited]
-#            Clear Element Value    //*[@name="ltlFreightRate"]
-#            Input Text    //*[@name="ltlFreightRate"]    ${shipping_rate}[freight]
         END
     ELSE IF  '${shipping_rate}[status]'=='${False}' and '${text}'=='Yes'
-        Click Element    //*[text()="Override Shipping Rate"]/following-sibling::label
+        Click Element    //*[@name="overrideShippingRate"]/parent::label
     END
     Sleep    1
 
 Create&Update - Set Return Policy
     Scroll Element Into View    //p[text()="Set a custom return policy for this item"]
     ${custom_return}    Set Variable    ${Listing_Info}[customReturn]
-    ${text}    Get Text   //*[@name="overrideShippingReturnPolicy"]/parent::label/following-sibling::p
+    ${text}    Get Text   //*[@name="overrideShippingReturnPolicy"]//following-sibling::span/p
     IF    '${custom_return}[status]'=='${True}' and '${text}'=='No'
         Click Element    //*[@name="overrideShippingReturnPolicy"]/parent::label
     END
     IF    '${custom_return}[status]'=='${True}'
-        Scroll Element Into View    //h4[text()="60 Days Return"]
-        IF   '${custom_return}[returnPolicy]'=='0'
-            Click Element  //*[contains(text(),"(Default)")]/../parent::label
-        ELSE IF    '${custom_return}[returnPolicy]'=='1'
+        Scroll Element Into View    //h4[text()="60 Day Returns"]
+        IF    '${custom_return}[returnPolicy]'=='1'
             Return Policy - Select By Index    1
         ELSE IF    '${custom_return}[returnPolicy]'=='2'
             Return Policy - Select By Index    2
-            Return Policy - Buyer Item Return Setup    ${False}
+            Return Policy - Buyer Item Need Return Setup    ${True}
         ELSE IF    '${custom_return}[returnPolicy]'=='3'
             Return Policy - Select By Index    2
-            Return Policy - Buyer Item Return Setup    ${True}
+            Return Policy - Buyer Item Need Return Setup    ${False}
         ELSE IF    '${custom_return}[returnPolicy]'=='4'
             Return Policy - Select By Index    3
-            Return Policy - Buyer Item Return Setup    ${False}
+            Return Policy - Buyer Item Need Return Setup    ${True}
         ELSE IF    '${custom_return}[returnPolicy]'=='5'
             Return Policy - Select By Index    3
-            Return Policy - Buyer Item Return Setup    ${True}
+            Return Policy - Buyer Item Need Return Setup    ${False}
         END
     END
 
@@ -556,9 +563,9 @@ Return Policy - Select By Index
     [Arguments]    ${index}
     Click Element    //div[@role="radiogroup"]/div/label[${index}]
 
-Return Policy - Buyer Item Return Setup
+Return Policy - Buyer Item Need Return Setup
     [Arguments]    ${need_return}=${True}
-    ${return_item}    Get Text    //*[@name="refundOnly"]/parent::label/following-sibling::p
+    ${return_item}    Get Text    //*[@name="refundOnly"]//following-sibling::span/p
     IF    '${need_return}'=='${True}' and '${return_item}'=='No'
         Click Element   //*[@name="refundOnly"]/parent::label
     ELSE IF  '${need_return}'=='${False}' and '${return_item}'=='Yes'
@@ -579,6 +586,7 @@ Create - Click Publish Campaign And Select Next Page
 
 Create&Update - Publish Confirmed
     [Arguments]    ${to_page}=1
+    Listing - Check Toast Top    //p[text()="Your Listing Submission Is Confirmed"]
     Wait Until Element Is Visible    //p[text()="Your Listing Submission Is Confirmed"]
     IF    '${to_page}'!='1'
         Click Element    //div[text()="GO TO DASHBOARD"]/parent::button
@@ -649,8 +657,28 @@ Update - Click Publish
 Update - Click Save Changes
     Scroll Element Into View    //div[text()="Save Changes"]/parent::button
     Click Element    //div[text()="Save Changes"]/parent::button
-    Run Keyword And Ignore Error    Update - Submission Confirmed Pop-up Windows
+    IF    "${Catefory_Need_Update}"=="${True}"
+        Create&Update - Publish Confirmed
+    END
     Wait Until Element Is Visible    //h2[text()="Listing Management"]
+
+Listing - Check Toast Top
+    [Arguments]    ${expect_ele}
+    FOR    ${i}    IN RANGE    ${TIME_OUT}
+        Sleep    1
+        ${toast_top_ele}    Set Variable    //*[@id="chakra-toast-manager-top"]
+        ${toast_top_count}    Get Element Count    ${toast_top_ele}//p
+        ${expect_ele_count}    Get Element Count    ${expect_ele}
+        Exit For Loop If    ${expect_ele_count}==1
+        IF    ${toast_top_count}==1
+            Wait Until Element Is Visible    ${toast_top_ele}//p
+            ${text}    Get Text    ${toast_top_ele}//p
+            Capture Element Screenshot     ${toast_top_ele}//div     filename=EMBED
+            Run Keyword And Ignore Error    Get Browser Console Log
+            Fail    Fail, Error msg: ${text}
+        END
+    END
+
 
 Update - Submission Confirmed Pop-up Windows
     Wait Until Element Is Visible    //p[text()="Your Listing Submission Is Confirmed"]
@@ -674,10 +702,10 @@ Update - Change Listing Category
         Append To List    ${categories}    ${category}
     END
     Click Element    //input[@name="category-search"]
+    Wait Until Element Is Visible    //*[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]   ${MAX_TIME_OUT}
     Input Text    //input[@name="category-search"]    ${Listing_Info}[category]
-    Wait Until Element Is Visible    //*[@name="category-search"]/parent::div/following-sibling::div/div/div
     Sleep    1
-    Click Element    //*[@name="category-search"]/parent::div/following-sibling::div/div/div
+    Click Element    //*[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]
     ${category_update}    Set Variable    ${True}
     ${item}    Set Variable
     FOR    ${item}    IN    @{categories}
@@ -753,36 +781,36 @@ Update - Change Price And Inverntory
         Create - Set One Variant Is Not Visible
     END
 
+#
+#Update - Change Subscription Setting
+#    ${subscription}    Set Variable    ${Listing_Info}[subscription]
+#    IF    '${subscription}[status]'!='${None}'
+#        IF    '${subscription}[status]'=='${True}'
+#            Create&Update - Set Item Have Subscription
+#            Clear Element Value    //*[@name="percentOffOnPrice"]
+#            Clear Element Value    //*[@name="percentOffOnRepeatDeliveries"]
+#            Input Text    //*[@name="percentOffOnPrice"]    ${subscription}[firstOff]
+#            Input Text    //*[@name="percentOffOnRepeatDeliveries"]    ${subscription}[repeatOff]
+#        ELSE
+#            Create&Update - Set Item Don't Have Subscription
+#        END
+#    END
 
-Update - Change Subscription Setting
-    ${subscription}    Set Variable    ${Listing_Info}[subscription]
-    IF    '${subscription}[status]'!='${None}'
-        IF    '${subscription}[status]'=='${True}'
-            Create&Update - Set Item Have Subscription
-            Clear Element Value    //*[@name="percentOffOnPrice"]
-            Clear Element Value    //*[@name="percentOffOnRepeatDeliveries"]
-            Input Text    //*[@name="percentOffOnPrice"]    ${subscription}[firstOff]
-            Input Text    //*[@name="percentOffOnRepeatDeliveries"]    ${subscription}[repeatOff]
-        ELSE
-            Create&Update - Set Item Don't Have Subscription
-        END
-    END
+#Create&Update - Set Item Have Subscription
+#    ${text}    Get Text  //*[@id="subscription-discounts"]/parent::label/following-sibling::p
+#    IF    "${text}"=="No"
+#        Click Element    //*[@id="subscription-discounts"]/parent::label
+#    END
+#    Sleep    1
+#    Page Should Contain Element    //*[@id="subscription-discounts"]/parent::label/following-sibling::p[text()="Yes"]
 
-Create&Update - Set Item Have Subscription
-    ${text}    Get Text  //*[@id="subscription-discounts"]/parent::label/following-sibling::p
-    IF    "${text}"=="No"
-        Click Element    //*[@id="subscription-discounts"]/parent::label
-    END
-    Sleep    1
-    Page Should Contain Element    //*[@id="subscription-discounts"]/parent::label/following-sibling::p[text()="Yes"]
-
-Create&Update - Set Item Don't Have Subscription
-    ${text}    Get Text  //*[@id="subscription-discounts"]/parent::label/following-sibling::p
-    IF    "${text}"=="Yes"
-        Click Element    //*[@id="subscription-discounts"]/parent::label
-    END
-    Sleep    1
-    Page Should Contain Element    //*[@id="subscription-discounts"]/parent::label/following-sibling::p[text()="No"]
+#Create&Update - Set Item Don't Have Subscription
+#    ${text}    Get Text  //*[@id="subscription-discounts"]/parent::label/following-sibling::p
+#    IF    "${text}"=="Yes"
+#        Click Element    //*[@id="subscription-discounts"]/parent::label
+#    END
+#    Sleep    1
+#    Page Should Contain Element    //*[@id="subscription-discounts"]/parent::label/following-sibling::p[text()="No"]
 
 Update - Upload Photos
     Scroll Element Into View    //*[text()="Video"]
@@ -863,6 +891,18 @@ Listing - Filter - Clear All Filter
     Listing - Filter - Open Filter
     Listing - Filter - View Results
 
+Listing - Filter Listing By API And Go To Edit Page
+    [Arguments]    ${status}    ${variant_number}=1    ${have_variants}=${False}    ${location}=3
+    Set Suite Variable     ${Variant_Quantity}    ${variant_number}
+    ${Listing_Info}    Get Listing Body    ${False}    ${True}    ${Variant_Quantity}
+    Set Suite Variable    ${Listing_Info}    ${Listing_Info}
+    ${filter_listing_info}    API - Get Listing Info By Status And Variants    ${status}    ${have_variants}    ${location}
+    Go To    ${URL_MIK}/mp/seller/edit-listing/${filter_listing_info}[sku]
+    Log    EA_Report_Data=${filter_listing_info}[sku]
+    Wait Until Element Is Visible    //*[@name="listingTitle"]
+    ${need_update}    ${new_category}    Listing - Check Listing Category Is Need Update    ${filter_listing_info}[category]
+    Set Suite Variable    ${Catefory_Need_Update}    ${need_update}
+
 Listing - Filter - Search Listing By Status Single
     [Documentation]    status list: Prohibited,Pending Review,Out of stock,Archived,Active,Draft,Inactive,Suspended
     [Arguments]    ${status}=Draft
@@ -874,12 +914,12 @@ Listing - Filter - Search Listing By Status Single
     [Return]    ${listing_number}
 
 Listing - Close All Tips
-    ${table-x-ele}   Set Variable   (//div[contains(@style,"display: block;")]//button//*[contains(@class,"icon-tabler-x")])
+    ${table-x-ele}   Set Variable   //div[contains(@style,"display: block;")]//button//*[contains(@class,"icon-tabler-x")]/parent::button
     ${count}    Get Element Count   ${table-x-ele}
     ${index}    Set Variable
-    FOR    ${index}    IN RANGE    1    ${${count}+1}
+    FOR    ${index}    IN RANGE    ${count}
         Run Keyword And Ignore Error    Click Element    ${table-x-ele}
-        Sleep    0.2
+        Sleep    0.5
     END
 
 Listing - Filter - Open Filter
@@ -1112,18 +1152,24 @@ Listing - Set Listing Selected By Index
 Listing - Set Listing Selected By Status And Index
     [Arguments]    ${status}    ${index}=1
     ${page_index}   Set Variable
+    ${listing_selected}    Set Variable    ${False}
     FOR    ${page_index}   IN RANGE    10
         ${count}    Get Element Count    (//p[text()="${status}"])[${index}]/../preceding-sibling::td
         IF    ${count}>0
             Click Element    (//p[text()="${status}"])[${index}]/../preceding-sibling::td
             ${Selected_Item_Name}    Get Text    ((//p[text()="${status}"])[${index}]/../preceding-sibling::td)[3]//p
             Set Suite Variable    ${Selected_Item_Name}    ${Selected_Item_Name}
+            ${listing_selected}    Set Variable    ${True}
             Exit For Loop
         END
         ${count}    Get Element Count    //div[@aria-label="Next Page" and @disabled]
         Exit For Loop If    ${count}==1
+        Scroll Element Into View    //div[@aria-label="Next Page"]
         Click Element    //div[@aria-label="Next Page"]
         Sleep    1
+    END
+    IF    "${listing_selected}"=="${False}"
+        Skip    There are no ${status} listings can do test.
     END
 
 Listing - Set Multiple Listings Selected By Status
@@ -1161,7 +1207,11 @@ Listing - Check Listing Status By Title
     Wait Loading Hidden
     Wait Until Element Is Visible    //p[text()="${Selected_Item_Name}"]/../../../following-sibling::td
     ${now_status}    Get Text    //p[text()="${Selected_Item_Name}"]/../../../following-sibling::td/p
-    IF   '${now_status}'!='Pending Review'
+    ${inventory}    Get Text    //p[text()="${Selected_Item_Name}"]/../../../following-sibling::td[2]/p
+    ${inventory}    Get Listing Inventory    ${inventory}
+    IF    "${inventory}"=="0" and "${status}[0]"=="Active"
+        Should Be Equal As Strings    ${now_status}    Out of stock
+    ELSE IF   '${now_status}'!='Pending Review'
         List Should Contain Value    ${status}    ${now_status}
     END
 
@@ -1176,7 +1226,7 @@ Listing - Check Listing Status After Import
             ${now_status}    Get Text    //p[text()="${title}"]/../../../following-sibling::td/p
             IF   '${now_status}'!='Pending Review'
                 IF    "${status}"!="${now_status}"
-                    Fail    Fail, expect status ${status[0]} != ${now_status}.
+                    Fail    Fail, expect status ${status} != ${now_status}.
                 END
             END
         END
@@ -1238,10 +1288,10 @@ Listing - Relist Listing After Selected Inactive Item
     Wait Until Element Is Not Visible    //div[text()="CONTINUE"]/parent::button
 
 Listing - Export Listing After Selected Item
-    Remove Download File If Existed    listings.xlsx
+    Remove Download File If Existed    listings.xlsx    ${False}    ${Custom_Chrome_Download_Path}
     Wait Until Element Is Visible    //*[contains(@class,"icon-tabler-file-export")]/parent::button
     Click Element    //*[contains(@class,"icon-tabler-file-export")]/parent::button
-    ${results}    ${file_path}    Wait Until File Download    listings.xlsx
+    ${results}    ${file_path}    Wait Until File Download    listings.xlsx    ${TIME_OUT}    ${False}    ${Custom_Chrome_Download_Path}
     IF    "${results}"=="${False}"
         Fail    Fail to export file listings.xlsx.
     END
@@ -1272,14 +1322,14 @@ Listing - Check Download File Info After Selected Listing
 
 Listing Detail - Shipping Rate Switch Check - Hazardous
     Scroll Element Into View    //p[text()="Is the item ground shipping only?"]
-    ${text}    Get Text    //*[@name="hazmatIndicator"]/parent::label/following-sibling::p
+    ${text}    Get Text    //*[@name="hazmatIndicator"]/following-sibling::span/p
     IF    '${text}'=='No'
         Click Element    //*[@name="hazmatIndicator"]/parent::label
         Wait Until Element Is Visible    //*[@name="groundShipOnly"]/parent::label[@data-disabled]
-        Scroll Element Into View    //h4[text()="Override Shipping Rate"]
-        ${over_text}    Get Text    //h4[text()="Override Shipping Rate"]/following-sibling::label/following-sibling::p
+        Scroll Element Into View    //*[text()="Return Location"]
+        ${over_text}    Get Text    //*[@name="overrideShippingRate"]/following-sibling::span/p
         IF    '${over_text}'=='No'
-            Click Element    //*[text()="Override Shipping Rate"]/following-sibling::label
+            Click Element    //*[@name="overrideShippingRate"]/parent::label
         END
         Wait Until Element Is Visible    //*[@name="freeStandardShipping"]/parent::label[@data-disabled]
         Page Should Contain Element    //*[@name="expeditedRate" and @disabled]
@@ -1287,13 +1337,13 @@ Listing Detail - Shipping Rate Switch Check - Hazardous
     END
 
 Listing Detail - Shipping Rate Switch Check - Free Standard
-    ${text}    Get Text    //input[@name="hazmatIndicator"]/../following-sibling::p
+    ${text}    Get Text    //input[@name="hazmatIndicator"]/following-sibling::span/p
     IF    '${text}'=='Yes'
         Click Element    //input[@name="hazmatIndicator"]/parent::label
     END
-    ${over_text}    Get Text    //*[text()="Override Shipping Rate"]/following-sibling::label/following-sibling::p
+    ${over_text}    Get Text    //*[@name="overrideShippingRate"]/following-sibling::span/p
     IF    '${over_text}'=='No'
-        Click Element    //*[text()="Override Shipping Rate"]/following-sibling::label
+        Click Element    //*[@name="overrideShippingRate"]/parent::label
     END
     Wait Until Element Is Visible    //*[@name="freeStandardShipping"]/parent::label
     Click Element    //*[@name="freeStandardShipping"]/parent::label
@@ -1364,7 +1414,7 @@ Listing - Variant Type - Remove Added Variations
     ${index}   Set Variable
     ${count}    Evaluate     ${count}+1
     FOR    ${index}    IN RANGE    1    ${count}
-        Click Element    (//p[text()="Remove"]/parent::button)[${index}]
+        Click Element    //p[text()="Remove"]/parent::button
         Sleep    0.5
         ${count}    Get Element Count    //p[text()="We will empty the table!"]
         IF    '${count}'!='0'
@@ -1429,6 +1479,7 @@ Listing - Check Listing Publish Success
 
 
 Flow - Create - Step 1
+    [Arguments]    ${add_from_days}=0
     Create - Input Listing Title
     Create - Select Listing Category
     Create - Input Seller Sku
@@ -1436,12 +1487,12 @@ Flow - Create - Step 1
     Create&Update - Select Optional Info
     Create - Input Description
     Create - Input Listing Tags
-    Create - Input Date Range - Availabel
+    Create - Input Date Range - Availabel    ${add_from_days}
 
 Flow - Create - Step 2 - No Variants
     Create - Upload Photos
     Create - Input Price And Quantity
-    Create - Subscription Setting
+#    Create - Subscription Setting
     Create - Wait Photos Uploaded For Single Sku
 
 Flow - Create - Step 2 - Have Variants
@@ -1451,7 +1502,7 @@ Flow - Create - Step 2 - Have Variants
     Create - Input Variant Inventory And Price
     Create&Update - Select All To Update Variant Inventory And Price
     Create - Set One Variant Is Not Visible
-    Create - Subscription Setting
+#    Create - Subscription Setting
 
 Flow - Create - Step 3 - No Variants
     Create - Input Item Attributes - Color Family
@@ -1484,12 +1535,21 @@ Flow - Update Listing - Update All Information
     Update - Change Description
     Create&Update - Select Item Has No End Date
     Update - Change Price And Inverntory
-    Update - Change Subscription Setting
+#    Update - Change Subscription Setting
     Update - Upload Photos
     Update - Change Items Attributes Info
     Create&Update - Set Shipping Policy
     Create&Update - Override Shipping Rate
     Create&Update - Set Return Policy
+
+Flow - Update Listing If Category Need Update
+    IF    "${Catefory_Need_Update}"=="${True}"
+        Update - Change Listing Category
+        Update - Change Price And Inverntory
+        Update - Upload Photos
+        Update - Change Items Attributes Info
+    END
+
 
 Listing - Download Lisings By Status
     [Arguments]    ${status}=Active    ${export_flag}=${True}
@@ -1502,9 +1562,10 @@ Listing - Download Lisings By Status
     END
     ${listings_data}    ${request_keys}    Read Listing Info From Excel    ${file_path}
     IF    "${export_flag}"=="${True}"
-        ${new_status}    Evaluate    '${status}'.upper()
-        IF    "${new_status}"!="${listings_data[0]}[status]"
-            Fail    Export listing status ${listings_data[0]}[status] != ${new_status}
+        FOR    ${item}    IN    @{listings_data}
+            IF    "${item}[sku_type]"=="Parent" or "${item}[sku_type]"=="Standalone"
+                Page Should Contain    ${item}[item_name]
+            END
         END
     ELSE
         ${listing_len}    Get Length    ${listings_data}
@@ -1514,24 +1575,28 @@ Listing - Download Lisings By Status
     END
 
 Listing - Download Listing
-    Remove Download File By Part Name    All_listings_*.xlsx
+    Remove Download File By Part Name    All_listings_*.xlsx    ${False}    ${Custom_Chrome_Download_Path}
     Scroll Element Into View  //div[text()="DOWNLOAD LISTINGS"]/parent::button
     Click Element    //div[text()="DOWNLOAD LISTINGS"]/parent::button
-    ${results}    ${file_path}    Wait Until File Download By Part Name    All_listings_*.xlsx
+    ${results}    ${file_path}    Wait Until File Download By Part Name    All_listings_*.xlsx    ${TIME_OUT}    ${False}    ${Custom_Chrome_Download_Path}
     [Return]    ${results}    ${file_path}
 
 Listing - Download Listing Excel Template By Random Category
-    ${category}    Get Random Category
+    [Arguments]    ${quantity}=1
     Click Element    //div[text()="BULK IMPORT LISTING"]/parent::button
     Wait Until Element Is Visible     //div[text()="How would you like to manage your listings?"]
-    Input Text     //input[@name="category-search"]    ${category}
-    Wait Until Element Is Visible    //div/p[contains(text(),"/")]
-    Click Element    //div/p[contains(text(),"/")]/../..
-#    Wait Until Element Is Visible    //span//p[contains(text(),"${category}")]
-    Sleep    1
-    Remove Download File If Existed     category.xlsx
+    FOR    ${index}    IN RANGE    ${quantity}
+        ${category}    Get Random Category
+        Click Element    //*[@name="category-search"]
+        Wait Until Element Is Visible    //*[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]
+        Input Text     //*[@name="category-search"]    ${category}
+        Sleep    1
+        Click Element    //*[@name="category-search"]/parent::div/following-sibling::div//div[contains(@class,"category-item")]
+        Sleep    1
+    END
+    Remove Download File If Existed     category.xlsx    ${False}    ${Custom_Chrome_Download_Path}
     Click Element    //p[text()="Download the spreadsheet template for bulk upload or listing update"]/../parent::button
-    ${results}   ${file_path}   Wait Until File Download     category.xlsx
+    ${results}   ${file_path}   Wait Until File Download     category.xlsx    ${TIME_OUT}    ${False}    ${Custom_Chrome_Download_Path}
     IF    "${results}"=="${False}"
         Fail    Fail to export file category.xlsx for ${category}.
     END
@@ -1541,34 +1606,69 @@ Listing - Download Listing Excel Template By Random Category
 Listing - Download Listing Excel Template By All Category
     Click Element    //div[text()="BULK IMPORT LISTING"]/parent::button
     Wait Until Element Is Visible     //div[text()="How would you like to manage your listings?"]
-    Remove Download File If Existed     category.xlsx
+    Remove Download File If Existed     category.xlsx    ${False}    ${Custom_Chrome_Download_Path}
     Click Element    //p[text()="Download the file of listing category or taxonomy"]/../parent::button
-    ${results}   ${file_path}   Wait Until File Download     category.xlsx
+    ${results}   ${file_path}   Wait Until File Download     category.xlsx    ${TIME_OUT}    ${False}    ${Custom_Chrome_Download_Path}
     IF    "${results}"=="${False}"
         Fail    Fail to export file category.xlsx for all categories.
     END
     Click Element    //p[text()="Bulk Import Listings"]/../following-sibling::button
     Wait Until Element Is Not Visible    //p[text()="Bulk Import Listings"]/../following-sibling::button
 
-Listing - Import to Update listing After Export
+Listing - Update Listing Taxonomy File
+    ${texonomy_need_update}    Check Taxonomy File Is Need Update
+    IF    "${texonomy_need_update}"=="${True}"
+        ${texonomy_info}    API - Get EA Taxomomy Info
+        Save Taxonomy File    ${texonomy_info}
+    END
+
+Listing - Check Listing Category Is Need Update
+    [Arguments]    ${category}
+    ${status}    API - Check Listing Category Is Normal    ${category}
+    IF    "${status}"!="200"
+        ${new_category}    Get New Category By Old    ${category}
+        ${need_update}    Set Variable    ${True}
+    ELSE
+        ${new_category}    Set Variable    ${category}
+        ${need_update}    Set Variable    ${False}
+    END
+    [Return]    ${need_update}    ${new_category}
+
+Listing - Download listing By API
+    [Arguments]    ${order_list}
+    ${res}    API - Export All Listings - POST    ${order_list}
+    ${file_path}    Save Download Listings File    ${res}    ${Download_Dir}    all_listings_${SELLER_STORE_ID}
+    [Return]    ${file_path}
+
+Listing - Download Excel Template By API
+    [Arguments]    ${category_list}
+    ${res}    Api - Download Excel Template - POST    ${category_list}
+    ${file_path}    Save Download Listings File    ${res}    ${Download_Dir}    listings_template
+    [Return]    ${file_path}
+
+Listing - Import To Update Listing
     [Arguments]     ${status}=Active     ${have_variants}=${False}    ${update}=${False}
     ...    ${data_status}=${None}    ${listing_status}=${None}    ${expect_status}=${None}
-    Listing - Filter - Clear All Filter
+    Run Keyword And Ignore Error    Listing - Close All Tips
     ${filter_listing_info}    API - Get Listing Info By Status And Variants    ${status}    ${have_variants}
-    Listing - Search Lisitng By Search Value    ${filter_listing_info}[itemName]
-    ${results}    ${file_path}    Listing - Download Listing
-    IF    '${results}'=='${False}'
-        Fail    Listing export fail after search by ${filter_listing_info}[itemName].
-        Wait Until Element Is Not Visible    //p[text()="Export failed."]
-        Sleep    1
-    END
+    ${order_list}    Create List      ${filter_listing_info}[sku]
+    ${need_update}    ${new_category}    Listing - Check Listing Category Is Need Update    ${filter_listing_info}[category]
+    ${file_path}    Listing - Download listing By API    ${order_list}
     IF    "${update}"=="${True}"
         ${listing_data}    ${required_keys}    Read Listing Info From Excel    ${file_path}
         ${new_listing_data}    Update Import Listing Data     ${listing_data}    ${required_keys}
-        ...    data_status=${data_status}   listing_status=${listing_status}    log=${True}
+        ...    data_status=${data_status}   listing_status=${listing_status}    log=${True}    category_path=${new_category}
         Write Listing Info To Excel     ${file_path}    ${new_listing_data}
     END
+    Sleep    1
     ${listing_data}    ${required_keys}    Read Listing Info From Excel    ${file_path}
+    IF    "${need_update}"=="${True}" and "${update}"=="${False}"
+        ${listing_data}    Update Import Listing Category    ${listing_data}    ${new_category}
+        ${category_list}    Create List    ${new_category}
+        ${template_file_path}    Listing - Download Excel Template By API     ${category_list}
+        ${file_path}    Write Listing Info To Excel    ${template_file_path}    ${listing_data}    ${None}    ${False}
+        Write Listing Info To Excel     ${file_path}    ${listing_data}
+    END
     IF    "${have_variants}"=="${False}"
         Set Suite Variable    ${Export_Listing_No_Variants}    ${listing_data}
     ELSE
@@ -1576,26 +1676,32 @@ Listing - Import to Update listing After Export
     END
     Set Suite Variable    ${Export_Listing_Required_Keys}    ${required_keys}
     ${result}    Check Required Key Not Null    ${listing_data}    ${required_keys}
-    Listing - Import And Check Results    ${file_path}    ${listing_data}    ${result}    ${status}    ${expect_status}
-    Listing - Check Listing Detail Is Update After Import    ${listing_data}
+    ${import_success}    Listing - Import And Check Results    ${file_path}    ${listing_data}    ${result}    ${status}    ${expect_status}
+    IF    "${import_success}"=="${True}"
+        Listing - Check Listing Detail Is Update After Import    ${listing_data}
+    END
 
 Listing - Import And Check Results
     [Arguments]    ${file_path}    ${listing_data}    ${result}    ${status}    ${expect_status}
+    Scroll Element Into View    //div[text()="BULK IMPORT LISTING"]/parent::button
     Click Element    //div[text()="BULK IMPORT LISTING"]/parent::button
     Wait Until Element Is Visible     //div[text()="How would you like to manage your listings?"]
     Choose File    //div[text()="SELECT FILE"]/input    ${file_path}
-    Sleep    0.5
+    Wait Until Element Is Not Visible    //div[text()="How would you like to manage your listings?"]
+    Sleep    1
     Wait Until Element Is Not Visible    //p[text()="Uploading your file..."]
+    Scroll Element Into View    //h2[text()="Listing Management"]
     Sleep    1
     ${success_count}    Get Element Count    //p[text()="Spreadsheet Successfully Uploaded!"]
     ${fail_count}    Get Element Count    //p[text()="Spreadsheet Uploaded Failed!"]
+    ${import_success}    Set Variable    ${False}
     IF    '${result}'=='${True}' and ${success_count}==1
+        ${import_success}    Set Variable    ${True}
         Click Element    //p[text()="Spreadsheet Successfully Uploaded!"]/following-sibling::button
         Listing - Check Listing Status After Import     ${listing_data}     ${expect_status}
     END
     IF    '${result}'=='${True}' and ${fail_count}==1
         ${err_info}    Listing - Download Import Fail Log And Check    ${listing_data}
-        Listing - Check Listing Status After Import     ${listing_data}     ${status}
         Fail    Fail reason: ${err_info}
     END
     IF    '${result}'=='${False}' and ${success_count}==1
@@ -1605,16 +1711,16 @@ Listing - Import And Check Results
     END
     IF    '${result}'=='${False}' and ${fail_count}==1
         ${err_info}    Listing - Download Import Fail Log And Check    ${listing_data}
-        Log    ${err_info}
-        Listing - Check Listing Status After Import     ${listing_data}     ${status}
+        Log    Fail reason: ${err_info}
     END
+    [Return]    ${import_success}
 
 Listing - Download Import Fail Log And Check
     [Arguments]    ${listing_data}
     Wait Until Element Is Visible    //div[text()="See Import logs"]/parent::button
-    Remove Download File If Existed    BulkUploadListings.xlsx
+    Remove Download File If Existed    BulkUploadListings.xlsx     ${False}    ${Custom_Chrome_Download_Path}
     Click Element    //div[text()="See Import logs"]/parent::button
-    ${results}    ${file_path}    Wait Until File Download    BulkUploadListings.xlsx
+    ${results}    ${file_path}    Wait Until File Download    BulkUploadListings.xlsx    ${TIME_OUT}    ${False}    ${Custom_Chrome_Download_Path}
     IF    "${results}"=="${False}"
         Fail    Fail to export file BulkUploadListings.xlsx.
     END
@@ -1624,13 +1730,16 @@ Listing - Download Import Fail Log And Check
 
 Listing - Import To Create Listing
     [Arguments]    ${status}    ${data_status}    ${date_type}    ${number}    ${expect_status}
-    IF    "${Export_Listing_No_Variants}"=="${None}" or "${Export_Listing_Have_Variants}"=="${None}"
+    IF    ${Export_Listing_No_Variants}==${None} or ${Export_Listing_Have_Variants}==${None}
         ${Export_Listing_No_Variants}    ${Export_Listing_Required_Keys}    Read Listing Info From Excel    listings_no_variants
         ${Export_Listing_Have_Variants}    ${Export_Listing_Required_Keys}    Read Listing Info From Excel    listings_have_variants
     END
-    ${new_listing_data}    Create Import New Listing Data    ${Export_Listing_No_Variants}    ${Export_Listing_Have_Variants}
+    Run Keyword And Ignore Error    Listing - Close All Tips
+    ${new_listing_data}    ${category_path}    Create Import New Listing Data    ${Export_Listing_No_Variants}    ${Export_Listing_Have_Variants}
     ...    ${Export_Listing_Required_Keys}    ${status}    ${data_status}    ${date_type}    ${number}
-    ${file_path}    Write Listing Info To Excel    Listings_Import_Template    ${new_listing_data}
+    ${category_list}    Create List    ${category_path}
+    ${template_file_path}    Listing - Download Excel Template By API     ${category_list}
+    ${file_path}    Write Listing Info To Excel    ${template_file_path}    ${new_listing_data}    ${None}    ${False}
     ${result}    Check Required Key Not Null    ${new_listing_data}    ${Export_Listing_Required_Keys}
     Listing - Import And Check Results    ${file_path}    ${new_listing_data}    ${result}    ${status}    ${expect_status}
 

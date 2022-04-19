@@ -12,10 +12,11 @@ Search By Company Name
     Clear Element Value    //*[@id="saerchValue"]
     Input Text    //*[@id="saerchValue"]    ${name}
     Press Keys    //*[@id="saerchValue"]     RETURN
+    Sleep    2
 
 Mouse Over To Application By Company Name
     [Arguments]    ${company_name}
-    wait until element is visible  //div[text()="${company_name}"]/../following-sibling::td[6]
+    Wait Until Element Is Visible    //table//tbody/tr[1]/td//div[text()="${company_name}"]
     ${Application_No}    Get Text    //div[text()="${company_name}"]/../following-sibling::td[1]
     Set Suite Variable    ${Application_No}    ${Application_No}
     Sleep   1
@@ -47,7 +48,7 @@ Reject Application
     Wait Until Element Is Visible    //td[text()="Rejected"]
 
 Flow - Approve Or Reject Pre Application
-    [Arguments]    ${approve}    ${name}=${None}    ${manager}=${None}
+    [Arguments]    ${approve}=${True}    ${name}=${None}    ${manager}=${None}
     Sign In Map With Admin Account
     Main Menu - To Marketplace
     Marketplace Left Menu - Vendor Management - Seller Applications
@@ -59,3 +60,13 @@ Flow - Approve Or Reject Pre Application
         Reject Application
     END
 
+Resend Email By Company Name
+    [Arguments]    ${name}
+    Wait Until Page Contains Element    //table//tr//*[text()="${name}"]
+    Click Element    //table//tr//*[text()="${name}"]
+    Wait Until Element Is Visible    //*[text()="Company Information"]
+    Wait Until Page Contains Element    //*[text()="Resend An Email"]/parent::button
+    Sleep    1
+    Scroll Last Button Into View
+    Click Element    //*[text()="Resend An Email"]/parent::button
+    Wait Until Page Contains Element    //*[text()="Succeeded"]

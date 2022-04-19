@@ -3,39 +3,51 @@ Library        ../../Libraries/MIK/MikCommonKeywords.py
 Library        ../../Libraries/MIK/MikFileLib.py
 Resource       ../../Keywords/Common/CommonKeywords.robot
 
+*** Variables ***
+${title_ele}
+
 *** Keywords ***
 Click On The Element And Wait
-    [Arguments]   ${element}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element    ${element}  ${time}
     Click Element   ${element}
 
 Mouse Over And Wait
-    [Arguments]   ${element}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Elements Ignore Ad    ${element}  ${time}
     Mouse Over  ${element}
 
 Input Text And Wait
-    [Arguments]   ${element}  ${text}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${text}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element    ${element}  ${time}
     Clear Element Value  ${element}
     Clear Element Text   ${element}
     Input Text  ${element}  ${text}
 
 Scroll Element And Wait And Click
-    [Arguments]   ${element}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element    ${element}  ${time}
     Scroll Element Into View  ${element}
     Click On The Element And Wait  ${element}
 
+Scroll Element And Mouse Over And Wait
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element   ${element}  ${time}
+    Scroll Element Into View  ${element}
+    Mouse Over  ${element}
+
+Scroll to the top of the page
+    Execute Javascript    var count = document.querySelectorAll("button"); count[1].scrollIntoView();
+
 Get Text And Wait
-    [Arguments]   ${element}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element    ${element}  ${time}
     ${text}  Get Text  ${element}
     Return From Keyword  ${text}
 
 Mouse Click And Wait
-    [Arguments]   ${element}
-    Wait Until Page Contains Element    ${element}  30
+    [Arguments]   ${element}  ${time}=${Default_wait_time}
+    Wait Until Page Contains Element    ${element}  ${time}
     Mouse Down  ${element}
     Mouse Up    ${element}
 
@@ -55,7 +67,17 @@ Sign in
 
 Search Project
     [Arguments]  ${search_result}
-    Run Keyword And Ignore Error  Wait Until Page Contains     MacArthur Park   60
+    Run Keyword And Ignore Error  Wait Until Page Contains     My Store   60
+    ${result}  Run Keyword And Ignore Error  Wait Until Page Contains  MacArthur Park  1
+    IF  '${result[0]}'=='FAIL'
+        Mouse Over And Wait  //p[text()='My Store:']
+        Click On The Element And Wait  //p[text()='FIND OTHER STORES']/parent::button
+        Input Text And Wait  //p[text()='SELECT OTHER STORE']/following-sibling::div//input  75063
+        Sleep  0.1
+        Press Keys  //p[text()='SELECT OTHER STORE']/following-sibling::div//input  \ue007
+        Click On The Element And Wait  //p[text()='MacArthur Park']/preceding-sibling::div//span
+        Click On The Element And Wait  //div[text()='CHANGE MY STORE']/parent::button
+    END
     Input Text And Wait  //input[@aria-label="Search Input"]  ${search_result}
     Click On The Element And Wait  //button[@aria-label="Search Button"]
     Sleep  5
@@ -73,22 +95,37 @@ Get Text To List
     END
     Return From Keyword  ${temp_list}
 
+Get Element Attribute To List
+    [Arguments]  ${elements}  ${Attribute}
+    ${temp_list}  Create List
+    ${elements_text}  Get Webelements  ${elements}
+    ${count}  Get Length  ${elements_text}
+    IF  ${count}>0
+        FOR  ${v}  IN  @{elements_text}
+            ${text}  Get Element Attribute  ${v}  ${Attribute}
+            Append To List  ${temp_list}  ${text}
+        END
+    END
+    Return From Keyword  ${temp_list}
+
 Get PLP Product Info
-    Wait Until Page Contains Element  //p[text()='Sort By']/../../../following-sibling::div[@style]//p[@title]
+    Set Suite Variable   ${title_ele}  //p[text()='Sort By']/../../../following-sibling::div[@style]//*[@title]
+    Wait Until Page Contains Element   ${title_ele}
     Scroll Element Into View          //div[contains(@id,'page-')]
-    ${product_count}  Get Element Count  //p[text()='Sort By']/../../../following-sibling::div[@style]//p[@title]
+    ${product_count}  Get Element Count  ${title_ele}
     ${product_list}  Create List
     FOR  ${i}  IN RANGE  1  ${product_count}+1
-        Sleep  3
-        Scroll Element Into View  (//p[@title])[${i}]
-        ${title}  Get Text And Wait  (//p[@title])[${i}]
-        ${result}   ${reviews_num}  Run Keyword And Ignore Error  Get Text And Extraction Data  (//p[@title])[${i}]/../following-sibling::div[1]//p  1  -1
-        IF  '${result}'=='FAIL'
+        Scroll Element Into View  (${title_ele})[${i}]
+        Sleep  0.5
+        ${title}  Get Text And Wait  (${title_ele})[${i}]
+        ${result}  Run Keyword And Ignore Error  Wait Until Page Contains Element  (${title_ele})[${i}]//../../following-sibling::div[1]//p  3
+        IF  '${result[0]}'=='FAIL'
             ${reviews_num}  Set Variable  0
+        ELSE
+            ${reviews_num}  Get Text And Extraction Data  (${title_ele})[${i}]//../../following-sibling::div[1]//p
         END
-        ${price_list}  Get Text To List  (//p[@title])[${i}]/../following-sibling::div[2]//p[1]
-        ${transportation}  Get Text To List  (//p[@title])[${i}]/../../following-sibling::div//p
-        ${product_info}  get_product_create_dict  ${title}  ${reviews_num}  ${price_list}  ${transportation}
+        ${price_list}  Get Text To List  (${title_ele})[${i}]/../../following-sibling::div[2]//p[1]
+        ${product_info}  get_product_create_dict  ${title}  ${reviews_num}  ${price_list}
         Append To List  ${product_list}  ${product_info}
     END
     Return From Keyword  ${product_list}
@@ -96,17 +133,17 @@ Get PLP Product Info
 Judge Search Results
     Sleep  1
     ${seach_count}  Get Element Count  //p[text()='Try a different search term or check out some of our suggestions below.']
-    ${cart_count}   Get Element Count  //div[text()='ADD TO CART']
+    ${cart_count}   Get Element Count  //div[text()='Add to Cart']
     ${List_count}   Get Element Count  //div[text()='ADD TO LIST']
-    ${Shop_Now}  Get Element Count  //div[text()='Shop Now']/parent::a
+    ${Shop_Now}  Get Element Count  //div[text()='SHOP NOW']
     IF  ${seach_count}>0
-        Log  Search results are empty
+        Log  Search results are emptyF
         Return From Keyword  False
     ELSE IF  ${cart_count}>0 or ${List_count}>0
         Return From Keyword  Cart
     ELSE IF  ${Shop_Now}>0
-        Click On The Element And Wait  //div[text()='Shop Now']/parent::a
-        Wait Until Page Contains Element  //p[@title]
+        Click On The Element And Wait  //div[text()='SHOP NOW']/parent::a
+        Wait Until Page Contains Element  //h5[@title]
     END
     Return From Keyword  True
 
@@ -123,7 +160,7 @@ Verify PLP Page Num
         ${pege_end_item}  Get Length   ${product_info}
         ${seach_resp_num}  Evaluate  24*(${page_id_num}-1)+${pege_end_item}
         Scroll Element and wait and click  //div[@id='page-1']
-        Wait Until Element Is Visible  //p[@title]
+        Wait Until Element Is Visible  ${title_ele}
     ELSE
         ${product_info}  Get PLP Product Info
         ${seach_resp_num}  Get Length   ${product_info}
@@ -147,14 +184,14 @@ Verify PLP
 
 Verify PLP And Cart
     [Arguments]  ${seach_text}  ${stay_PLP}=True
-    ${result}  Run Keyword And Ignore Error   Wait Until Page Contains Element  //p[text()='We found']  3
+    ${result}  Run Keyword And Ignore Error   Wait Until Page Contains Elements Ignore Ad  //p[contains(text(),"found")]/span  5
     IF  '${result[0]}'=='PASS'
-        Wait Until Element Is Visible   //p[text()='We found']/span
-        ${title_text}  Get Webelements  //p[text()='We found']/span
+        Wait Until Element Is Visible   //p[contains(text(),"found")]/span
+        ${title_text}  Get Webelements  //p[contains(text(),"found")]/span
         ${seach_result_num_text}  Get Text And Wait  ${title_text}[0]
         ${seach_result_num}  split_str_get_num   ${seach_result_num_text}
         ${seach_result_text}  Get Text And Wait  ${title_text}[-1]
-        Should Be Equal As Strings  ${seach_result_text}  "${seach_text}"
+        Should Be Equal As Strings  ${seach_result_text}  ${seach_text}
         ${title_text}  Get Webelements  //p[text()='We found']/span
         ${seach_result_num_text}  Get Text And Wait  ${title_text}[0]
         ${seach_result_num}  split_str_get_num   ${seach_result_num_text}
@@ -175,16 +212,16 @@ Go To Merchandise Details Page
     ${product_info}  Get PLP Product Info
     ${product_len}  Get Length  ${product_info}
     ${num}  Evaluate  random.randint(1,${product_len})  random
-    ${item_title_text}  Get Text And Wait  (//p[@title])[${num}]
-    Scroll Element and wait and click  (//p[@title])[${num}]
-    Wait Until Element Is Visible  //h1  300
+    ${item_title_text}  Get Text And Wait  (${title_ele})[${num}]
+    Scroll Element and wait and click  (${title_ele})[${num}]
+    Wait Until Element Is Visible  //h1   ${Default_wait_time}
+    Sleep  0.3
     ${item_title_text_h1}  Get Text And Wait  //h1
     Should Be Equal As Strings  ${item_title_text}  ${item_title_text_h1}
 
 Count The Number Of Reviews On The Product Details Page
     ${Reviews}  Set Variable  //*[text()='Reviews']/following-sibling::div//div/p[2]
-    Wait Until Element Is Visible  ${Reviews}  60
-    Scroll Element Into View  ${Reviews}
+    Common - Scroll Down Until Page Contains Elements  ${Reviews}  60
     ${Reviews_num}  Set Variable  0
     FOR  ${i}  IN RANGE   1   6
         ${num}  Get Text And Wait  (${Reviews})[${i}]
@@ -194,11 +231,12 @@ Count The Number Of Reviews On The Product Details Page
 
 Verify Product Detail Page Reviews Number
     [Arguments]  ${Reviews_num}=${null}
-    ${result}  ${item_Reviews}  Run Keyword And Ignore Error  Get Text And Wait   //p[contains(text(),'Item')]/following-sibling::div/p
+    ${result}  ${item_Reviews}  Run Keyword And Ignore Error  Get Text And Wait   //p[contains(text(),'Item')]/following-sibling::div//p
     IF  '${result}'=='FAIL'
-        ${item_Reviews}  Evaluate  0
+        ${item_Reviews_num}  Evaluate  0
+    ELSE
+        ${item_Reviews_num}  get_pdp_reviews  ${item_Reviews}
     END
-    ${item_Reviews_num}  get_pdp_reviews  ${item_Reviews}
     ${Count_Reviews_num}  Count The Number Of Reviews On The Product Details Page
     IF  ${Reviews_num}==${null}
         Should Be Equal As these data  ${item_Reviews_num}  ${Count_Reviews_num}
@@ -272,7 +310,7 @@ Should Be Equal As These Data
 
 Go To personal information
     [Arguments]  ${button}    ${name}=summer
-    Mouse Over  //p[text()='${name}']
+    Mouse Over And Wait  //p[text()='${name}']/../parent::button
     Click On The Element And Wait  //p[text()='${button}']
 
 Choose File And Wait
@@ -280,6 +318,10 @@ Choose File And Wait
     Wait Until Element Is Enabled  ${element}
     ${photos_path}  get_mik_img_path
     Choose File  ${element}   ${photos_path}
+
+Scroll To The Bottom Of The Page
+    Execute Javascript    var count = document.querySelectorAll("*"); count[count.length-1].scrollIntoView();
+    Sleep    0.5
 
 Wait Loading End
     Run Keyword And Ignore Error  Wait Until Element Is Visible       //img[@src="https://static.platform.michaels.com/assets/header/images/loading-red-circle.svg"]  5

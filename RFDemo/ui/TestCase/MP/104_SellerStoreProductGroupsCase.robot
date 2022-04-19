@@ -14,15 +14,9 @@ ${Group_Count}
 
 
 *** Test Cases ***
-Test Check Store Settings - Product Groups Page Fixed Element text
-    [Documentation]   Check Product Groups page fixed element text
-    [Tags]  mp    mp-ea    ea-store-group    ea-store-group-ele
-    Store Left Meun - Store Settings - Product Groups
-    ${fixed_ele}    Get Ea Fixed Element    FixedElement_SellerStoreSettings.json
-    Common - Check Page Contain Fixed Element    ${fixed_ele}    productGroups
-
+#[MKP-6497] no items
 Test Create Product Groups
-    [Documentation]   Add a new product groups
+    [Documentation]   [MKP-6498],Add a new product groups
     [Tags]    mp    mp-ea    ea-store-group
     Store Left Meun - Store Settings - Product Groups
     Product Groups - Click Button - Create Product Groups
@@ -32,6 +26,13 @@ Test Create Product Groups
     Product Groups - Stop Search Listing
     Product Groups - Click Button - Save
     [Teardown]    Run Keyword If    '${TEST STATUS}'=='FAIL'    Product Groups - Click Button - Back
+
+Test Check Store Settings - Product Groups Page Fixed Element text - Have Groups
+    [Documentation]   Check Product Groups page fixed element text
+    [Tags]  mp    mp-ea    ea-store-group    ea-store-group-ele
+    Store Left Meun - Store Settings - Product Groups
+    ${fixed_ele}    Get Ea Fixed Element    FixedElement_SellerStoreSettings.json
+    Common - Check Page Contain Fixed Element    ${fixed_ele}    productGroups
 
 Test Copy Product Groups
     [Documentation]   Copy product groups
@@ -71,7 +72,7 @@ Test Preview Product Groups In Storefront
     Product Groups - Preview In Storefront And Back    ${Cur_Group_Name}
     [Teardown]     Switch Window
 
-Test Delete Added Product Groups
+Test Delete All Product Groups
     [Documentation]   Delete Add product groups
     [Tags]    mp    mp-ea    ea-store-group
     ${old_count}    Product Groups - Get Total Group Quantity
@@ -81,3 +82,12 @@ Test Delete Added Product Groups
     ${count}    Product Groups - Get Total Group Quantity
     ${count1}    Evaluate    ${count}+2
     Should be Equal As Strings    ${count1}    ${old_count}
+
+Test Check Store Settings - Product Groups Page Fixed Element text - No Groups
+    [Documentation]   Check Product Groups page fixed element text
+    [Tags]  mp    mp-ea    ea-store-group    ea-store-group-ele
+    Store Left Meun - Store Settings - Product Groups
+    Product Groups - Delete All Group
+    ${fixed_ele}    Get Ea Fixed Element    FixedElement_SellerStoreSettings.json
+    Common - Check Page Contain Fixed Element    ${fixed_ele}    productGroupsNone
+

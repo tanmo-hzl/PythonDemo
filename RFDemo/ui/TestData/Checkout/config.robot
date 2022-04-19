@@ -1,13 +1,15 @@
 *** Settings ***
-Library    SeleniumLibrary     run_on_failure=Capture Screenshot and embed it into the report
 Resource  ../EnvData.robot
 
 *** Variables ***
-${ENV}    tst
+${ENV}    qa
 ${Home URL}      https://mik.${ENV}.platform.michaels.com
 ${BROWSER}       Chrome
-${Track Order Suffix}    footer-nav/track-my-order
+${Track Order Suffix}     track-my-order
+${Delivery Instruction}   SDD Delivery Instruction - Please put the package under the PO BOX
+${Updated ZipCode}        76039
 
+${Short Waiting Time}       6
 ${Mid Waiting Time}         25
 ${Long Waiting Time}        50
 
@@ -19,10 +21,10 @@ ${Time Initial}         20
 ${Store Address}        2901 Rio Grande Blvd, Ste 700, Euless, TX, 76039
 ${Initial Store Name}   Glade Parks
 
-${Order Number}  Not Created
-@{options}       --disable-geolocation
-&{arguments}     args=${options}
-&{Desired_CAP}   firefoxOptions=${arguments}
+${Order Number}   Not Created
+@{options}        --disable-geolocation
+&{arguments}      args=${options}
+&{Desired_CAP}    firefoxOptions=${arguments}
 #2901 Rio Grande Blvd, Euless, TX 76039
 
 &{guestInfo}    firstName=MO
@@ -33,6 +35,7 @@ ${Order Number}  Not Created
 ...             zipCode=76039
 ...             email=ui_cart_smoke@snapmail.cc
 ...             phoneNumber=469-779-6009
+
 
 
 &{billAddress}    firstName=MO
@@ -79,32 +82,42 @@ ${Order Number}  Not Created
 ...              email=ui_cart_smoke@snapmail.cc
 ...              phoneNumber=469-779-6009
 
+&{addtionalPickInfo}    firstNameAdditional=AddPick
+...                     lastNameAdditional=AddInfo
+...                     emailAdditional=additional_person@snapmail.cc
 
 &{creditInfo}   cardHolderName=JOHN BELL
 ...             cardNumber=5155718238074354
 ...             expirationDate=10/23
 ...             cvv=123
 
-&{giftInfo}     giftCard=6006496912999904780
-...             pin=1613
+&{giftInfo}     giftCard=6006496912999904202
+...             pin=8185
 
 
 &{paypalInfo}   email=sb-upbk56551725@personal.example.com
 ...             password=Testing@123
 
 
-&{buyer}    user=lisa@snapmail.cc    password=Aa123456
-&{buyer2}    user=july@snapmail.cc    password=Aa123456
+&{buyer}     user=lisa@snapmail.cc     password=Aa123456
+&{buyer2}    user=july@snapmail.cc     password=Aa123456
+&{buyer3}    user=habe@snapmail.cc     password=Aa123456
+&{buyer4}    user=alice@snapmail.cc     password=Aa123456
 
 &{account_info}    first_name=Lisa    last_name=Luo    address=2901 Rio Grande Blvd,Euless,TX,76039-1339
 ...     		   phone=619-876-5675    email=lisa@snapmail.cc
 
 &{signin_CC_info}    credit_card_number=4112344112344113    card_type=Visa     expiration=01/30
-&{signin_giftInfo}     giftCard=6006496912999904798    pin=5889
+&{signin_giftInfo}     giftCard=6006496912999904723    pin=9722
 
 
 &{store1_info}    store_name=Glade Parks    store_address=2901 Rio Grande Blvd, Ste 700, Euless, 76039, TX     store_phone=682-503-7937     city=DFW-EULESS, TX
-&{store2_info}    store_name=MacArthur Park     store_address=7635 N MacArthur Blvd, Irving, 75063, TX     store_phone=972-501-0525    city=DFW-IRVING
+&{store2_info}    store_name=MacArthur Park     store_address=7635 N MacArthur Blvd, Irving, 75063, TX     store_phone=972-501-0525    city=DFW-IRVING     zipcode=75063
 
-${pickup_location_in_buy_now}     DFW-EULESS, TX,2901 Rio Grande Blvd, Ste 700,Euless,76039,682-503-7937
+${pickup_location_in_buy_now}     Glade Parks,2901 Rio Grande Blvd, Ste 700,Euless,76039,682-503-7937
 ${pickup_location_in_order_detail}    2901 Rio Grande Blvd, Euless, TX 76039-1339
+
+
+&{pickup_additional}      firstNameAdditional=mo
+...                       lastNameAdditional=do
+...                       emailAdditional=neivi@snapmail.cc

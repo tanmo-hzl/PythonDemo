@@ -12,12 +12,20 @@ ${Address}
 ${Application_No}
 
 *** Keywords ***
-Open And Click START SELLING WITH MICHAELS Button
-    Open Browser With URL               ${URL_MP_LANDING}       mpLandingURL
-    Switch Browser    mpLandingUrl
-    Wait Until Element Is Visible       //div[text()='START SELLING WITH MICHAELS']
-    Click Element                       //div[text()='START SELLING WITH MICHAELS']
-    Wait Until Element Is Visible       //p[text()="Company Information"]
+Skip Case If Parent Case Fail Or Skip
+    [Arguments]    ${msg}=Parent Cases Fail
+    Skip If    '${Par_Case_Status}'=='FAIL' or '${Par_Case_Status}'=='SKIP'    ${msg}
+
+Check START SELLING WITH MICHAELS Button Existed
+    [Arguments]    ${existed}=${True}
+    Go To    ${URL_MP_LANDING}
+    Wait Until Element Is Visible    //*[text()="Expand your reach as a Michaels Marketplace seller."]
+    Sleep    2
+    IF    "${existed}"=="${True}"
+        Page Should Contain Element    //div[text()='START SELLING WITH MICHAELS']
+    ELSE
+        Page Should Not Contain Element    //div[text()='START SELLING WITH MICHAELS']
+    END
 
 Open And Enter MP Apply Page
     [Arguments]    ${new_browser}=${True}
@@ -31,6 +39,7 @@ Open And Enter MP Apply Page
 
 Create - Input Company Legal Name
     Wait Until Element Is Visible       //p[text()="Company Information"]
+    Clear Element Value    //input[@id="companyName"]
     Input Text                          //input[@id="companyName"]          ${Seller_Info}[name]
 
 Create - Input First And Last Name
@@ -38,10 +47,13 @@ Create - Input First And Last Name
     Input Text                          //input[@id="coLastName"]           ${Seller_Info}[last_name]
 
 Create - Input Email And Confirm Email Address
+    Clear Element Value                 //input[@id="email"]
+    Clear Element Value                 //input[@id="confirmEmail"]
     Input Text                          //input[@id="email"]                ${Seller_Info}[email]
     Input Text                          //input[@id="confirmEmail"]         ${Seller_Info}[email]
 
 Create - Input Employer Identification Number(EIN)
+    Clear Element Value                 //input[@id="ein"]
     Input Text                          //input[@id="ein"]          ${Seller_Info}[ein]
 
 Create - Upload Photos
@@ -56,7 +68,7 @@ Create - Upload Photos
     Scroll Element Into View             //div[text()="Submit"]
 
 Create - Click Sold And Shipped Lable Button
-    Click Element                           //p[@id="switch-label" and text()="No"]/preceding-sibling::label
+    Click Element                           //p[@id="switch-label" and text()="No"]/../parent::label
     Wait Until Element Is Visible           //p[@id="switch-label" and text()="Yes"]
 
 Create - Select Categories You Sell In
@@ -110,18 +122,17 @@ Create - Click Submit Button
     Wait Until Element Is Enabled    //div[text()="Submit"]/parent::button
     Sleep    1
     Click Element                   //div[text()="Submit"]/parent::button
-    Wait Until Element Is Visible    //p[text()="You have submitted your application successfully."]
+    Wait Until Element Is Visible    //*[text()="You have submitted your application successfully."]
 
 Create An Account and Account Password
     ${SIGN_UP_URL}    set variable      ${URL_BASE_SIGN_UP}?applicationId=${Application_No}&email=${Seller_Info}[email]
     Go To    ${SIGN_UP_URL}
-    Sleep    3
     Reload Page
     Wait Until Element Is Visible       //p[text()="Sign up for Marketplace Emails"]
     Click Element                       //p[text()="Sign up for Marketplace Emails"]
     Click Element                       //p[text()="I certify that I am at least 18 years of age"]
-    Input Text                          //input[@id="password"]     ${SELLER_PWD}
-    Input Text                          //input[@id="confirmPassword"]      ${SELLER_PWD}
+    Input Text                          //label[text()="Password"]/following-sibling::div/input     ${SELLER_PWD}
+    Input Text                          //label[text()="Confirm password"]/following-sibling::div/input     ${SELLER_PWD}
 
 Read And Confirm Seller Agreement
     Wait Until Page Contains Element    //div[@id="docx"]
@@ -152,8 +163,6 @@ Fill In Store Information
     Click Element                       //div[text()="SAVE AND CONTINUE"]/parent::button
     Wait Until Page Contains Element    //h1[text()="How You’ll Get Paid."]
 
-
-
 Fill In Payment Information
     ${now_url}    Get Location
     ${bank_info}   Get Json Value    ${Seller_Info}    bank_info
@@ -174,19 +183,23 @@ Fill In Payment Information
     Wait Until Page Contains Element    //h1[text()="Complete Billing Information"]
 
 Fill In Billing Information
-    ${payment_info}    Get Json Value      ${Seller_Info}    payment_info
-    Click Element                       //p[text()="Add Card"]
-    Wait Until Page Contains Element    //p[text()="Please enter your credit card information."]
-    Input Text                          //input[@id="cardholderName"]               ${payment_info}[cardHolderName]
-    Input Text                          //input[@id="bankCardNickName"]             ${payment_info}[bankCardNickName]
-    Input Text                          //input[@id="cardNumber"]                   ${payment_info}[cardNumber]
-    Press Keys                          //input[@id="expirationDate"]               ${payment_info}[expirationDate]
-    Press Keys                          //input[@id="cvv"]                          ${payment_info}[cvv]
-    Click Element                       //span[text()="Use previous address"]/parent::label
-    Press Keys                          //input[@id="phoneNumber"]                  ${Seller_Info}[phone]
-    Click Element                       //div[text()="SAVE"]/parent::button
-    Sleep  1
-    Wait Until Element Is Not Visible    //p[text()="Please enter your credit card information."]
+    [Arguments]    ${input_card_info}=${True}
+    Wait Until Element Is Visible    //p[text()="Add Card"]
+    IF    "${input_card_info}"=="${True}"
+        ${payment_info}    Get Json Value      ${Seller_Info}    payment_info
+        Click Element                       //p[text()="Add Card"]
+        Wait Until Page Contains Element    //p[text()="Please enter your credit card information."]
+        Input Text                          //input[@id="cardholderName"]               ${payment_info}[cardHolderName]
+        Input Text                          //input[@id="bankCardNickName"]             ${payment_info}[bankCardNickName]
+        Input Text                          //input[@id="cardNumber"]                   ${payment_info}[cardNumber]
+        Press Keys                          //input[@id="expirationDate"]               ${payment_info}[expirationDate]
+        Press Keys                          //input[@id="cvv"]                          ${payment_info}[cvv]
+        Click Element                       //span[text()="Use previous address"]/parent::label
+        Press Keys                          //input[@id="phoneNumber"]                  ${Seller_Info}[phone]
+        Click Element                       //div[text()="SAVE"]/parent::button
+        Sleep  1
+        Wait Until Element Is Not Visible    //p[text()="Please enter your credit card information."]
+    END
     Click Element                       //div[text()="Submit"]/parent::button
     Wait Until Page Contains Element    //h4[text()="Congrats!"]
     Click Element                       //div[text()="Start Now"]/parent::button
@@ -239,7 +252,6 @@ Add Customer Service Datails
     Wait Until Element Is Visible       //p[starts-with(text(),"Provide your fulfillment center locations,")]
 
 
-
 Provide Fulfillment Infomation
     ${now_url}    Get Location
     # Address
@@ -262,7 +274,8 @@ Provide Fulfillment Infomation
     Click Element                       //div[contains(@id,".days")]
 
     # Observed Holidays(Optional)
-    Click Element                       //div[contains(@id,"fulfillment0holidayName")]
+    Click Element     //*[@id="fulfillmentCenters[0].anthorHolidays[0].holidayName"]
+#    Click Element                       //div[contains(@id,"fulfillment0holidayName")]
     Wait Until Element Is Visible       //p[text()="New Years Day"]/..
     Click Element                       //p[text()="New Years Day"]/..
     Wait Until Element Is Visible       //input[@id="fulfillmentCenters[0].anthorHolidays[0].from"]
@@ -274,7 +287,7 @@ Provide Fulfillment Infomation
 
     #Shipping Rate Table
     Scroll Element Into View            //div[text()="SAVE"]
-    Input Text                          //input[@id="standardShippingLines[0].shipmentCost"]      12
+    Input Text                          //input[@id="standardShippingLines[0].shipmentCost"]      ${Seller_Info}[shipmentCost]
     Click Element                       //div[text()="SAVE"]
 
 Fill In Return Information
@@ -284,14 +297,14 @@ Fill In Return Information
     Click Element                       //div[text()="SAVE"]
     Wait Until Element Is Visible       //header[text()="Onboarding Complete Confirmation"]
     Click Element                       //div[text()="GO TO MY STOREFRONT"]
-    Wait Until Element Is Visible       //h4[text()="Store Name and Location"]
+    Wait Until Element Is Visible       //h2[text()="Store Name and Location"]
 
 Initialize Seller Data
     ${Seller_Info}    Get New Seller Info    ${ENV}
     Set Suite Variable    ${Seller_Info}    ${Seller_Info}
 
 Flow - Seller Pre Application Submit
-    [Arguments]    ${new_browser}=${True}
+    [Arguments]    ${new_browser}=${True}    ${submit}=${True}
     Open And Enter MP Apply Page    ${new_browser}
     Create - Input Company Legal Name
     Create - Input First And Last Name
@@ -305,7 +318,43 @@ Flow - Seller Pre Application Submit
     Create - Select Approximate Annual ECommerce Revenue
     Create - Select Integration Source
     Create - Check Privacy Policy Checkbox
-    Create - Click Submit Button
+    Run Keyword If    "${submit}"=="${True}"    Create - Click Submit Button
+
+Check Submit Pre Application by Existed Info
+    [Documentation]     N:name   M:email    I:EIN    ES:exited seller
+    [Arguments]    ${existed_key}=NEI
+    ${tip1}    Set Variable    Please note that your registration information contains content that has been used by others
+    ${tip2}    Set Variable    You`re already a seller!
+    ${msg1}    Set Variable    This Company Legal Name has already been used.
+    ${msg2}    Set Variable    This email address has already been used.
+    ${msg3}    Set Variable    This EIN has already been used.
+    ${msg4}    Set Variable    This mailbox has already registered a merchant!
+    Wait Until Element Is Enabled    //div[text()="Submit"]/parent::button
+    Sleep    1
+    Click Element                   //div[text()="Submit"]/parent::button
+    Scroll Element Into View      //p[text()="Company Information"]
+    IF    "${existed_key}"!="ES"
+        Wait Until Element Is Visible    //*[text()="${tip1}"]
+    ELSE
+        Wait Until Element Is Visible    //*[text()="${tip2}"]
+        Page Should Contain    ${msg4}
+    END
+    IF    "${existed_key}"=="NMI"
+        Page Should Contain    ${msg1}
+        Page Should Contain    ${msg2}
+        Page Should Contain    ${msg3}
+    END
+    IF    "${existed_key}"=="NI"
+        Page Should Contain    ${msg1}
+        Page Should Contain    ${msg3}
+    END
+    IF    "${existed_key}"=="I"
+        Page Should Contain    ${msg3}
+    END
+    IF    "${existed_key}"=="M"
+        Page Should Contain    ${msg2}
+    END
+
 
 Flow - Buyer Sign Up
     Open Browser With URL    ${URL_MIK}/signup   mpApply
@@ -321,4 +370,25 @@ Flow - Buyer Sign Up
     Click Element    //*[@id="certifyAge"]
     Click Element    //*[@id="keepSignIn"]
     Click Element    //div[text()="Sign up"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Verification email has been sent!"]
+    Run Keyword And Ignore Error    Close Dialog If Existed
+    Wait Until Element Is Visible    //*[text()="Verification email has been sent!"]
+
+Register Seller AS A Buyer
+    Go To    ${URL_MIK}/mp/storefront/${SELLER_STORE_NAME}?sellerStoreId=${SELLER_STORE_ID}
+    Wait Until Element Is Visible    //h1[text()="CONTACT INFO"]
+    Wait Until Element Is Visible    (//div[@pointer-events="all"]//div[contains(@class,"chakra-aspect-ratio")])
+    Wait Until Page Contains Element    //div[@aria-label="Previous Page"]
+    Sleep    1
+    ${lst_ele}    Set Variable    (//div[@pointer-events="all"]//div[contains(@class,"chakra-aspect-ratio")])
+    Click Element    ${lst_ele}\[1\]
+    Wait Until Element Is Visible    //div[text()="ADD TO CART"]/parent::button
+    ${button_text}    Create List    ADD TO CART    BUY NOW
+    ${btn}    Evaluate    random.choice(${button_text})
+    Click Element    //*[text()="${btn}"]
+    Wait Until Element Is Visible    //*[text()="This Email is Already Registered as a Seller"]
+    Input Text    //*[@id="password"]    ${SELLER_PWD}
+    Click Element    //*[text()="Apply to be a buyer"]
+    Wait Until Element Is Visible    //*[text()="You're already a buyer"]
+    Click Element    //*[text()="ADD TO CART"]
+    Wait Until Element Is Visible    //*[text="Items added to cart!"]
+

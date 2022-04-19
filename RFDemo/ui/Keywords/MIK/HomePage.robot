@@ -1,6 +1,7 @@
 *** Settings ***
 Library        ../../Libraries/CommonLibrary.py
 Resource       ../../Keywords/Common/MikCommonKeywords.robot
+Resource       ../../Keywords/Common/CommonKeywords.robot
 
 
 *** Keywords ***
@@ -27,7 +28,8 @@ Click Top Table And Verify Title
 Click Bottom Table And Verify Title
     [Arguments]   ${One_Table}   ${element_title}
     FOR  ${element}  ${title}  IN  &{element_title}
-        Scroll Element and wait and click  //p[text()="${One_Table}"]/parent::button
+        Common - Scroll Down Until Page Contains Elements  //p[text()="${One_Table}"]/parent::button
+        Scroll Element And Wait And Click  //p[text()="${One_Table}"]/parent::button
         IF  "${element}"=="Track My Order"
             Click Element And Verify Title     (//p[text()="${element}"])[2]  ${title}
         ELSE
@@ -38,16 +40,15 @@ Click Bottom Table And Verify Title
 
 Verify Recommended Product Review
     [Arguments]   ${Title_tab}   ${Product_num}=${null}
-    Wait Until Page Contains Element   //*[text()='${Title_tab}']
-    Scroll Element Into View        //*[text()='${Title_tab}']
+    Common - Scroll Down Until Page Contains Elements   //*[text()='${Title_tab}']  60  1
     ${elements}  Get Product Recommended Or Category element  ${Title_tab}  ${Product_num}
     IF  '${Product_num}'=='${null}'
-        Mouse Over  (//div[text()='${Title_tab}']/../following-sibling::div/div)[3]
-        Click On The Element And Wait  (//div[text()='${Title_tab}']/../following-sibling::div/div)[3]
+        Mouse Over  (//*[text()='${Title_tab}']/../following-sibling::div/div)[3]
+        Click On The Element And Wait  (//*[text()='${Title_tab}']/../following-sibling::div/div)[3]
         Sleep  0.1
     END
     Click On The Element And Wait  ${elements}
-    Wait Until Page Contains Element  //*[text()='Reviews']  30
+    Wait Until Page Contains Elements Ignore Ad  //*[text()='Reviews']  30
     Verify Product Detail Page Reviews Number
     Go Back
 
@@ -65,14 +66,29 @@ Get Product Recommended Or Category element
     Return From Keyword  (${product_element})[${Product_num}]
 
 Verify SHOP BY CATEGORY
-    Wait Until Page Contains  SHOP BY CATEGORY  60
-    ${product_element}  Set Variable  //div[text()='SHOP BY CATEGORY']/../following-sibling::div/a
+    Common - Scroll Down Until Page Contains Elements  //*[text()='SHOP BY CATEGORY']  30
+    ${product_element}  Set Variable  //*[text()='SHOP BY CATEGORY']/../following-sibling::div/a
     ${count}  Get Element Count  ${product_element}
     FOR  ${Product_num}  IN RANGE  1  ${count}+1
         ${Category_title}  Get Text  (${product_element})[${Product_num}]//span
         Scroll Element And Wait And Click  (${product_element})[${Product_num}]
         Wait Until Page Contains  ${Category_title}  60
         Go Back
+        Common - Scroll Down Until Page Contains Elements  //*[text()='SHOP BY CATEGORY']  30
     END
-    Scroll Element And Wait And Click  //div[text()='SHOP BY CATEGORY']/following-sibling::a
+    Scroll Element And Wait And Click  //*[text()='SHOP BY CATEGORY']/following-sibling::a
     Wait Until Page Contains  Site Map  60
+
+Verify Advertising Rotation Diagram
+#    Verify Feature available  //div[contains(text(), ' NOW')]
+#    Click On The Element And Wait  //p[text()='Michaels']/parent::a
+#    Sleep  0.3
+    Verify Feature available  //div[@data-index="0"]//img
+
+Verify Feature available
+    [Arguments]   ${element}
+    Click On The Element And Wait  ${element}
+    ${result}  Run Keyword And Ignore Error  Wait Until Page Contains  Feature is not currently available  5
+    IF  '${result[0]}'=='PASS'
+        Fail  Feature is not currently available
+    END

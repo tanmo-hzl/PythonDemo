@@ -2,25 +2,40 @@
 Library    SeleniumLibrary     run_on_failure=Capture Screenshot and embed it into the report
 Resource    ../../TestData/Checkout/config.robot
 Resource    BuyerCheckKeywords.robot
+Resource    PDPPageKeywords.robot
 
 Library     Collections
 Library     ../../Libraries/Checkout/BuyerKeywords.py
 
 
 *** Variables ***
-${items_added_to_cart_text}   //p[text()="Items added to cart!"]
+${items_added_to_cart_text}   //*[text()="Items added to cart!"]
 ${view_my_cart_ele}    //div[text()="View My Cart"]
-${items_atc_ele}    (//p[contains(text(),"Items added to cart!")])
+${items_atc_ele}    (//*[contains(text(),"Items added to cart!")])
 ${name_eles}    ${items_atc_ele}/../following-sibling::div[1]/div/p
 ${product_eles}    ${items_atc_ele}/../following-sibling::div[1]/div/div/p
 
-${bn_img_ele}    //p[text()="Buy Now"]/../div//img
+${bn_img_ele}    //p[text()="Buy Now"]/../..//img
 
 *** Keywords ***
 
 
 Buy Now Process
+#    ${Checkout Panel Stats}  Get All Relevant Number Before Placing Order
+#    Log    ck_order_stats:${Checkout Panel Stats}
     Click Place Order Button In Buy Now Page
+    ${payment_err_message}  Run Keyword And Ignore Error  Wait Until Page Contains Elements Ignore Ad  //*[contains(text(),"Unable to Process Payment")]
+    IF  "${payment_err_message[0]}"=="PASS"
+         Log Source
+         Wait Until Page Contains Elements Ignore Ad  //*[text()="Close"]
+         Click Element                                //*[text()="Close"]
+#         Wait Until Element Is Visible                //p[text()="Buy Now"]
+#         Click Element                                //p[text()="Buy Now"]
+         Click Buy Now Button    ${PRODUCT_INFO_LIST[0]["channel"]}
+         Wait Until Element Is Visible    //h3[contains(text(),"Order Summary")]
+         Scroll Element Into View    //div[text()="PLACE ORDER"]/parent::button
+         Click Element   //div[text()="PLACE ORDER"]/parent::button
+    END
     ${orderNo}    Get OrderNo
     Set Suite Variable    ${ORDER_NO}    ${orderNo}
     log    ck_order_number:${orderNo}
@@ -45,11 +60,27 @@ Click Place Order Button In Buy Now Page
     Wait Until Element Is Visible    //h3[contains(text(),"Order Summary")]
     Wait Until Element Is Visible    //p[contains(text(),"Total:")]
     Scroll Element Into View    //div[text()="PLACE ORDER"]/parent::button
+    ${err_win}      Run Keyword And Ignore Error    Wait Until Page Contains Element  //*[contains(text(),"Sorry, we cannot process your transaction.")]
+    IF  "${err_win[0]}"=="PASS"
+        Wait Until Page Contains Element    //div[text()="TRY AGAIN"]/parent::button
+        Click Element  //div[text()="TRY AGAIN"]/parent::button
+        Wait Until Page Contains Element   //button[@class="chakra-modal__close-btn css-iwhjmc"]
+        Click Element  //button[@class="chakra-modal__close-btn css-iwhjmc"]
+#        Wait Until Page Contains Element     //p[text()="Buy Now"]
+#        Wait Until Element Is Visible        //p[text()="Buy Now"]
+#        Click Element                        //p[text()="Buy Now"]
+        Click Buy Now Button   ${PRODUCT_INFO_LIST[0]["channel"]}
+        Wait Until Element Is Visible       //h3[contains(text(),"Order Summary")]
+        Scroll Element Into View           //div[text()="PLACE ORDER"]/parent::button
+        Sleep  1
+    END
     Wait Until Element Is Enabled   //div[text()="PLACE ORDER"]/parent::button
     Click Element    //div[text()="PLACE ORDER"]/parent::button
 
 
 Book Class Only Process
+#    ${Checkout Panel Stats}  Get All Relevant Number Before Placing Order
+#    Log    ck_order_stats:${Checkout Panel Stats}
     Click Register & Pay Button
     Wait Until Element Is Visible    //p[text()="Successfully booked"]
     Page Should Contain Element     //p[text()="Successfully booked"]
@@ -67,8 +98,8 @@ Click Register & Pay Button
 
 
 Click View My Cart Button
-    Wait Until Page Contains Element    //p[text()="Items added to cart!"]
-    wait until element is visible    //p[text()="Items added to cart!"]
+    Wait Until Page Contains Element    //*[text()="Items added to cart!"]
+    wait until element is visible    //*[text()="Items added to cart!"]
     Wait Until Element Is Enabled    //div[text()="View My Cart"]
     click element    xpath=//div[text()="View My Cart"]
 
@@ -78,17 +109,30 @@ Click Continue as Guest Button
     wait until element is visible    //div[text()="CONTINUE AS GUEST"]/..
     click element    //div[text()="CONTINUE AS GUEST"]/..
 
+Login In Slide Page And Get Account Info
+    login in slide page     ${buyer['user']}    ${buyer['password']}
+    ${user_information}    Get Account Info
+    Set Suite Variable     ${USER_INFO}    ${user_information}
+
 login in slide page
+    [Arguments]     ${user}    ${password}
+    Sleep    2
     Wait Until Page Contains Element     //label[text()="Email Address"]
     Wait Until Element Is Visible    //label[text()="Email Address"]
     wait until element is visible    //input[@id="email"]
     click element    //input[@id="email"]
-    input text    //input[@id="email"]    ${buyer['user']}
-    input text    //input[@id="password"]    ${buyer['password']}
-    click button    //div[text()="SIGN IN"]/parent::button
-    ${user_information}    Get Account Info
-    Set Suite Variable     ${USER_INFO}    ${user_information}
-
+#    input text    //input[@id="email"]    ${user}
+#    input text    //input[@id="password"]    ${password}
+    Press Keys    //input[@id="email"]    ${user}
+    click element    //input[@type="password"]
+    Press Keys    //input[@type="password"]    ${password}
+    ${sign in eles}     Get Webelements   //div[text()="SIGN IN"]/parent::button
+    ${sign in eles length}  Get Length   ${sign in eles}
+    IF  ${sign in eles length}>1
+        click button   ${sign in eles}[-1]
+    ELSE
+        click button    //div[text()="SIGN IN"]/parent::button
+    END
 
 #Check store name
 #    [Arguments]    ${store_name}
@@ -115,9 +159,9 @@ Check View My Cart Slide Page
     ${A_price}           Get Text           ${product_eles[0]}
     ${A_qty}             Get Text           ${product_eles[1]}
     Check Item Properties                   ${product_info}
-    ${items}   Get Text   (//p[contains(text(),"Items added to cart!")])/../following-sibling::div[2]/div/div/p[1]
+    ${items}   Get Text   (//*[contains(text(),"Items added to cart!")])/../following-sibling::div[2]/div/div/p[1]
     Sleep   1
-    ${subtotal}    Get Text    (//p[contains(text(),"Items added to cart!")])/../following-sibling::div[2]/div/div/p[2]
+    ${subtotal}    Get Text    (//*[contains(text(),"Items added to cart!")])/../following-sibling::div[2]/div/div/p[2]
     Run Keyword And Warn On Failure    Should Be Equal As Strings    ${product_info}[store_name]      ${A_store_name}      store name are inconsistent in view my cart slide page
     Run Keyword And Warn On Failure    Should Be Equal As Strings    ${product_info}[product_name]    ${A_product_name}    product name are inconsistent in view my cart slide page
     Run Keyword And Warn On Failure    Should Be Equal As Strings    price:${product_info}[price]     price:${A_price}     product price are inconsistent in view my cart slide page
@@ -209,7 +253,7 @@ Buy Now Class - Input All Guest Info
     IF   "${product_type}" == "class"
         sleep   2
         ${Guest_Ele}    Set Variable    (//h4[contains(text(),"Guest")])
-        Wait Until Page Contains Element     ${Guest_Ele}
+        Wait Until Page Contains Elements Ignore Ad     ${Guest_Ele}
         Wait Until Element Is Visible     ${Guest_Ele}
         ${count}    Get Element Count    ${Guest_Ele}
         ${count}    Evaluate    ${count} - 1
@@ -225,10 +269,28 @@ Buy Now Class - Input All Guest Info
     END
 
 
+Buy Now Class - Input Same Guest Info
+    [Arguments]     ${account_info}
+    sleep   2
+    ${Guest_Ele}    Set Variable    (//h4[contains(text(),"Guest")])
+    Wait Until Page Contains Element     ${Guest_Ele}
+    Wait Until Element Is Visible     ${Guest_Ele}
+    ${count}    Get Element Count    ${Guest_Ele}
+    ${count}    Evaluate    ${count} - 1
+#        ${Guest_Data}    Get Class Guest Info    ${count}
+    ${index}    Set Variable    2
+    FOR    ${i}    IN RANGE   ${count}
+        Input Text    ${Guest_Ele}\[${index}\]/following-sibling::div//input[contains(@id,"firstName")]    ${account_info}[first_name]
+        Input Text    ${Guest_Ele}\[${index}\]/following-sibling::div//input[contains(@id,"lastName")]    ${account_info}[last_name]
+        Input Text    ${Guest_Ele}\[${index}\]/following-sibling::div//input[contains(@id,"email")]    ${account_info}[email]
+        Input Text    ${Guest_Ele}\[${index}\]/following-sibling::div//input[contains(@id,"phoneNumber")]    ${account_info}[phone]
+        ${index}    Evaluate    ${index}+1
+    END
+
 
 Check Product Info In Buy Now
     [Arguments]    ${product_info}
-    ${img_ele}    Set Variable     //p[text()="Buy Now"]/../div//img
+    ${img_ele}    Set Variable      //img[@alt="thumbnail"]
     ${img_src}    Get Element Attribute     ${img_ele}    src
     Run Keyword And Warn On Failure    Should Not Be Empty    ${img_src}    product thumbnail is not empty
     ${product_text}    Get Text    ${img_ele}/../div
@@ -242,7 +304,7 @@ Check Product Info In Buy Now
 
 Check Item Properties in Buy Now Slide Page
     [Arguments]    ${product_info}
-    ${img_ele}    Set Variable     //p[text()="Buy Now"]/../div//img
+    ${img_ele}    Set Variable     //img[@alt="thumbnail"]
 #    ${isSize}   Get Element Count    ${items_atc_ele}/../following-sibling::div[1]//p[text()="Size"]
     IF   '${product_info}[size]' != '${EMPTY}'
         ${A_size}   Get Text     ${img_ele}/../div//p[text()="Size"]/following-sibling::p
@@ -292,8 +354,8 @@ Check SDD Info In Buy Now Slide Page
     ${user}    Set Variable    ${USER_INFO[0]} ${USER_INFO[1]}
     ${address1}    Upper Parameter    ${USER_INFO[2]}
     ${address1}    Split Parameter    ${address1}    ,
-    ${address2}    Set Variable     ${address1[0]},${address1[1]},${address1[3]},${address1[2]}
-    ${E_SDD_Info}    Catenate     ${user}\n${address2},US
+    ${address2}    Set Variable     ${address1[0]},${address1[1]}, ${address1[3]}, ${address1[2]}
+    ${E_SDD_Info}    Catenate     ${user}\n${address2}, US
     Run Keyword And Warn On Failure    Should Be Equal As Strings     ${SDD_Info}    ${E_SDD_Info}    SDD consignee info are inconsistent in buy now slide page
 
 
@@ -301,21 +363,19 @@ Check Pickup Info In Buy Now Slide Page
     ${pickup_location_text}    Get Text     //p[text()="Pickup Location:"]/following-sibling::p
     ${pickup_location}    Split Parameter    ${pickup_location_text}    \n
     ${A_pickup_location}    Catenate    ${pickup_location[0]},${pickup_location[1]},${pickup_location[2]},${pickup_location[3]}
-#    ${store_address}    Split Parameter     ${store1_info}[store_address]   ,
-#    ${store_address}    Catenate    ${store_address[0]},${store_address[1]},${store_address[2][1:]},${store_address[3]}
-#    ${pis_location}    Catenate     ${store1_info}[city],${store_address},${store1_info}[store_phone]
     ${E_pickup_location}    Set Variable     ${pickup_location_in_buy_now}
     Run Keyword And Warn On Failure     Should Be Equal As Strings     ${A_pickup_location}    ${E_pickup_location}    pickup_location are inconsistent in buy now slide page
-    ${pipup_person_address}    Get Text    (//p[text()="Pickup Person"]/following-sibling::p)[1]
-    ${pipup_person_email}    Get Text     (//p[text()="Pickup Person"]/following-sibling::p)[2]
+    ${pipup_person_name}    Get Text    //p[text()="Pickup Person"]/../../following-sibling::p[1]
+    ${pipup_person_email}    Get Text     //p[text()="Pickup Person"]/../../following-sibling::p[2]
     ${user}    Set Variable    ${USER_INFO[0]} ${USER_INFO[1]}
-    ${address1}    Upper Parameter    ${USER_INFO[2]}
-    ${address1}    Split Parameter    ${address1}    ,
-    ${address2}    Set Variable     ${address1[0]},${address1[1]}, ${address1[3]}, ${address1[2]}
-    ${E_pipup_person_address}    Catenate     ${user}\n${address2}, US
-    ${E_mail}    Set Variable     ${buyer}[user]
-    Run Keyword And Warn On Failure     Should Be Equal As Strings    ${pipup_person_address}    ${E_pipup_person_address}    pipup_person_address are inconsistent in buy now slide page
-    Run Keyword And Warn On Failure     Should Be Equal As Strings    ${pipup_person_email}    ${E_mail}    pipup_person_email are inconsistent in buy now slide page
+#    ${address1}    Upper Parameter    ${USER_INFO[2]}
+#    ${address1}    Split Parameter    ${address1}    ,
+#    ${address2}    Set Variable     ${address1[0]},${address1[1]}, ${address1[3]}, ${address1[2]}
+#    ${E_pipup_person_address}    Catenate     ${user}\n${address2}, US
+    ${E_mail}    Set Variable     ${USER_INFO[4]}
+#    Run Keyword And Warn On Failure     Should Be Equal As Strings    ${pipup_person_address}    ${E_pipup_person_address}    pipup_person_address are inconsistent in buy now slide page
+    Run Keyword And Warn On Failure     Should Be Equal As Strings    ${pipup_person_name}    ${user}     user name is wrong in buy now slide page
+    Run Keyword And Warn On Failure     Should Be Equal As Strings    ${pipup_person_email}    ${E_mail}    pipup_person_email is wrong in buy now slide page
 
 
 
@@ -343,7 +403,7 @@ Check Order Summary In Buy Now
 
 Check Order Summary In Order Detail
     [Arguments]    ${product_info}
-    ${order_summary_ele}    Set Variable    //h4[contains(text(),"Order Summary ")]
+    ${order_summary_ele}    Set Variable    //h4[contains(text(),"Order Summary")]
     ${subtotal_text}    Get Text     ${order_summary_ele}/..//following-sibling::div[1]
     ${subtotal_text}   Split Parameter    ${subtotal_text}   \n
     ${A_item_nums}   Set Variable    ${subtotal_text[0]}
@@ -431,7 +491,7 @@ Check Order Detail Page
 Check order number in detail page
     [Arguments]    ${order_num}
     go to    ${Home URL}/buyertools/order-history?detail=${order_num}
-    Wait Until Element Is Visible     //p[text()="Order Detail"]
+    Wait Until Page Contains Element     //p[text()="Order Detail"]
     Wait Until Page Contains Element    (//h4)[1]
     Wait Until Element Is Visible    (//h4)[1]
     ${order_num_text}    Get Text     (//h4)[1]
@@ -491,11 +551,11 @@ Check Ship to Address In Order Detail
 
 
 Check Payment Method In Oeder Detail
-    ${card_number}    Get Text    //p[text()="Payment Method"]/../following-sibling::div/div/div
+    ${card_number}    Get Text    (//p[text()="Payment Method"]/../following-sibling::div/div/div/div/button/p)[1]
     ${E_card_number}    Set Variable    ${signin_CC_info}[credit_card_number]
     ${E_card_number}    Set Variable    ${E_card_number[-4:]}
     Run Keyword And Warn On Failure     Should Be Equal As Strings     ${card_number}    ending in ${E_card_number}    the credit card last four digtil number is wrong in order detail page
-    ${payment_amount}    Get Text    //p[text()="Payment Method"]/../following-sibling::div/div/p
+    ${payment_amount}    Get Text    (//p[text()="Payment Method"]/../following-sibling::div/div/div/div/button/p)[2]
     ${order_total}    Get Text    //p[text()="Order Total"]/following-sibling::p
     Run Keyword And Warn On Failure    Should Be Equal As Strings    ${payment_amount}    ${order_total}    payment amount is wrong in order detail page
 
@@ -549,4 +609,164 @@ Update default address
     Wait Until Element Is Visible    //div[text()="Save"]/..
     Click Element    //div[text()="Save"]/..
     sleep   1
+
+
+Delete default address
+    [Arguments]     ${address}
+    sleep   2
+    go to    ${Home URL}/buyertools/profile
+    sleep   2
+    Reload Page
+    Wait Until Page Contains Element     //p[text()="Edit Profile"]/..
+    Wait Until Element Is Visible    //p[text()="Edit Profile"]/..
+    Click Element      //p[text()="Edit Profile"]/..
+    Scroll Element Into View     //div[text()="Save"]/..
+#    ${address}    Upper Parameter     ${address}
+#    ${delete_icon_ele}    Set Variable     //p[contains(text(),"${address}")]/../following-sibling::div/button[2]
+    ${status}    Run Keyword And Ignore Error     Wait Until Page Contains Element     //p[contains(text(),"${address}")]/../following-sibling::div/button[2]    5
+    IF    "${status[0]}" == "FAIL"
+        ${address}    Upper Parameter     ${address}
+        Wait Until Page Contains Element     //p[contains(text(),"${address}")]/../following-sibling::div/button[2]    5
+        Click Element       //p[contains(text(),"${address}")]/../following-sibling::div/button[2]
+    ELSE
+        Click Element       //p[contains(text(),"${address}")]/../following-sibling::div/button[2]
+    END
+    Wait Until Page Contains Element     //p[contains(text(),"Remove Address?")]
+    Wait Until Element Is Visible     //p[contains(text(),"Remove Address?")]
+    Wait Until Page Contains Element     //div[contains(text(),"Delete")]
+    Click Element    //div[contains(text(),"Delete")]
+    Wait Until Page Does Not Contain Element     //p[contains(text(),"${address}")]/../following-sibling::div/button[2]
+    Wait Until Element Is Visible    //div[text()="Save"]/..
+    Click Element    //div[text()="Save"]/..
+    sleep   1
+
+
+Buy Now Payment Select
+    [Arguments]    ${update card}=false
+    ${Slide Paymet}  Run Keyword And Ignore Error  Wait Until Page Contains Elements Ignore Ad  //div[text()="Add"]/parent::button
+    IF  "${Slide Paymet[0]}"=="PASS"
+        Wait Until Page Contains Elements Ignore Ad   //div[text()="Add"]/parent::button
+        Click Element                                 //div[text()="Add"]/parent::button
+        Wait Until Page Contains Elements Ignore Ad   //p[text()="Credit Cards"]
+        Wait Until Page Contains Elements Ignore Ad   //p[text()="Add Additional Card"]/parent::button
+        Click Element                                 //p[text()="Add Additional Card"]/parent::button
+        Wait Until Page Contains Elements Ignore Ad   //h2[text()="Card Information"]
+        FOR  ${key}  ${value}  IN ZIP  ${creditInfo.keys()}    ${creditInfo.values()}
+            Click Element   //input[@id="${key}"]
+            Press Keys      //input[@id="${key}"]    ${value}
+        END
+        Wait Until Page Contains Elements Ignore Ad    //p[text()="Billing Information"]
+        FOR    ${key}   ${value}   IN ZIP   ${billAddress.keys()}    ${billAddress.values()}
+            IF   '${key}' != 'state'
+                Click Element  //input[@id='${key}']
+                Press Keys     //input[@id='${key}']       ${value}
+            ELSE IF   '${key}' == 'state'
+                Select From List By Value    //select[@id="${key}"]    ${value}
+            END
+        END
+        Wait Until Page Contains Elements Ignore Ad   //div[text()="Save"]/parent::button
+        Click Element                                 //div[text()="Save"]/parent::button
+        Wait Until Page Contains Elements Ignore Ad   //p[text()="Verify Address"]
+        Wait Until Page Contains Elements Ignore Ad   //div[text()="SAVE"]/parent::button
+        Click Element  //div[text()="SAVE"]/parent::button
+    ELSE
+        Wait Until Page Contains Element   //div[text()="Change"]
+            IF  "${update card}"=="true"
+                Click Element     //div[text()="Change"]
+                Wait Until Page Contains Element    //p[text()="Change"]
+                Wait Until Page Contains Element    //p[text()="Credit Cards"]
+                Wait Until Page Contains Element    //label[@class="e1g7q6s60 css-10qeu3y" and @data-checked=""]
+                ${two_cc}  Run Keyword And Ignore Error   Wait Until Page Contains Element    //label[@class="e1g7q6s60 css-10qeu3y" and name(@data-checked)!="data-checked"]
+                IF   "${two_cc[0]}"=="FAIL"
+                    Wait Until Page Contains Elements Ignore Ad   //p[text()="Credit Cards"]
+                    Wait Until Page Contains Elements Ignore Ad   //p[text()="Add Additional Card"]/parent::button
+                    Click Element                                 //p[text()="Add Additional Card"]/parent::button
+                    Wait Until Page Contains Elements Ignore Ad   //h2[text()="Card Information"]
+                    FOR  ${key}  ${value}  IN ZIP  ${creditInfo1.keys()}    ${creditInfo1.values()}
+                        Click Element   //input[@id="${key}"]
+                        Press Keys      //input[@id="${key}"]    ${value}
+                    END
+                    Wait Until Page Contains Elements Ignore Ad    //p[text()="Billing Information"]
+                    FOR    ${key}   ${value}   IN ZIP   ${billAddress1.keys()}    ${billAddress1.values()}
+                        IF   '${key}' != 'state'
+                            Click Element  //input[@id='${key}']
+                            Press Keys     //input[@id='${key}']       ${value}
+                        ELSE IF   '${key}' == 'state'
+                            Select From List By Value    //select[@id="${key}"]    ${value}
+                        END
+                    END
+                    Wait Until Page Contains Elements Ignore Ad   //div[text()="Save"]/parent::button
+                    Click Element                                 //div[text()="Save"]/parent::button
+                    Wait Until Page Contains Elements Ignore Ad   //p[text()="Verify Address"]
+                    Wait Until Page Contains Elements Ignore Ad   //div[text()="SAVE"]/parent::button
+                    Click Element  //div[text()="SAVE"]/parent::button
+                END
+                Wait Until Page Contains Element    //label[@class="e1g7q6s60 css-10qeu3y" and name(@data-checked)!="data-checked"]
+                Click Element                       //label[@class="e1g7q6s60 css-10qeu3y" and name(@data-checked)!="data-checked" ]
+                Wait Until Page Contains Element    //div[text()="USE SELECTED PAYMENT"]/..
+                Click Element                       //div[text()="USE SELECTED PAYMENT"]/..
+            END
+    END
+
+Get buy Now tax data
+    Wait Until Page Contains Element   //p[text()="Estimated Tax"]
+    ${tax}      Get Text               //p[text()="Estimated Tax"]/following-sibling::p
+    [Return]      ${tax[1:]}
+
+
+Click Buy Now Class Register & Pay
+    Wait Until Page Contains Element   //div[text()="Register & Pay"]/..
+    Click Element                      //div[text()="Register & Pay"]/..
+
+
+Add payment credit card in slide page
+    [Arguments]     ${creditInfo}     ${billAddress}
+    ${add_payment_ele}    Set Variable    //p[contains(text(),"Register for")]/../following-sibling::button
+    Wait Until Element Is Visible     //div[text()="Add"]/parent::button
+    Click Element     //div[text()="Add"]/parent::button
+    Add A Credit Card     ${creditInfo}     ${billAddress}
+    Wait Until Element Is Visible     //p[text()="Default Payment Method"]
+    Click Element     //div[text()="USE SELECTED PAYMENT"]/..
+    Sleep    1
+
+
+Remove credit card in wallet
+    sleep    1
+    Go To    ${HOME URL}/buyertools/wallet
+    Wait Until Element Is Visible     //h2[text()="Wallet"]
+    Wait Until Element Is Visible     //h4[text()="Credit and Debit Cards"]/..//*[name()="svg"]/../parent::button
+    Click Element     //h4[text()="Credit and Debit Cards"]/..//*[name()="svg"]/../parent::button
+    Wait Until Element Is Visible     //p[text()="Remove"]/../..
+    Click Element     //p[text()="Remove"]/../..
+    Wait Until Element Is Visible     //p[text()="Remove Card Confirmation"]
+    Click Element    //div[text()="Confirm"]
+    sleep    1
+
+View All Rewards
+    Wait Until Page Contains Elements Ignore Ad   //div[text()="View All Rewards"]/parent::button
+    Click Element                                 //div[text()="View All Rewards"]/parent::button
+
+Apply a voucher
+    Wait Until Page Contains Elements Ignore Ad  //div[@class="css-1jf5i1d"]//button[text()="Apply"]
+    ${voucher_ele_list}  Get Webelements         //div[@class="css-1jf5i1d"]//button[text()="Apply"]
+    IF  ${voucher_ele_list}
+        Click Element    ${voucher_ele_list[0]}
+    END
+
+Close View All Rewards Slide Page
+    Wait Until Page Contains Elements Ignore Ad  //div[text()="Close"]/parent::button
+    Click Element   //div[text()="Close"]/parent::button
+
+
+Select number voucher apply
+    [Arguments]  ${number}
+    View All Rewards
+    FOR  ${i} IN RANGE   ${number}
+        Apply a voucher
+        Sleep  1
+
+
+
+
+
 

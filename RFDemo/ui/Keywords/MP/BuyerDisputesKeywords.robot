@@ -1,68 +1,54 @@
 *** Settings ***
-Library        ../../Libraries/CommonLibrary.py
-Library        ../../Libraries/MP/BuyerDisputeLib.py
-Resource        ../../Keywords/Common/CommonKeywords.robot
-Resource       ../../TestData/EnvData.robot
+Library             ../../Libraries/CommonLibrary.py
+Library             ../../Libraries/MP/BuyerDisputeLib.py
+Resource            ../../Keywords/Common/CommonKeywords.robot
+Resource            ../../Keywords/MP/EAInitialBuyerDataAPiKeywords.robot
+Resource            ../../TestData/EnvData.robot
 
 *** Variables ***
 ${Reason_List}
 ${Disputable_Order_Number}    ${None}
 ${BUYER_EMAIL}
-${Cur_Order_Number}    ${None}
+${Cur_Return_Number}    ${None}
 ${Dispute_Buttons}
+${Required_Order_List}
+${Required_Order_Info}
 
 *** Keywords ***
-Buyer Disputes - List - Loop To Get Return Declined Order
-    ${disputable_order_numbers}    Create List
-    ${base_ele}   Set Variable   (//div[text()="Refund Declined"]/../../parent::div/preceding-sibling::div//p[text()="Return Numbers"]/following-sibling::p)
-    ${count}    Get Element Count    ${base_ele}
-    ${count}    Evaluate    ${count}+1
-    ${index}    Set Variable
-    FOR    ${index}    IN RANGE    1    ${count}
-        ${order_number}    Get Text    ${base_ele}\[${index}\]
-        Append To List    ${disputable_order_numbers}    ${order_number}
+Buyer Disputes - Get Return And Dispute Order By API
+    [Arguments]    ${action}=submitDispute    ${need_dispute_status}=${None}
+    ${after_sales_order_list}    Create List
+    FOR      ${index}    IN RANGE    1    6
+        ${sales_order_list}    API - Get Buyer After Sales Order List    ${index}    20
+        ${after_sales_order_list}    Combine Lists    ${after_sales_order_list}    ${sales_order_list}
     END
-    Save File    orders_refund_declined    ${disputable_order_numbers}    MP    ${ENV}
+    IF    "${action}"=="submitDispute"
+        ${action_flag}    Set Variable    ${True}
+    ELSE
+        ${action_flag}    Set Variable    ${False}
+   END
+    ${Required_Order_List}    Get Return Orders Can Disputes    ${after_sales_order_list}    ${action_flag}    ${need_dispute_status}
+    Set Suite Variable    ${Required_Order_List}    ${Required_Order_List}
 
-Buyer Disputes - List - Loop To Get Order By Dispute Status
-    [Arguments]    ${status}=Submit Dispute
-    ${return_numbers}    Get Disputable Order Ids    ${Disputable_Order_Number}    ${ENV}
-    ${return_number}    Set Variable
-    ${index}    Set Variable    0
-    FOR    ${return_number}    IN    @{return_numbers}
-        ${index}    Evaluate    ${index}+1
-        Exit For Loop If    ${index}>10
-        Set Suite Variable    ${Disputable_Order_Number}    ${return_number}
-        Buyer Disputes - List - Search Order By Value    ${return_number}
-        Buyer Disputes - List - Eneter Detail Page By Index    1    ${True}
-        ${count}    Get Element Count    //div[text()="${status}"]/parent::button
-        Exit For Loop If    '${count}'=='1'
-        Buyer Disputes - Detail - Back To Order List On Detail Page
-        Buyer Disputes - List - Clear Search Value
+Buyer Disputes - Set Cur Return Order Number
+    ${len}    Get Length    ${Required_Order_List}
+    IF    ${len}==0
+        Skip    There are no required order can do test.
     END
-    ${now_url}    Get Location
-    ${url_mp_dispute}   Set Variable    ${URL_MIK}/buyertools/return-and-dispute
-    IF   '${now_url}'=='${url_mp_dispute}'
-        #Capture Page Screenshot    filename=EMBED
-        Skip   No order can ${status}.
-    END
+    ${Required_Order_Info}    Evaluate    random.choice(${Required_Order_List})
+    Set Suite Variable    ${Cur_Return_Number}    ${Required_Order_Info}[returnOrderNumber]
 
-Buyer Disputes - Get Offer Made Order Numbers
-    ${Offer_Made_Orders}    Get Offer Made Order Ids    ${Cur_Order_Number}    ${ENV}
-    ${order_len}    Get Length    ${Offer_Made_Orders}
-    IF   "${order_len}"=="0"
-        Skip    No order status is Offer Made!
-    END
-    Set Suite Variable    ${Cur_Order_Number}    ${Offer_Made_Orders[0]}
+Buyer Disputes - Go To Retrun and Dispute Detail Page
+    Buyer Disputes - Set Cur Return Order Number
+    Go To    ${URL_MIK}/buyertools/return-and-dispute?detaiReturnId=${Cur_Return_Number}
+    Log   EA_Report_Data=${Cur_Return_Number}
+    Wait Until Element Is Visible    //div[contains(text(),"Dispute")]/parent::button
 
-Buyer Disputes - Get Cancellable Order Numbers
-    ${Offer_Made_Orders}    Get Cancellable Order Ids    ${None}    ${ENV}
-    ${order_len}    Get Length    ${Offer_Made_Orders}
-    IF   "${order_len}"=="0"
-        Skip    No order is calcellable!
-    END
-    Set Suite Variable    ${Cur_Order_Number}    ${Offer_Made_Orders[0]}
-
+Buyer Disputes - Submit Dispute By API
+    [Arguments]    ${cur_index}=1    ${action}=submitDispute
+    Buyer Disputes - Get Return And Dispute Order By API    ${action}
+    Buyer Disputes - Set Cur Return Order Number
+    API - Buyer Create Dispute Order By Return Number     ${Cur_Return_Number}
 
 
 Buyer Disputes - List - Search Order By Value
@@ -103,7 +89,8 @@ Buyer Disputes - List - Eneter Detail Page By Status
 Buyer Disputes - Detail - Click Submit Dispute
     Wait Until Element Is Visible    //div[text()="Submit Dispute"]/parent::button
     Click Element    //div[text()="Submit Dispute"]/parent::button
-    Wait Until Element Is Visible    //*[text()="Reason for Dispute"]
+    Wait Until Element Is Visible    //*[text()="Reason for Dispute"]    ${MAX_TIME_OUT}
+    Wait Until Page Contains Element    //*[text()="Item Sold On:"]
 
 Buyer Disputes - Detail - Click View Dispute
     Wait Until Element Is Visible    //div[text()="View Dispute"]/parent::button
@@ -116,7 +103,7 @@ Buyer Disputes - Submit - Select All Items
     Checkbox Should Be Selected    //input[@aria-label="primary checkbox"]
 
 Buyer Disputes - Submit - Get Items Count Dispute Reason
-    ${count}    Get Element Count    //p[text()="SKU No."]
+    ${count}    Get Element Count    //p[text()="Dispute Reason"]
     ${Reason_List}    Get Dispute Reason    ${count}
     Set Suite Variable    ${Reason_List}    ${Reason_List}
 
@@ -127,8 +114,6 @@ Buyer Disputes - Submit - Loop Add Dispute Reason And Notes To Items
     ${index}    Evaluate    1
     FOR    ${reason_info}    IN    @{Reason_List}
         Execute Javascript    document.querySelectorAll('div[role="region"] > div')[${index}].scrollIntoView()
-#        ${item_area_index}    Evaluate      ${index}+1
-#        Scroll Element Into View    //*[@role="region"]/div[${item_area_index}]
         Buyer Disputes - Submit - Select Dispute Reason By Index    ${reason_info}[reason]    ${index}
         Buyer Disputes - Submit - Input Dispute Notes By Index    ${reason_info}[notes]    ${index}
         IF   '${reason_info}[photo]'!='${None}'
@@ -187,11 +172,17 @@ Buyer Disputes - Submit - Click Submit
     Click Element    ${submit_ele}
     Wait Until Element Is Not Visible    ${submit_ele}
     Wait Until Element Is Visible    //*[text()="Dispute Confirmation"]
+    Wait Until Element Is Visible    //*[text()="Submitted Successfully"]
 
 Buyer Disputes - Submit - Click View Dispute Details
+    Wait Until Page Contains Element    //*[contains(text(),"Dispute ID")]
+    ${dispute_id}    Get Text    //*[contains(text(),"Dispute ID")]
+    ${dispute_id}    Evaluate    "${dispute_id}"\[13:\]
     Wait Until Element Is Visible    //span[text()="View Dispute Details"]/parent::button
     Click Element    //span[text()="View Dispute Details"]/parent::button
     Wait Until Element Is Visible    //*[text()="Process Dispute"]
+    Wait Until Element Is Visible    //*[contains(text(),"Dispute #${dispute_id} is create")]
+    Sleep    1
 
 Buyer Disputes - Submit - Cancel Submit
     [Arguments]    ${sure}=${True}
@@ -225,6 +216,7 @@ Buyer Disputes - Process - Click Dispute Summary
     Wait Until Element Is Visible    //*[text()="Dispute Summary"]
 
 Buyer Disputes - Process - Back To Dispute Detail
+    Sleep    1
     Click Close Icon In Top Right-hand Corner
     Wait Until Element Is Not Visible    //*[text()="Process Dispute"]
     Wait Until Page Contains Element    //a[text()="Contact Seller"]        ${MAX_TIME_OUT}
@@ -299,9 +291,10 @@ Buyer Disputes - Escalate - Click Yes Or No
     Wait Until Element Is Not Visible    //h3[text()="Escalate to Michaels"]
 
 Buyer Disputes - Flow - Submit Dispute For Rejected Refund Order
-    [Arguments]    ${occupancy_parameter}=0
+    [Arguments]    ${action}=submitDispute
     Buyer Left Menu - Return And Dispute
-    Buyer Disputes - List - Loop To Get Order By Dispute Status    ${Dispute_Buttons[0]}
+    Buyer Disputes - Get Return And Dispute Order By API    ${action}
+    Buyer Disputes - Go To Retrun And Dispute Detail Page
     Buyer Disputes - Detail - Click Submit Dispute
     Buyer Disputes - Submit - Select All Items
     Buyer Disputes - Submit - Loop Add Dispute Reason And Notes To Items

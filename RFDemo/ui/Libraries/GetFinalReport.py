@@ -1,29 +1,26 @@
 import datetime
-import os
-import sys
+import re
 
 import pytz
 from bs4 import BeautifulSoup
+import os
+import sys
 
 
 def get_total_case_info(soup):
-	# suite1 = soup.find("suite").get("name")
-	# suite2 = soup.find("suite").find("suite").get("name")
 	suites = soup.findAll("suite")
 	totalCase = []
 	for item in suites:
 		if item.get("id") is not None:
 			case = {"name": item.get("name"), "id": item.get("id")}
 			totalCase.append(case)
-	max_count = 0
-	for item in totalCase:
-		if item.get("id").count("-") > max_count:
-			max_count = item.get("id").count("-")
 	allCases = []
 	for item in totalCase:
-		if item.get("id").count("-") == max_count:
+		item_suite = soup.find("suite", id=item.get("id"))
+		next_suite = item_suite.find("suite")
+		if next_suite is None:
 			allCases.append(item)
-	# print(allCases)
+	allCases.sort(key=lambda key: (key.get("name"), 0))
 	return allCases
 
 
@@ -44,13 +41,17 @@ def get_suite_test_result(id):
 	test = suite.findAll("test")
 	testReport = []
 	for item in test:
-		ck_order_number = ""
+		cus_report_data = ""
+		browser_error = ""
 		msgs = item.findAll("msg", level="INFO")
 		for msg in msgs:
-			ckOrderNumber = msg.string
-			if ckOrderNumber is not None and ckOrderNumber.count("ck_order_number"):
-				ck_order_number += ckOrderNumber + "; "
-
+			msg_string = msg.string
+			if msg_string is not None:
+				for key in cus_report_keys:
+					if msg_string.count(key):
+						cus_report_data += msg_string + "; "
+			if msg_string is not None and msg_string.startswith("BrowserError:"):
+				browser_error = msg_string
 		tags = []
 		for tg in item.findAll("tag"):
 			tags.append(tg.string)
@@ -78,7 +79,8 @@ def get_suite_test_result(id):
 			"documentation": doc,
 			"tags": ",".join(tags),
 			"status": status.get("status"),
-			"ckOrder": ck_order_number,
+			"cusReportData": cus_report_data,
+			"browser_error": browser_error,
 			"msg": msg,
 			"time": "{}\n{}".format(status.get("starttime"), status.get("endtime"))
 		}
@@ -129,6 +131,9 @@ def create_new_report(summary, failCase, detail, file_name="TestReport.html"):
 .pad-left {{padding-left:5px;}}
 .pad-right {{padding-right:5px;}}
 .case-color {{color:#15c;}}
+.suite {{background:#B0B0B0 !important;height:30px;font-size:1.1em;}}
+.suite-remark {{background:#E8E8E8 !important;}}
+.browser_error {{color:#CC00CC}}
 .w-5 {{width:5%}}
 .w-10 {{width:10%}}
 .w-25 {{width:25%}}
@@ -198,7 +203,7 @@ def get_test_summary_info(caseInfo, timeRange):
 def get_fail_case_info(caseInfo):
 	headers = ["Name", "Documentation", "Status", "Type/Tester", "Remark"]
 	body = '<table width="90%" border="1" cellspacing="0" cellpadding="0" align="center">\n'
-	body += '<caption><h2>Failure Case Analysis</h2></caption>\n'
+	body += '<caption><h2>Failure Cases Analysis</h2></caption>\n'
 	# header
 	body += '<thead>\n<tr class="h-tr">'
 	for item in headers:
@@ -208,18 +213,39 @@ def get_fail_case_info(caseInfo):
 	body += '\n<tbody>'
 	for item in caseInfo:
 		testInfo = item.get("test")
+		is_fail_skip = False
+		fail_skip_total = 0
+		for testItem in testInfo:
+			if testItem.get("status") in ("FAIL", "SKIP"):
+				is_fail_skip = True
+				fail_skip_total += 1
+		if is_fail_skip:
+			body += '\n<tr>'
+			body += '<td class="suite" colspan="2"><span class="pad-left">{}</span></td>'.format(item.get("name"))
+			body += '<td class="suite" align="center">{}</td>'.format(fail_skip_total)
+			body += '<td class="suite-remark" align="left" colspan="2"></td>'
+			body += '</tr>'
 		for testItem in testInfo:
 			if testItem.get("status") in ("FAIL", "SKIP"):
 				body += '\n<tr>'
-				body += '<td class="case-color w-30"><span class="small-size pad-left">{}</span>.{}</td>'.format(item.get("name"), testItem.get("name"))
+				msg = add_link_to_documentation(testItem.get("documentation"))
+				body += '<td class="case-color w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("name"))
 				if testItem.get("status") == "FAIL":
-					body += '<td class="fail w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("documentation"))
+					body += '<td class="w-30"><span class="pad-left">{}</span></td>'.format(msg)
 					body += '<td class="fail w-5" align="center">{}</td>'.format(testItem.get("status"))
 				elif testItem.get("status") == "SKIP":
-					body += '<td class="skip w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("documentation"))
+					body += '<td class="w-30"><span class="pad-left">{}</span></td>'.format(msg)
 					body += '<td class="skip w-5" align="center">{}</td>'.format(testItem.get("status"))
 				body += '<td class="w-10"></td>'
-				body += '<td class="w-25"><span class="pad-left">{}</span></td>'.format(testItem.get("msg"))
+
+				if testItem.get("cusReportData") is not None and testItem.get("cusReportData") != "":
+					body += '<td class="w-35"><span class="pad-left">{}</span><br>' \
+					        '<span class="pad-left">{}</span></td>'.format(testItem.get("cusReportData"), testItem.get("msg"))
+				elif show_browser_error:
+					body += '<td class="w-25"><span class="pad-left browser_error">{}</span><br>' \
+					        '<span class="pad-left">{}</span></td>'.format(testItem.get("browser_error"), testItem.get("msg"))
+				else:
+					body += '<td class="w-25"><span class="pad-left">{}</span></td>'.format(testItem.get("msg"))
 				body += '</tr>'
 	body += '\n</tbody>'
 	body += '\n</table>'
@@ -239,22 +265,25 @@ def get_test_detail_info(caseInfo):
 	body += '\n<tbody>'
 	for item in caseInfo:
 		testInfo = item.get("test")
+		body += '\n<tr>'
+		body += '<td class="suite w-30" colspan="4"><span class="pad-left">{}</span></td>'.format(item.get("name"))
+		body += '</tr>'
 		for testItem in testInfo:
 			body += '\n<tr>'
-			body += '<td class="case-color w-30"><span class="small-size pad-left">{}</span>.{}</td>'.format(item.get("name"), testItem.get("name"))
-
+			body += '<td class="case-color w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("name"))
+			msg = add_link_to_documentation(testItem.get("documentation"))
 			if testItem.get("status") == "FAIL":
-				body += '<td class="fail w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("documentation"))
+				body += '<td class="w-30"><span class="pad-left">{}</span></td>'.format(msg)
 				body += '<td class="fail w-5" align="center">{}</td>'.format(testItem.get("status"))
 			elif testItem.get("status") == "SKIP":
-				body += '<td class="skip w-30"><span class="pad-left">{}</span></td>'.format(testItem.get("documentation"))
+				body += '<td class="w-30"><span class="pad-left">{}</span></td>'.format(msg)
 				body += '<td class="skip w-5" align="center">{}</td>'.format(testItem.get("status"))
 			else:
-				body += '<td><span class="pad-left  w-30">{}</span></td>'.format(testItem.get("documentation"))
+				body += '<td><span class="pad-left  w-30">{}</span></td>'.format(msg)
 				body += '<td class="pass w-5" align="center">{}</td>'.format(testItem.get("status"))
-			if testItem.get("ckOrder") is not None and testItem.get("ckOrder") != "":
+			if testItem.get("cusReportData") is not None and testItem.get("cusReportData") != "":
 				body += '<td class="w-35"><span class="pad-left">{}</span><br>' \
-				        '<span class="pad-left">{}</span></td>'.format(testItem.get("ckOrder"), testItem.get("msg"))
+				        '<span class="pad-left">{}</span></td>'.format(testItem.get("cusReportData"), testItem.get("msg"))
 			else:
 				body += '<td class="w-35"><span class="pad-left">{}</span></td>'.format(testItem.get("msg"))
 			body += '</tr>'
@@ -263,9 +292,22 @@ def get_test_detail_info(caseInfo):
 	return body
 
 
+def add_link_to_documentation(msg):
+	jira_ids = re.findall("\\[(.*?)\\]", msg, re.M|re.I)
+	for item in jira_ids:
+		is_jira_ids = re.findall("[A-Za-z]{1,}-[0-9]{1,}", item, re.M|re.I)
+		for item in is_jira_ids:
+			a = ' <a href="{url}{id}" target="_blank">{id}</a> '.format(url=base_url, id=item.upper())
+			msg = msg.replace(item, a)
+	return msg
+
+
 if __name__ == '__main__':
+	base_url = "https://michaels.atlassian.net/browse/"
+	cus_report_keys = ["ck_order_number", "EA_Report_Data", "ck_order_stats"]
+	show_browser_error = False
 	if len(sys.argv) == 1:
-		filePath = os.path.join("../output1.xml")
+		filePath = os.path.join("../output.xml")
 	else:
 		filePath = sys.argv[1]
 	print(filePath)
@@ -284,5 +326,5 @@ if __name__ == '__main__':
 		print(saveFileName)
 		create_new_report(case_summary, fail_case, case_detail, saveFileName)
 	else:
-		print("XML文件不存在")
+		print("filePath not existed")
 

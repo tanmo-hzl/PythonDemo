@@ -13,7 +13,7 @@ Checkout - Click Button - Proceed To Checkout
     Wait Until Element Is Visible    //div[text()="PROCEED TO CHECKOUT"]/parent::button        ${MAX_TIME_OUT}
     Wait Until Element Is Enabled    //div[text()="PROCEED TO CHECKOUT"]/parent::button
     Click Element    //div[text()="PROCEED TO CHECKOUT"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Getting your Order"]        ${MAX_TIME_OUT}
+    Wait Until Element Is Visible    //*[text()="Getting your Order"]        ${MAX_TIME_OUT}
     Wait Until Element Is Visible    //div[text()="Next: Payment & Order Review"]/parent::button        ${MAX_TIME_OUT}
 
 Checkout - Click Button - Payment & Order Review
@@ -21,7 +21,7 @@ Checkout - Click Button - Payment & Order Review
     Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]
     Wait Until Element Is Enabled    //div[text()="Next: Payment & Order Review"]/parent::button
     Click Element    //div[text()="Next: Payment & Order Review"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Payment & Order Review"]        ${MAX_TIME_OUT}
+    Wait Until Element Is Visible    //*[text()="Payment & Order Review"]        ${MAX_TIME_OUT}
     Wait Until Element Is Visible    //div[text()="PLACE ORDER"]/parent::button        ${MAX_TIME_OUT}
 
 Checkout - Click Button - Place Order

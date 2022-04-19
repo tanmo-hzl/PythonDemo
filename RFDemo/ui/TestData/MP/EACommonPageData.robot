@@ -4,7 +4,7 @@ ${SELLER_BASE_URL}      /mp/sellertools
 ...                     msf=/my-storefront          spr=/store-profile              cus=/customer-service
 ...                     fui=/fulfillment-info       rep=/return-policy              mpr=/product-groups
 ...                     lst=/listing-management     ovr=/overview                   ret=/returns
-...                     dis=/disputes               mak=/marketing                  fio=/finance-overview
+...                     dis=/disputes               mak=/marketing-overview         fio=/finance-overview
 ...                     deo=/deposit-options        fit=/finance-transactions       tax=/tax-information
 ...                     rep=/reports
 

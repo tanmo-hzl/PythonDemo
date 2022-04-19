@@ -1,24 +1,28 @@
 *** Settings ***
 Documentation     Common Method For Cart Checkout Flow
+Library           SeleniumLibrary
 Library           OperatingSystem
-Library          ../../TestData/Checkout/GuestGenerateAddress.py
+Library           ../../TestData/Checkout/GuestGenerateAddress.py
+Library           ../../Libraries/CustomSeleniumKeywords.py    run_on_failure=Capture Screenshot and embed it into the report    implicit_wait=0.2 seconds
 Resource          ../../TestData/Checkout/config.robot
+Variables         ../../TestData/Checkout/productInfo.py
 
+*** Variables ***
+${Buy Now General}         //*[contains(text(),'BUY NOW')]
+${Buy Now Exception}       //*[contains(text(),'Buy Now')]
+${Add To Cart General}     (//*[contains(text(),'ADD TO CART')])[1]
+${Add To Cart Exception}   (//*[contains(text(),'Add to Cart')])[1]
+${Note One}    Note: Pickup person must bring the order number and their ID to pick up your order.
+${Note Two}    We'll send an email to you and your additional pickup person once your order is ready.
+@{Add Panel Text}    ${Note One}    ${Note Two}
+${SDD Element}       (//div[contains(@aria-label, "Open samedaydelivery Details Modal")]/preceding-sibling::div)[2]
+${Header Store}      (//p[text()="My Store:"])[1]/following-sibling::p
 *** Keywords ***
 Add Browser Cookies
     [Arguments]   ${ENV}
     Delete All Cookies
     Add Cookie   tracker_device   eaefaf1b-d3a5-4b69-9cb5-4dff1a362030
-    IF  '${ENV}' == 'qa'
-        Add Cookie   spid.7997        1a20fc83-51c0-448f-bda9-350d639fc69b.1635386728.64.1644202154.1643279208.dea01cea-05be-4465-b0af-72a31a788ab4    /   .michaels.com    ${True}
-        Add Cookie   _sp_id.0f37      a5cdbd48-541f-44a8-8363-a33a8bf45f0a.1639361011.25.1644202131.1643019061.a67a7955-34b3-4a8e-ad6f-a292376ad6fb    /   mik.qa.platform.michaels.com   ${True}
-    ELSE IF  '${ENV}' == 'stg'
-        Add Cookie   spid.7997        1a20fc83-51c0-448f-bda9-350d639fc69b.1635386728.65.1644204705.1644202432.c2ea826e-12b0-44d0-97c4-7c0cac319ae7    /   .michaels.com    ${True}
-        Add Cookie   _sp_id.0c26      8dd43a33-a890-4d4b-9c6f-e05759b1788d.1636714392.37.1644202341.1642514383.cc43f94e-b2d2-43f1-901e-b4373107911e    /   mik.stg.platform.michaels.com   ${True}
-    ELSE IF  '${ENV}' == 'tst'
-        Add Cookie   spid.7997        1a20fc83-51c0-448f-bda9-350d639fc69b.1635386728.84.1645610356.1645535978.21f39d62-e7bf-4b3b-82a1-155b3bfe355f    /   .michaels.com    ${True}
-        Add Cookie   _sp_id.d3bd      556c8557-c394-49ab-a9e4-85f521846858.1635386728.12.1645610355.1645423706.49bb8a40-831f-4c79-b35d-f3148c6143ae    /   mik.tst.platform.michaels.com   ${True}
-    END
+
 
 Finalization Processment
     Delete All Cookies
@@ -47,13 +51,14 @@ Select Or Change a Store In the Homepage
             Click Element                 //p[text()='${Store}']/preceding-sibling::div/child::label
             ${Store Address}   Get Text   //p[text()='${Store}']/parent::div/parent::div/following-sibling::div
             Click Element                 //div[contains(text(),"CHANGE MY STORE")]/..
+            Sleep  2
         END
     END
 
     [Return]    ${Store Address}
 
 Add Products To Cart Process
-    [Arguments]   ${product_channel_info}    ${qty_process}    ${store_amount}
+    [Arguments]   ${product_channel_info}    ${qty_process}    ${store_amount}=1
     ${PDP Shipping}      Create List
     ${Class Set Qty}     Create List
     ${Store Address}     Create List
@@ -64,9 +69,6 @@ Add Products To Cart Process
         ${ClassOrNot}         If Class              ${product}
         ${MIK Mode Result}    Mik Ship Major Mode   ${channel}
 #        ${Before Count}       Sliding Right Panel Verification Qty   ${ClassOrNot}
-        IF   '${channel}' == 'MKP' or '${channel}' == 'MKPS'
-            Sleep  5
-        END
         IF   '${ClassOrNot}' == 'Class'
             ${Class Qty}   Set Variable    ${qty_process.pop()}
             Wait Until Element Is Enabled             (//p[text()="Add Class to Cart"])[2]
@@ -76,60 +78,77 @@ Add Products To Cart Process
             ${Class Set Qty}=  Evaluate   ${Class Set Qty} + [${Class Qty}]
             Sleep  2
 #            ${After Count}     Sliding Right Panel Verification Qty  ${ClassOrNot}
-            AD Exception Handle     ${Class Add to Cart}
+            Click Element           ${Class Add to Cart}
+            Click Again If No Reaction    ${Class Add to Cart}    Items added to cart!
             Sliding Right Panel Have Correct Buttons and QTY      ${Class Qty}  ${MIK Check}
         ELSE
             IF  '${channel}' == 'SDD' or '${channel}' == 'SDDH'
-                Wait Until Element Is Enabled    //p[contains(text(),'Ship to Me')]       ${Long Waiting Time}
+                Wait Until Element Is Visible      ${Header Store}    50
+                ${Store In Header}    Get Text     ${Header Store}
+                ${Store Address}      Channel Pre-Initialization    ${channel}    ${Store In Header}
+                Wait Until Element Is Enabled    //*[contains(text(),'Ship to Me')]       ${Long Waiting Time}
                 Sleep    2
-                ${SDD}    Get Webelements        //p[@class='css-1tyd7ay']
-                Wait Until Element Is Enabled    ${SDD[2]}
-                ${Ship Text}     Get Text        ${SDD[2]}
+                Wait Until Element Is Enabled    ${SDD Element}
+                ${Ship Text}     Get Text        ${SDD Element}
                 ${Ship List}     Create List     ${Ship Text}
                 ${PDP Shipping}  Evaluate        ${PDP Shipping} + ${Ship List}
-                AD Exception Handle    ${SDD[2]}
+                Click Element    ${SDD Element}
                 ${SDD Qty}       Set Variable    ${qty_process.pop()}
                 Inputing the Product or Class Quantity    ${SDD Qty}
-                Wait Until Element Is Visible    //*[contains(text(),'ADD TO CART')]     ${Mid Waiting Time}
 
 #                ${After Count}     Sliding Right Panel Verification Qty   ${ClassOrNot}
-                AD Exception Handle   //*[contains(text(),'ADD TO CART')]
+                ${Click Exception}   Run Keyword And Warn On Failure   Click Element   ${Add To Cart General}
+                IF  '${Click Exception}[0]' == 'FAIL'
+                    Click Element   ${Add To Cart Exception}
+                    Click Again If No Reaction    ${Add To Cart Exception}    Items added to cart!
+                END
+                Click Again If No Reaction    ${Add To Cart General}     Items added to cart!
                 Sliding Right Panel Have Correct Buttons And QTY      ${SDD Qty}   ${MIK Check}
             ELSE IF  '${channel}' == 'PISM'
-                Wait Until Element Is Enabled       //p[contains(text(),'Ship to Me')]      ${Mid Waiting Time}
+                Wait Until Element Is Enabled       //*[contains(text(),'Ship to Me')]      ${Mid Waiting Time}
                 ${Store Address}   ${Total Items}   Pick Up In Store One Product With Different Stores    ${store_amount}    ${qty_process.pop()}     200
                 ${PISM_Shipping}   PISM List    Pick-up - Free    ${store_amount}
                 ${PDP Shipping}    Evaluate     ${PDP Shipping} + ${PISM_Shipping}
 #                ${After Count}     Sliding Right Panel Verification Qty   ${ClassOrNot}
                 Sliding Right Panel Have Correct Buttons And QTY      ${Total Items}   ${MIK Check}
             ELSE
-
-                ${PDP Handle}      Run Keyword And Warn On Failure     Wait Until Element Is Enabled       //p[contains(text(),'${MIK Mode Result}')]      ${Long Waiting Time}
+                IF  '${channel}' == 'PIS'
+                    Wait Until Element Is Visible      ${Header Store}    50
+                    ${Store In Header}    Get Text     ${Header Store}
+                    ${Store Address}      Channel Pre-Initialization    ${channel}    ${Store In Header}
+                END
+                ${PDP Handle}      Run Keyword And Warn On Failure     Wait Until Element Is Enabled       //*[contains(text(),'${MIK Mode Result}')]      ${Long Waiting Time}
                 IF   '${PDP Handle}[0]' == 'FAIL'
                     Reload Page
                 END
-                ${Ship Text}       Get Text         //p[contains(text(),'${MIK Mode Result}')]
+                ${Ship Text}       Get Text         //*[contains(text(),'${MIK Mode Result}')]
                 ${Ship List}       Create List      ${Ship Text}
                 ${PDP Shipping}    Evaluate         ${PDP Shipping} + ${Ship List}
-                AD Exception Handle    //p[contains(text(),'${MIK Mode Result}')]
+                Click Element    //*[contains(text(),'${MIK Mode Result}')]
                 ${Qty Required}    Set Variable    ${qty_process.pop()}
                 Inputing the Product or Class Quantity    ${Qty Required}
                 Sleep  1
-                Wait Until Element Is Visible      //*[contains(text(),'ADD TO CART')]    ${Mid Waiting Time}
+
 #                ${After Count}     Sliding Right Panel Verification Qty  ${ClassOrNot}
-                AD Exception Handle    //*[contains(text(),'ADD TO CART')]
+                ${Click Exception}   Run Keyword And Warn On Failure   Click Element   ${Add To Cart General}
+                IF  '${Click Exception}[0]' == 'FAIL'
+                    Click Element   ${Add To Cart Exception}
+                    Click Again If No Reaction    ${Add To Cart Exception}    Items added to cart!
+                END
+                Click Again If No Reaction   ${Add To Cart General}     Items added to cart!
                 Sliding Right Panel Have Correct Buttons And QTY     ${Qty Required}   ${MIK Check}
             END
         END
-        Wait Until Element Is Visible    //div[text()='View My Cart']    ${Long Waiting Time}
+        Wait Until Element Is Enabled    //div[text()='View My Cart']    ${Long Waiting Time}
 
     END
     [Return]    ${PDP Shipping}    ${Class Set Qty}    ${Store Address}
 
 Verify Calculation On The Order Summary Panel and Subtals Comparison
     [Arguments]    ${Order Summary Panel In}
-    Wait Until Element Is Visible    //p[text()="Total:"]
-    Wait Until Element Is Visible    //p[text()="Total:"]/following-sibling::h4
+    Sleep    2
+    Wait Until Page Contains Element      //*[text()="Total:"]/following-sibling::h4
+    Wait Until Element Is Enabled         //*[text()="Total:"]/following-sibling::h4
     ${Order Summary List}   Get Webelements    //h3[text()="Order Summary"]/following-sibling::div/child::p/following-sibling::p
     ${Except Subtotals}      Create List        Other Fees    Savings    Estimated Shipping
     FOR    ${Other Fee}   IN    @{Except Subtotals}
@@ -137,24 +156,28 @@ Verify Calculation On The Order Summary Panel and Subtals Comparison
         ${Order Summary List}    Order Summary Panel Additional Consideration   ${Element}   ${Other Fee}   ${Order Summary List}
     END
 
-#    ${Cart Fees Info}       Get Webelements    //p[text()="Other Fees"]
-#    ${Savings Info}         Get Webelements    //p[text()="Savings"]
-#    ${Estimate Shipping}    Get Webelements    //p[text()="Estimated Shipping"]
-#
-#    ${Order Summary List}    Order Summary Panel Additional Consideration     ${Cart Fees Info}      Other Fees            ${Order Summary List}
-#    ${Order Summary List}    Order Summary Panel Additional Consideration     ${Savings Info}        Savings               ${Order Summary List}
-#    ${Order Summary List}    Order Summary Panel Additional Consideration     ${Estimate Shipping}   Estimated Shipping    ${Order Summary List}
     ${Total Calculated}   ${Order Subtotal}   Order Summary Page Process      ${Order Summary List}
 
-    ${Total Display}     Get Text        //p[text()='Total:']/following-sibling::h4
+    ${Total Display}     Get Text        //*[text()='Total:']/following-sibling::h4
     ${Total Number}      Set Variable    ${Total Display[1:]}
     IF  '${Order Summary Panel In}' == 'CART'
-#        Run Keyword And Warn On Failure    String Comparison     ${Cart Subtotals}      ${Order Subtotal}
+#   Will
         Run Keyword And Warn On Failure    String Comparison     ${Total Calculated}    ${Total Number}
     ELSE
         Run Keyword And Warn On Failure    String Comparison     ${Total Calculated}    ${Total Number}
     END
     [Return]   ${Total Number}
+
+Get All Relevant Number Before Placing Order
+    ${Place Order Parameters}   Get Webelements    //h3[text()='Order Summary']/following-sibling::div
+    ${orderSummaryDict}   Create Dictionary
+    FOR   ${Each Param}  IN   @{Place Order Parameters}
+        ${Parameter}           Get Text                        ${Each Param}
+        ${Updated Parameter}   Get Stats From Order Summary    ${Parameter}
+        Set To Dictionary	${orderSummaryDict}    ${Updated Parameter}[0]=${Updated Parameter}[1]
+    END
+
+    [Return]    ${orderSummaryDict}
 
 Inputing the Product or Class Quantity
     [Arguments]   ${qty}    ${Class}=Not
@@ -162,12 +185,12 @@ Inputing the Product or Class Quantity
         IF  '${Class}' == 'Class'
             Wait Until Element Is Enabled   (${Class Plus Mark})[2]
             FOR  ${i}  IN RANGE   ${${qty} - 1}
-                AD Exception Handle    (${Class Plus Mark})[2]
+                Click Element    (${Class Plus Mark})[2]
             END
         ELSE
             Wait Until Element Is Enabled   ${Plus Mark}
             FOR  ${i}  IN RANGE   ${${qty} - 1}
-                AD Exception Handle    ${Plus Mark}
+                Click Element    ${Plus Mark}
             END
         END
     END
@@ -178,28 +201,37 @@ Pick Up In Store One Product With Different Stores
     ${Total Items}=  Evaluate   ${Required Store Amount} * ${qty}
     ${Multiple Store Address}    Create List
     ${Available Store}   Set Variable   0
-    Wait Until Element Is Visible    //span[text()='Available Nearby']     ${Long Waiting Time}
-    AD Exception Handle    //span[text()='Available Nearby']
-    ${SelectStoreHandle}   Run Keyword And Ignore Error    Wait Until Element Is Visible    //p[contains(text(), "Stores in your Range")]     10
+    ${COS Display}       Run Keyword And Warn On Failure     Wait Until Element Is Enabled    //span[text()='Check Other Stores']     ${Short Waiting Time}
+    IF  '${COS Display}[0]' == 'PASS'
+        Reload Page
+    END
+    ${Available Found}   Run Keyword And Warn On Failure     Wait Until Element Is Enabled    //span[text()='Available Nearby']      ${Short Waiting Time}
+    IF  '${Available Found}[0]' == 'PASS'
+        Click Element     //span[text()='Available Nearby']
+    ELSE
+        Click Element     //span[text()='Check Other Stores']
+    END
+    ${SelectStoreHandle}   Run Keyword And Ignore Error    Wait Until Element Is Enabled    //p[contains(text(), "Stores in your Range")]     ${Short Waiting Time}
     IF  '${SelectStoreHandle}[0]' == 'FAIL'
-        Run Keyword And Ignore Error    Wait Until Element Is Visible    //p[contains(text(), "Stores in your range")]     5
+        Run Keyword And Ignore Error    Wait Until Element Is Enabled    //p[contains(text(), "Stores in your range")]     ${Short Waiting Time}
     END
     Sleep   2
 
     FOR    ${i}    IN RANGE    20    #${store_amount}
-        ${Stock Row}   Set Variable    (//span[contains(text(), "in Stock")])[${i + 1}]
+        ${Stock Row}   Set Variable    (//span[contains(text(), " Stock")])[${i + 3}]
         ${Stock}       Get Text        ${Stock Row}
-        ${Stock Adequate}  Store Panel Stock Handle    ${Stock}  ${qty}
+        ${Stock Adequate}   Store Panel Stock Handle   ${Stock}   ${qty}
         Continue For Loop If     ${Stock Adequate} == ${False}
         Sleep  1
         Execute Javascript       window.scrollBy(0,140)         #querySelectorAll('tr')[${i + 1}].scrollIntoView({behavior: 'smooth', block: 'center'})
 
         FOR    ${j}   IN RANGE   ${qty}
-            AD Exception Handle   ((${Stock Row}/parent::div/preceding-sibling::div)[1]/child::div/child::div/child::div)[2]
+            #Click Element   ((${Stock Row}/parent::div/preceding-sibling::div)[1]/child::div/child::div/child::div)[2]
+            Click Element   (//div[@aria-label="button to increment counter for number stepper"])[${i + 3}]
         END
 
-        ${Store Name}         Get Text    (//span[text()="Store Hours"]/parent::div/preceding-sibling::div)[${i + 1}]       #(//table/tr[${i + 1}]/td[5]/child::div/child::div/child::p)[1]
-        ${Current Address}    Get Text    (//span[text()="Store Hours"]/parent::div/following-sibling::p)[${i + 1}]         #//table/tr[${i + 1}]/td[5]/child::div/child::p
+        ${Store Name}         Get Text    ${Stock Row}/parent::div/parent::div/following-sibling::div//span[text()="Store Hours"]/parent::div/preceding-sibling::div
+        ${Current Address}    Get Text    ${Stock Row}/parent::div/parent::div/following-sibling::div//span[text()="Store Hours"]/parent::div/following-sibling::p
         ${Available Store}=   Evaluate    ${Available Store} + 1
         ${Current Address}    Convert Store Address To Regular Space    ${Current Address}
 
@@ -209,14 +241,19 @@ Pick Up In Store One Product With Different Stores
     END
     Sleep   1
     Run Keyword And Warn On Failure    Check Items and Locations In Store Locator   ${Total Items}   ${Required Store Amount}
+    ${Similar Items}     Run Keyword And Ignore Error       Wait Until Element Is Enabled     //div[text()="Compare With Similar Items"]    4
     ${AddCartButtons}    Get Webelements     //div[text()='ADD TO CART']
-    AD Exception Handle   ${AddCartButtons[1]}
+    IF   '${Similar Items}[0]' == 'FAIL'
+        Click Element   ${AddCartButtons[0]}
+    ELSE
+        Click Element   ${AddCartButtons[-1]}
+    END
 
     [Return]   ${Multiple Store Address}   ${Total Items}
 
 Check Items and Locations In Store Locator
     [Arguments]    ${Total Items}    ${Required Store Amount}
-    Wait Until Element Is Visible         //*[text()='${Total Items}' and text()='${Required Store Amount}']
+    Wait Until Element Is Enabled         //*[text()='${Total Items}' and text()='${Required Store Amount}']
 
 
 String Comparison
@@ -224,8 +261,8 @@ String Comparison
     Should Be Equal As Strings   ${Message Source One}    ${Message Source Two}
 
 Edit Cart Items and Subtotal Items Comparison
-    Wait Until Element Is Visible     //p[text()='Edit Cart']
-    Wait Until Element Is Visible     //p[contains(text(), 'Subtotal')]
+    Wait Until Element Is Enabled     //p[text()='Edit Cart']
+    Wait Until Element Is Enabled     //p[contains(text(), 'Subtotal')]
 
     ${Edit Cart Qty}    Get Text      //p[text()='Edit Cart']
     ${Subtotal Qty}     Get Text      //p[contains(text(), 'Subtotal')]
@@ -233,7 +270,8 @@ Edit Cart Items and Subtotal Items Comparison
     ${Edit Cart Qty}    Number Extracted    ${Edit Cart Qty}
     ${Subtotal Qty}     Number Extracted    ${Subtotal Qty}
 
-    Should Be Equal As Strings     ${Edit Cart Qty}   ${Subtotal Qty}
+    ${Verify Res}       Web Element Number Verification    ${Edit Cart Qty}   ${Subtotal Qty}
+    [Return]    ${Verify Res}
 
 Sliding Right Panel Verification Qty
     [Arguments]    ${ClassOrNot}
@@ -247,9 +285,9 @@ Sliding Right Panel Verification Qty
 
 Sliding Right Panel Have Correct Buttons and QTY
     [Arguments]    ${Qty Input}   ${MIK Check}
-    Wait Until Element Is Visible     //p[text()="Items added to cart!"]     ${Mid Waiting Time}
-    Run Keyword And Warn On Failure   Page Should Contain Element    //p[text()="Items added to cart!"]
-    Wait Until Element Is Visible     //*[text()="View My Cart"]/parent::button
+    Wait Until Element Is Enabled     //*[text()="Items added to cart!"]     ${Mid Waiting Time}
+    Run Keyword And Warn On Failure   Page Should Contain Element    //*[text()="Items added to cart!"]
+    Wait Until Element Is Enabled     //*[text()="View My Cart"]/parent::button
     Page Should Contain Button        //*[text()="View My Cart"]/parent::button
     Run Keyword And Warn On Failure   Page Should Contain Button     //*[text()="Continue Shopping"]/parent::button
 
@@ -283,12 +321,12 @@ Environ Browser Selection And Setting
 
 Select Change Store Common Process
     [Arguments]    ${Store}
-    Wait Until Element Is Visible    //p[text()='SELECT OTHER STORE']     ${Long Waiting Time}
-    Input Text                       //input[@placeholder='Enter city, state, zip']     ${Store}
-    Wait Until Element Is Enabled    //select
-    Select From List By Value        //select      200
-    Wait Until Element Is Visible    //p[text()='${Store}']               ${Long Waiting Time}
-    Wait Until Element Is Visible    (//p[text()='MY STORE']/following-sibling::div/child::div/following-sibling::div)[1]
+    Wait Until Element Is Enabled    //p[text()='SELECT OTHER STORE']     ${Long Waiting Time}
+    Input Text                       //input[@placeholder='Enter city, state, zip']     DFW-EULESS
+    Sleep  2
+    Press Keys                       //input[@value="DFW-EULESS"]    \ue007
+    Wait Until Element Is Enabled    //p[text()='${Store}']               ${Long Waiting Time}
+    Wait Until Element Is Enabled    (//p[text()='MY STORE']/following-sibling::div/child::div/following-sibling::div)[1]
     ${Store Address}    Get Text     (//p[text()='MY STORE']/following-sibling::div/child::div/following-sibling::div)[1]
     [Return]    ${Store Address}
 
@@ -307,27 +345,21 @@ AD Exception Handle-element visible
         Advertisement Processment Handle   ${Triggering Element}  flase
     END
 
+AD Exception Handle-element Enabled
+    [Arguments]    ${Triggering Element}
+    ${Pop Handle}   Run Keyword And Ignore Error     Wait Until Element Is Enabled     ${Triggering Element}
+    IF  '${Pop Handle}[0]' == 'FAIL'
+        Advertisement Processment Handle   ${Triggering Element}  flase
+    END
+
 
 Advertisement Processment Handle
     [Arguments]    ${Button}   ${click_true}=true
-    ${Selected}    Run Keyword And Ignore Error     Select Frame        id:attentive_creative
-    IF   '${Selected}[0]' == 'PASS'
-        ${Crorss Icon}   Run Keyword And Ignore Error   Wait Until Element Is Visible     //button[@id='closeIconContainer']
-        Run Keyword And Ignore Error   Wait Until Element Is Visible    //button[@id='closeIconContainer']
-        Run Keyword And Ignore Error   Click Element                    //button[@id='closeIconContainer']
-        Unselect Frame
-        Sleep  1
-        Wait Until Element Is Enabled      ${Button}
-        Sleep  1
-        Click Element                      ${Button}
-    ELSE
-        Sleep  1
-        Wait Until Element Is Enabled      ${Button}   15
-        Sleep  1
-        IF  "${click_true}"=="true"
-            Click Element                      ${Button}
-        END
-    END
+    Execute Javascript    document.querySelector("#attentive_creative").remove()
+    Sleep  1
+    Wait Until Element Is Enabled      ${Button}
+    Click Element                      ${Button}
+
 
 
 Order Summary Panel Additional Consideration
@@ -346,7 +378,7 @@ Order Summary Panel Additional Consideration
 
 Select Store If Needed
     [Arguments]    ${Initial Store Name}
-    ${Select Or Change}     Run Keyword And Ignore Error    Wait Until Element Is Visible    (//p[text()="My Store:"])[1]    20
+    ${Select Or Change}     Run Keyword And Ignore Error    Wait Until Element Is Enabled    (//p[text()="My Store:"])[1]    20
     IF  '${Select Or Change}[0]' == 'PASS'
         ${Store Address}    Select Or Change A Store In The Homepage   ${Initial Store Name}    CHANGE
     ELSE
@@ -357,7 +389,7 @@ Select Store If Needed
 
 
 Add Products To Cart Process - Guest Continue As Guest
-    [Arguments]   ${product_channel_info}    ${qty_process}    ${store_amount}
+    [Arguments]   ${product_channel_info}    ${qty_process}
     ${PDP Shipping}      Create List
     ${Class Set Qty}     Create List
     ${Store Address}     Create List
@@ -368,9 +400,8 @@ Add Products To Cart Process - Guest Continue As Guest
         ${ClassOrNot}         If Class              ${product}
         ${MIK Mode Result}    Mik Ship Major Mode   ${channel}
 #        ${Before Count}       Sliding Right Panel Verification Qty   ${ClassOrNot}
-        IF   '${channel}' == 'MKP' or '${channel}' == 'MKPS'
-            Sleep  5
-        END
+
+        Sleep  3
         IF   '${ClassOrNot}' == 'Class'
             ${Class Qty}   Set Variable    ${qty_process.pop()}
             Wait Until Element Is Enabled             (//p[text()="Book Class Only"])[2]
@@ -380,38 +411,288 @@ Add Products To Cart Process - Guest Continue As Guest
             ${Class Set Qty}=  Evaluate   ${Class Set Qty} + [${Class Qty}]
             Sleep  2
 #            ${After Count}     Sliding Right Panel Verification Qty  ${ClassOrNot}
-            AD Exception Handle     ${Class Add to Cart}
+            Click Element     ${Class Add to Cart}
         ELSE
             IF  '${channel}' == 'SDD' or '${channel}' == 'SDDH'
-                Wait Until Element Is Enabled    //p[contains(text(),'Ship to Me')]       ${Long Waiting Time}
+                Wait Until Element Is Visible      ${Header Store}   50
+                ${Store In Header}    Get Text     ${Header Store}
+                ${Store Address}      Channel Pre-Initialization    ${channel}    ${Store In Header}
+                Wait Until Element Is Enabled    //*[contains(text(),'Ship to Me')]       ${Long Waiting Time}
                 Sleep    2
-                ${SDD}    Get Webelements        //p[@class='css-1tyd7ay']
-                Wait Until Element Is Enabled    ${SDD[2]}
-                ${Ship Text}     Get Text        ${SDD[2]}
+                Wait Until Element Is Enabled    ${SDD Element}
+                ${Ship Text}     Get Text        ${SDD Element}
                 ${Ship List}     Create List     ${Ship Text}
                 ${PDP Shipping}  Evaluate        ${PDP Shipping} + ${Ship List}
-                AD Exception Handle    ${SDD[2]}
+                Click Element    ${SDD Element}
                 ${SDD Qty}       Set Variable    ${qty_process.pop()}
                 Inputing the Product or Class Quantity    ${SDD Qty}
-                Wait Until Element Is Visible    //*[contains(text(),'BUY NOW')]     ${Mid Waiting Time}
 #                ${After Count}     Sliding Right Panel Verification Qty   ${ClassOrNot}
-                AD Exception Handle   //*[contains(text(),'BUY NOW')]
+                ${Buy Now Result}   Run Keyword And Warn On Failure   Click Element   ${Buy Now General}
+                IF  '${Buy Now Result}[0]' == 'FAIL'
+                    Click Element   ${Buy Now Exception}
+                END
             ELSE
-                ${PDP Handle}      Run Keyword And Warn On Failure     Wait Until Element Is Enabled       //p[contains(text(),'${MIK Mode Result}')]      ${Long Waiting Time}
+                IF  '${channel}' == 'PIS'
+                    Wait Until Element Is Visible      ${Header Store}   50
+                    ${Store In Header}    Get Text     ${Header Store}
+                    ${Store Address}      Channel Pre-Initialization    ${channel}    ${Store In Header}
+                END
+                ${PDP Handle}      Run Keyword And Warn On Failure     Wait Until Element Is Enabled       //*[contains(text(),'${MIK Mode Result}')]      ${Long Waiting Time}
                 IF   '${PDP Handle}[0]' == 'FAIL'
                     Reload Page
                 END
-                ${Ship Text}       Get Text         //p[contains(text(),'${MIK Mode Result}')]
+                ${Ship Text}       Get Text         //*[contains(text(),'${MIK Mode Result}')]
                 ${Ship List}       Create List      ${Ship Text}
                 ${PDP Shipping}    Evaluate         ${PDP Shipping} + ${Ship List}
-                AD Exception Handle    //p[contains(text(),'${MIK Mode Result}')]
+                Click Element    //*[contains(text(),'${MIK Mode Result}')]
                 ${Qty Required}    Set Variable    ${qty_process.pop()}
                 Inputing the Product or Class Quantity    ${Qty Required}
                 Sleep  1
-                Wait Until Element Is Visible      //*[contains(text(),'BUY NOW')]    ${Mid Waiting Time}
 #                ${After Count}     Sliding Right Panel Verification Qty  ${ClassOrNot}
-                AD Exception Handle    //*[contains(text(),'BUY NOW')]
+                ${Buy Now Result}   Run Keyword And Warn On Failure   Click Element   ${Buy Now General}
+                IF  '${Buy Now Result}[0]' == 'FAIL'
+                    Click Element   ${Buy Now Exception}
+                END
             END
         END
     END
     [Return]    ${PDP Shipping}    ${Class Set Qty}    ${Store Address}
+
+Check Web Element Number Existed
+   [Arguments]    ${Element One}   ${Element Two}
+   ${Res One}   Run Keyword And Warn On Failure   Should Not Be Equal As Strings   ${Element One}   0
+   ${Res Two}   Run Keyword And Warn On Failure   Should Not Be Equal As Strings   ${Element Two}   0
+   [Return]   ${Res One}   ${Res Two}
+
+
+Web Element Number Verification
+    [Arguments]    ${Element One}   ${Element Two}
+    ${Element One Res}   ${Element Two Res}   Check Web Element Number Existed    ${Element One}   ${Element Two}
+    IF  '${Element One Res}[0]' == 'PASS' and '${Element Two Res}[0]' == 'PASS'
+        ${Element Verify Res}   Run Keyword And Warn On Failure    Should Be Equal As Strings   ${Element One}   ${Element Two}
+    END
+    [Return]   ${Element Verify Res}
+
+
+Click Again If No Reaction
+    [Arguments]    ${Button}     ${Verify Point}
+    ${Panel Slidng}   Run Keyword And Warn On Failure    Wait Until Element Is Enabled     //*[text()="${Verify Point}"]     ${Mid Waiting Time}
+    IF  '${Panel Slidng}[0]' == 'FAIL'
+        Click Element      ${Button}
+    END
+
+
+login
+    [Arguments]    ${user}    ${password}
+    Environ Browser Selection And Setting    ${ENV}    ${BROWSER}    ${Home URL}/signin?returnUrl=/cart
+    login without open browser    ${user}    ${password}
+
+login without open browser
+    [Arguments]     ${user}    ${password}
+    Wait Until Element Is Visible    //p[text()="Remember me"]
+    Wait Until Element Is Enabled    //input[@id="email"]
+    click element    //input[@id="email"]
+    Sleep  1
+    Press Keys  //input[@id="email"]   ${user}
+    Click Element    //input[@id="password"]
+    Sleep  1
+    Press Keys  //input[@id="password"]   ${password}
+    Click Button   //div[text()="SIGN IN"]/parent::button
+    Sleep    2
+#    IF  "${is_sign}" == "true"
+    Wait Until Page Contains Element    //p[text()="${account_info["first_name"]}"]     ${Long Waiting Time}
+#    END
+
+
+#initial env data
+#    Set Selenium Timeout   ${Time Initial}
+#    ${env_data}    read excel    BuyerData.xlsx    ${None}    ${ENV}
+#    FOR   ${product_group}   IN   @{env_data}
+#        ${value}   get_list_step_value    ${product_group}   1
+#        Set Suite Variable    ${${product_group[0]}}    ${value}
+#    END
+Initial Custom Selenium Keywords
+    Set Library Search Order    CustomSeleniumKeywords
+    Set Selenium Timeout      ${Time Initial}
+
+Initial Env Data2
+    Set Library Search Order    CustomSeleniumKeywords
+    Set Selenium Timeout      ${Time Initial}
+    ${test_data}    Set Variable    ${test_data}[${ENV}]
+    ${keys}    Get Dictionary Keys     ${test_data}
+    FOR    ${key}    IN    @{keys}
+        Set Suite Variable    ${${key}}    ${test_data}[${key}]
+    END
+
+Paypal Payment
+    Wait Until Element Is Visible       //h3[text()="Order Summary"]
+    Wait Until Page Contains Element    //div[@type="submit"]
+    Wait Until Element Is Visible       //div[@type="submit"]
+    Wait Until Page Contains Element    //div[@type="submit"]//iframe[@title="PayPal"]
+    Wait Until Element Is Visible       //div[@type="submit"]//iframe[@title="PayPal"]
+    Wait Until Element Is Enabled       //div[@type="submit"]//iframe[@title="PayPal"]
+    sleep    3
+    Click Element    //div[@type="submit"]//iframe[@title="PayPal"]
+    ${handles}  Get Window Handles
+    Switch Window    ${handles[1]}
+    Maximize Browser Window
+    sleep    3
+    If Close Cookie Popup
+    login when paypal payment
+    sleep    3
+    If Close Cookie Popup
+    Wait Until Page Contains Element     //*[contains(text(),"Pay with")]    ${Long Waiting Time}
+    Wait Until Element Is Visible    //*[contains(text(),"Pay with")]     ${Long Waiting Time}
+    Execute Javascript    document.querySelector("#payment-submit-btn").click()
+#    Wait Until Page Contains Element   //p[text()="Processing..."]
+#    Wait Until Page Does Not Contain Element   //p[text()="Processing..."]
+#    Switch Window   ${handles[0]}
+    FOR   ${num}    IN RANGE    10
+        ${handles}  Get Window Handles
+        ${len}    Get Length     ${handles}
+        Exit For Loop If    ${len} == 1
+        sleep    3
+    END
+    Switch Window   ${handles[0]}
+    sleep    1
+    Wait Until Page Does Not Contain Element     //*[@stroke="transparent"]
+
+If Close Cookie Popup
+    ${is_accept_button}    Get Element Count     //button[@id="acceptAllButton"]
+    IF    ${is_accept_button} > 0
+        Wait Until Page Contains Element         //button[@id="acceptAllButton"]
+        Wait Until Element Is Visible            //button[@id="acceptAllButton"]
+        Execute Javascript    document.querySelector("#acceptAllButton").click()
+    END
+
+
+login when paypal payment
+    ${is_email}    Get Element Count     //input[@id="email"]
+    IF   ${is_email} > 0
+        Wait Until Element Is Visible    //input[@id="email"]
+        Click Element   //input[@id="email"]
+        Input Text    //input[@id="email"]   ${paypalInfo.email}
+        ${is_next}    Get Element Count    //button[@id="btnNext"]
+        IF   ${is_next} == 0
+            Input Text    //input[@id="password"]    ${paypalInfo.password}
+        ELSE
+            Click Element    //button[@id="btnNext"]
+            Wait Until Element Is Visible    //input[@id="password"]
+            Input Text    //input[@id="password"]    ${paypalInfo.password}
+        END
+        Wait Until Element Is Visible    //button[@id="btnLogin"]
+        Click Element    //button[@id="btnLogin"]
+    END
+
+
+Add Promo Code Function
+    [Arguments]    ${Code}
+    Run Keyword And Ignore Error   Click Element     //div[text()="Add a Promo Code"]
+    Run Keyword And Ignore Error   Wait Until Element Is Enabled   //div[text()="Apply"]   5
+    Input Text    id:promoCode    ${Code}
+    Click Element                    //div[text()="Apply"]
+    Wait Until Element Is Enabled    //p[text()="Savings"]
+    Wait Until Element Is Visible    //p[text()="${Code}"]
+    ${Saving Amount}    Run Keyword And Ignore Error    Get Text    //p[text()="Savings"]/following-sibling::p
+    [Return]    ${Saving Amount}
+
+Add First Additional Pick Up Person
+    Click Element    (//p[text()="Add additional pickup person"])[1]
+    FOR    ${Note}   IN   @{Add Panel Text}
+        Wait Until Element Is Visible     //p[text()="${Note}"]
+    END
+    FOR    ${key}   ${value}   IN ZIP   ${addtionalPickInfo.keys()}    ${addtionalPickInfo.values()}
+        Wait Until Element Is Visible    //input[@id='${key}']
+        Input Text    //input[@id='${key}']       ${value}
+    END
+    Click Element    //div[text()="ADD PICKUP PERSON"]
+    Wait Until Element Is Not Visible        //div[text()="ADD PICKUP PERSON"]
+    Wait Until Element Is Visible            //span[text()="Additional Pickup Person"]
+    ${Add Full Name}   Get Text   (//span[text()="Additional Pickup Person"]/following-sibling::p)[1]
+    ${Add Email}       Get Text   (//span[text()="Additional Pickup Person"]/following-sibling::p)[2]
+    [Return]    ${Add Full Name}    ${Add Email}
+
+
+Add A Credit Card
+    [Arguments]     ${creditInfo}     ${billAddress}
+#    ${add_payment_ele}    Set Variable    //p[contains(text(),"Register for")]/../following-sibling::button
+    ${add_additional_card_ele}     Set Variable     //p[contains(text(),"Add Additional Card")]
+    Wait Until Page Contains Element     ${add_additional_card_ele}
+    Wait Until Element Is Visible     ${add_additional_card_ele}
+    Click Element     ${add_additional_card_ele}
+    Wait Until Element Is Visible     //h2[text()="Card Information"]
+    FOR    ${key}   ${value}   IN ZIP   ${creditInfo.keys()}    ${creditInfo.values()}
+        Wait Until Element Is Visible    //input[@id='${key}']
+        Input Text    //input[@id='${key}']       ${value}
+    END
+    FOR    ${key}   ${value}   IN ZIP   ${billAddress.keys()}    ${billAddress.values()}
+        IF   "${key}" == "state"
+            Click Element      //select[@id="${key}"]
+            Click Element     //option[@value="${value}"]
+        ELSE
+            Wait Until Element Is Visible    //p[text()="Billing Information"]/..//input[@id='${key}']
+            Input Text    //p[text()="Billing Information"]/..//input[@id='${key}']       ${value}
+        END
+    END
+    Click Element     //div[text()="Save"]/..
+    Wait Until Element Is Visible     //div[text()="SAVE"]/..
+    Click Element     //div[text()="SAVE"]/..
+#    Wait Until Page Contains Element     //div[text()="Success!"]
+
+
+Special Channel Detect
+    [Arguments]   ${Channel Mode}
+    ${IF PIS}    Pis Only Verify    ${Channel Mode}
+
+    ${IF SDD}    Sdd Detect         ${Channel Mode}
+    IF  '${IF PIS}' != 'PIS Only'
+        ${IF MKR}    Mkr Only Verify     ${Channel Mode}
+    ELSE
+        ${IF MKR}    Set Variable        Not MKR Only
+    END
+    [Return]    ${IF PIS}   ${IF MKR}     ${IF SDD}
+
+Channel Pre-Initialization
+    [Arguments]    ${Channel}   ${Store In Header}
+    ${Store Address}    Set Variable   Not Set
+    IF   '${Channel}' == 'MKP' or '${Channel}' == 'MKPS'
+        Sleep  3
+    ELSE IF  '${Channel}' == 'PIS' or '${Channel}' == 'SDD' or '${Channel}' == 'SDDH'
+        IF  '${Store In Header}' != '${Initial Store Name}'
+            ${Store Address}   Select Or Change a Store In the Homepage    ${Initial Store Name}    CHANGE
+        END
+    END
+    [Return]    ${Store Address}
+
+SDD Delivery Instructions
+    [Arguments]     ${IF SDD}   ${Delivery Instruction}
+    IF   '${IF SDD}' == 'YES'
+        Wait Until Element Is Enabled    //p[text()="Add Delivery Instructions (optional)"]
+        Click Element                    //p[text()="Add Delivery Instructions (optional)"]
+        Wait Until Element Is Enabled    //textarea[@id="deliveryInstruction"]
+        Input Text                       //textarea[@id="deliveryInstruction"]      ${Delivery Instruction}
+    END
+SDD Instruction Verify
+    [Arguments]   ${IF SDD}  ${Instruction}
+    IF  '${IF SDD}' == 'YES'
+        ${Verify Locaiton}       Get Text    //p[text()="Delivery Instructions: "]/b
+        Run Keyword And Ignore Error    Should Be Equal As Strings      ${Verify Locaiton}   ${Instruction}
+    END
+
+
+Checkout Process - Qty And Price Calculation Compare with Subtotals
+    ${Subtotal}  Set Variable    ${0}
+    Execute Javascript    window.scrollTo((document.body.offsetWidth -window.innerWidth )/2, 0)
+    ${Qty Collection}     Get Webelements          //p[contains(text(),"Qty: ")]
+    ${Price Collection}   Get Webelements          //p[contains(@class,"ProductName")]/following-sibling::div[1]/child::p[1]
+    ${Loop Count}         Get Element Count        //p[contains(text(),"Qty: ")]
+    FOR   ${i}   IN RANGE  ${Loop Count}
+        ${Price}     Get Text    ${Price Collection}[${i}]
+        ${Qty}       Get Text    ${Qty Collection}[${i}]
+        ${Qty Ext}   Number Extracted    ${Qty}
+        ${Subtotal}=  Evaluate  ${Subtotal} + ${Price[1:]} * ${Qty Ext}
+    END
+    ${Subtotal On Panel}    Get Text       //p[text()="Subtotal ("]/following-sibling::p
+    ${Subtotal On Panel}    Set Variable   ${Subtotal On Panel[1:]}
+    ${Compare Res}=  Evaluate    ${Subtotal} == ${Subtotal On Panel}
+    [Return]   ${Compare Res}

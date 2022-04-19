@@ -29,7 +29,6 @@ Test Manage Buyer Address - Add New Address
     Buyer Left Menu - Account Information - Profile
     ${Address_Info}    Get Address Info
     Set Suite Variable    ${Address_Info}    ${Address_Info}
-#    Buyer - Profile - Address - Enter Manage Address Page
     Buyer - Profile - Address - Add A New Address
     [Teardown]    Run Keyword If    '${TEST STATUS}'=='FAIL'    Reload Page
 
@@ -37,7 +36,6 @@ Test Manage Buyer Address - Edit Address
     [Documentation]    Edit buyer Shipping address
     [Tags]    mp    ea-buyer-account    ea-buyer-address
     Buyer Left Menu - Account Information - Profile
-#    Buyer - Profile - Address - Enter Manage Address Page
     ${Address_Info}    Get Address Info
     Set Suite Variable    ${Address_Info}    ${Address_Info}
     Buyer - Profile - Address - Edit Address By Index
@@ -47,7 +45,6 @@ Test Manage Buyer Address - Delete Address
     [Documentation]    Delete buyer Shipping address
     [Tags]    mp    mp-ea    ea-buyer-account    ea-buyer-address
     Buyer Left Menu - Account Information - Profile
-    Buyer - Profile - Address - Enter Manage Address Page
     Buyer - Profile - Address - Remove Address By Index    1
     [Teardown]    Run Keyword If    '${TEST STATUS}'=='FAIL'    Reload Page
 

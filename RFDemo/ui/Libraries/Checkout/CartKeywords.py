@@ -29,6 +29,7 @@ class CartKeywords:
     def get_order_summary_data_fun(data: dict):
         data1 = data.copy()
         print(data)
+
         for key, value in data1.items():
             if "Subtotal" in key:
                 print(key, value)
@@ -41,6 +42,8 @@ class CartKeywords:
                 print(key, value)
                 value = re.match("\$([\d.]*)", value).group(1)
                 data.update({key: float(value)})
+            elif "$" in key:
+                data.pop(key)
 
         return data
 

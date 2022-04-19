@@ -11,19 +11,42 @@ Library     ../../TestData/Checkout/GuestGenerateAddress.py
 *** Keywords ***
 Use USPS Suggested Address
     [Arguments]   ${IF PIS}
-    ${Suggested Address}   Set Variable    Not Using Suggested Address
+    ${Suggested Address}   Set Variable   Not Using Suggested Address
     IF  '${IF PIS}' != 'PIS Only'
-        ${Suggested Address}   Get Text    //p[text()='USPS Suggested']//following-sibling::p
-        Click Element                      //div[text()='Use USPS Suggestion']
+        ${Suggested Address}  Run Keyword And Warn On Failure   Get Text    //p[text()='USPS Suggested']//following-sibling::p
+        ${Updated ZipCode}    Set Variable   ${Suggested Address[1].split(" ")[-1]}
+        Click Element                       //div[text()='Use USPS Suggestion']
     END
-    [Return]   ${Suggested Address}
+    [Return]   ${Updated ZipCode}
+
+Get dif class name from product info
+    [Arguments]     ${product_info}
+    @{class_product_name1}    Create List
+    FOR   ${one_product}    IN    @{product_info}
+        IF   "${one_product}[product_type]" == "class"
+            ${product_name}     Set Variable     ${one_product}[product_name]
+            Append To List     ${class_product_name1}     ${product_name}
+        Exit For Loop
+    END
+    @{class_product_name}    Create List
+    FOR    ${i}     IN    @{class_product_name1}
+        IF    "${i}" not in ${class_product_name}
+            Append To List     ${class_product_name}    ${i}
+        END
+    END
+    [Return]     ${class_product_name}
+
+
 
 Checkout Class - Input All Guest Info
     [Arguments]     ${product_info}
 #    ${count}    Get Element Count    (//h2[text()="Classes"]/../../../..//div[contains(text(),"Guest")])
     ${status}    If Class In Products     ${product_info}
     IF   "${status}" == "True"
-        ${Guest_Ele}    Set Variable    (//h2[text()="Classes"]/../../../..//div[contains(text(),"Guest")])
+#        ${class_product_name}     Get dif class name from product info     ${product_info}
+#        FOR    ${product_name}    IN    @{class_product_name}
+#            ${Guest_Ele}    Set Variable    (//h2[text()="${product_name}"]/../../../..//div[contains(text(),"Guest")])
+        ${Guest_Ele}    Set Variable    (//div[contains(text(),"Guest")])
         Wait Until Page Contains Element     ${Guest_Ele}
         Wait Until Element Is Visible     ${Guest_Ele}
         ${count}    Get Element Count    ${Guest_Ele}
@@ -36,6 +59,7 @@ Checkout Class - Input All Guest Info
             Input Text    ${Guest_Ele}\[${index}\]/following-sibling::div//input[contains(@id,"phoneNumber")]    ${Guest_Info}[phone]
             ${index}    Evaluate    ${index}+1
         END
+#        END
     END
 
 Adding The Personal Infomation For the Getting Your Order Page
@@ -43,14 +67,32 @@ Adding The Personal Infomation For the Getting Your Order Page
     ${Class Length}    Get Length    ${Class Set Qty}
 
     IF  '${IF PIS}' == 'PIS Only'
-    Wait Until Element Is Visible      //h3[text()="Pick Up Person Information"]
+        Wait Until Element Is Enabled      //h3[text()="Pick Up Person Information"]
+        Run Keyword And Ignore Error       Wait Until Element Is Enabled      //p[text()="Add additional pickup person"]    4
+        Sleep  2
         FOR    ${key}   ${value}   IN ZIP   ${pickupInfo.keys()}    ${pickupInfo.values()}
-            Wait Until Element Is Visible    //input[@id='${key}']
-            Input Text    //input[@id='${key}']       ${value}
+            Wait Until Element Is Enabled     //input[@id='${key}']
+            Sleep  2
+            Input Text     //input[@id='${key}']    ${value}
+#            IF  '${key}' == 'email' or '${key}' == 'phoneNumber'
+#                Execute Javascript       document.getElementById('${key}').value="${value}"
+#            ELSE
+#                Input Text     //input[@id='${key}']    ${value}
+#            END
         END
     ELSE
         FOR    ${key}   ${value}   IN ZIP   ${guestInfo.keys()}    ${guestInfo.values()}
-            Input Text    //input[@id='${key}']       ${value}
+            IF  '${key}' == 'state'
+                Run Keyword And Ignore Error   Wait Until Element Is Enabled    //select[@id='${key}']     5
+            ELSE
+                Run Keyword And Ignore Error   Wait Until Element Is Enabled    //input[@id='${key}']      5
+            END
+            Run Keyword And Ignore Error    Clear Element Text      //input[@id='${key}']
+            ${Error Handle}   Run Keyword And Ignore Error    Input Text    //input[@id='${key}']     ${value}
+
+            IF  '${Error Handle}[0]' == 'FAIL'
+                Select From List By Value    //select[@id='${key}']    ${value}
+            END
         END
         IF  ${Class Length} > 0
             FOR   ${i}  IN RANGE  ${Class Length}
@@ -70,25 +112,91 @@ Adding The Personal Infomation For the Getting Your Order Page
 Click Next: Payment & Order Review Button
     sleep    3
     Wait Until Page Contains Element     //h3[text()="Order Summary"]
-    Wait Until Element Is Visible     //h3[text()="Order Summary"]
-    Wait Until Element Is Visible     //p[text()="Total:"]
-    Scroll Element Into View    //h3[text()="Order Summary"]
-    Wait Until Element Is Enabled    //div[text()="Next: Payment & Order Review"]/parent::button
+    Scroll Element Into View             //h3[text()="Order Summary"]
+    Wait Until Element Is Visible        //h3[text()="Order Summary"]
+    Wait Until Element Is Visible        //*[text()="Total:"]
+    Wait Until Element Is Enabled        //div[text()="Next: Payment & Order Review"]/parent::button
     Click Button    //div[text()="Next: Payment & Order Review"]/parent::button
 
-#If toast
-#    ${is_toast}    Get Element Count     //li[@class="chakra-toast"]
-#    IF   ${is_toast} > 0
-#        ${text}    Get Text    //li[@class="chakra-toast"]//p
-#    END
 
+Input Shipping Information
+    [Arguments]     ${consignee}
+    FOR    ${key}   ${value}   IN ZIP   ${consignee.keys()}    ${consignee.values()}
+        ${Error Handle}   Run Keyword And Ignore Error    Wait Until Element Is Visible    //input[@id='${key}']    3
+        IF  '${Error Handle}[0]' == 'PASS'
+            ${text}    Get Element Attribute     //input[@id='${key}']     value
+            IF   "${text}" == "${EMPTY}"
+                Input Text    //input[@id='${key}']       ${value}
+            END
+        ELSE
+            Select From List By Value    //select[@id='${key}']    ${value}
+        END
+    END
+
+#        ${ENV}    Lower Parameter     ${ENV}
+#        IF    '${ENV}' == 'qa'
+#            IF    '${key}' == 'state'
+#                Select From List By Value    //select[@id='${key}']    ${value}
+#            END
+#        ELSE
+#            Wait Until Element Is Visible    //input[@id='${key}']
+#            ${text}    Get Element Attribute     //input[@id='${key}']     value
+#            IF   "${text}" == "${EMPTY}"
+#                Input Text    //input[@id='${key}']       ${value}
+#            END
+#        END
+
+
+
+Input Pickup Info
+    [Arguments]     ${pickupInfo}
+    Wait Until Element Is Visible      //h3[text()="Pick Up Person Information"]
+    FOR    ${key}   ${value}   IN ZIP   ${pickupInfo.keys()}    ${pickupInfo.values()}
+        Wait Until Element Is Visible    //input[@id='${key}']
+        ${text}    Get Element Attribute     //input[@id='${key}']     value
+        IF   "${text}" == "${EMPTY}"
+            Input Text    //input[@id='${key}']       ${value}
+        END
+    END
+
+
+Input Guest Info In Get Your Order
+    [Arguments]     ${pickupInfo}     ${consignee}     ${pickup_additional}=${pickup_additional}
+    Wait Until Page Contains Element     //h3[text()="Order Summary"]
+    Wait Until Element Is Visible     //h3[text()="Order Summary"]
+    Wait Until Element Is Visible     //*[text()="Total:"]
+    ${IF PIS}     Set Variable     ${EMPTY}
+    ${status}    If pis in Products     ${PRODUCT_INFO_LIST}
+    IF   "${status}" == "True"
+        Input Pickup Info    ${pickupInfo}
+        Add additional pickup person      ${pickup_additional}
+        ${IF PIS}     Set Variable     PIS Only
+    ELSE
+        Input Shipping Information     ${consignee}
+    END
+    [Return]     ${IF PIS}
+
+
+Add additional pickup person
+    [Arguments]     ${pickup_additional}
+    Wait Until Element Is Visible    //p[text()="Add additional pickup person"]
+    Click Element     //p[text()="Add additional pickup person"]
+    FOR    ${key}   ${value}   IN ZIP   ${pickup_additional.keys()}    ${pickup_additional.values()}
+        Wait Until Element Is Visible    //input[@id='${key}']
+        ${text}    Get Element Attribute     //input[@id='${key}']     value
+        IF   "${text}" == "${EMPTY}"
+            Input Text    //input[@id='${key}']       ${value}
+        END
+    END
+    Wait Until Element Is Visible     //div[text()="ADD PICKUP PERSON"]
+    Click Element    //div[text()="ADD PICKUP PERSON"]
 
 
 check getting your order page
     [Arguments]    ${product_info}
-    Wait Until Element Is Visible    //h2[contains(text(),"Getting your Order")]
+#    Wait Until Element Is Visible    //h2[contains(text(),"Getting your Order")]
     check pickup multiple store tips    ${product_info}
-    check delivery address
+    check delivery address     ${product_info}
     Check SDD Fee    ${product_info}
 #    check sku pickup location    GYO   ${product_info}
 #    ${skus_subtotal}    check sku info in GYO or OR page    ${product_info}
@@ -96,6 +204,18 @@ check getting your order page
 #    ${total_items}    get items from GYO or OR page
     check order summary    ${total_items}   ${skus_subtotal}   GYO
 
+
+Check Pick Up Person Information
+    [Arguments]     ${account_info}
+    Wait Until Element Is Visible     //*[text()="Pick Up Person Information"]
+    ${first_name}    Get Element Attribute     //input[@id="firstName"]    value
+    ${last_name}    Get Element Attribute     //input[@id="lastName"]    value
+    ${email}    Get Element Attribute     //input[@id="email"]    value
+    ${phone_number}    Get Element Attribute     //input[@id="phoneNumber"]    value
+    Run Keyword And Warn On Failure    Should Be Equal As Strings     ${first_name}     ${account_info}[first_name]     The first name of pick up person information is wrong
+    Run Keyword And Warn On Failure    Should Be Equal As Strings     ${last_name}      ${account_info}[last_name]      The last name of pick up person information is wrong
+    Run Keyword And Warn On Failure    Should Be Equal As Strings     ${email}          ${account_info}[email]          The email of pick up person information is wrong
+    Run Keyword And Warn On Failure    Should Be Equal As Strings     ${phone_number}   ${account_info}[phone]          The phone number of pick up person information is wrong
 
 
 get total shipping fee from your order page
@@ -124,6 +244,7 @@ get total shipping fee from your order page
 
 
 Get Delivery Address
+    Wait Until Page Contains Element     //h3[text()="Delivery Address"]/../div/div
     Wait Until Element Is Visible     //h3[text()="Delivery Address"]/../div/div
     ${delivery_address}    Get Text    //h3[text()="Delivery Address"]/../div/div
     ${delivery_address}    Split Parameter     ${delivery_address}   \n
@@ -131,13 +252,18 @@ Get Delivery Address
 
 
 Check Delivery Address
-    ${delivery_address}     Get Delivery Address
-    Set Suite Variable     ${DELIVERY_ADDRESS}     ${delivery_address}
-    ${delivery_address}     Catenate    ${delivery_address[0]},${delivery_address[1]}${delivery_address[2]}${delivery_address[3]}
-    ${address}    Upper Parameter    ${USER_INFO[2]}
-    ${phone}    Set Variable     ${USER_INFO[3]}
-    ${E_delivery_address}    Catenate     ${USER_INFO[0]} ${USER_INFO[1]},${address},${phone}
-    Run Keyword And Warn On Failure    Should Be Equal As Strings     ${E_delivery_address}     ${delivery_address}    Delivery address are inconsistent in getting your order page
+    [Arguments]     ${product_info}
+    ${status}    If Pis In Products      ${product_info}
+    IF    "${status}" != "True"
+        ${delivery_address}     Get Delivery Address
+        Set Suite Variable     ${DELIVERY_ADDRESS}     ${delivery_address}
+        ${delivery_address}     Catenate    ${delivery_address[0]},${delivery_address[1]}${delivery_address[2]}${delivery_address[3]}
+        ${address}    Upper Parameter    ${USER_INFO[2]}
+        ${phone}    Set Variable     ${USER_INFO[3]}
+        ${E_delivery_address}    Catenate     ${USER_INFO[0]} ${USER_INFO[1]},${address},${phone}
+        Run Keyword And Warn On Failure    Should Be Equal As Strings     ${E_delivery_address}     ${delivery_address}    Delivery address are inconsistent in getting your order page
+    END
+
 
 Get SDD Fee
     Wait Until Element Is Visible     //h2[contains(text(),"Same Day Delivery")]/../../../following-sibling::div/div[2]/p
@@ -156,8 +282,21 @@ If Class in Products
         END
     END
     ${status}     Set Variable If    "class" in ${product_type_list}    True
-#    Run Keyword And Return Status     List Should Contain Value     ${product_type_list}    class
-#    Set Variable If    ${product_type_list} > 0    True
+    [Return]     ${status}
+
+If pis in Products
+    [Arguments]     ${product_info}
+    @{shipping_method_list}    Create List
+    FOR    ${sku_info}    IN    @{product_info}
+        ${shipping_method}    Set Variable    ${sku_info}[shipping_method]
+        Append To List     ${shipping_method_list}    ${shipping_method}
+#        IF   "${shipping_method}" == "PIS" and "PIS" not in ${shipping_method_list}
+#            Append To List     ${shipping_method_list}    ${shipping_method}
+#        END
+    END
+    ${pis_count}   Count Values In List    ${shipping_method_list}    PIS
+    ${list_len}    Get Length     ${shipping_method_list}
+    ${status}     Set Variable If    "${pis_count}" == "${list_len}"     True
     [Return]     ${status}
 
 
@@ -381,8 +520,81 @@ Get EA shipping Info
     [Return]     ${sth_shipping_info}
 
 USPS Address Handling
-    [Arguments]    ${Button}     ${Verify}    ${Trigger}
+    [Arguments]    ${Button}     ${Verify}    ${Trigger}    ${IF PIS}=Initial
     Click Element      //div[text()='${Button}']
-    ${USPS Verify}    Run Keyword And Ignore Error     Wait Until Element Is Visible    //h4[text()="${Verify}"]    3
-    ${USPS Trigger}   Run Keyword And Ignore Error     Wait Until Element Is Enabled    //div[text()="${Trigger}"]    3
+    ${Required Show Up}   Run Keyword And Ignore Error     Wait Until Element Is Enabled    //p[text()="Required"]    2
+    ${USPS Verify}        Run Keyword And Ignore Error     Wait Until Element Is Visible    //h4[text()="${Verify}"]      3
+    ${USPS Trigger}       Run Keyword And Ignore Error     Wait Until Element Is Enabled    //div[text()="${Trigger}"]    3
     [Return]     ${USPS Verify}   ${USPS Trigger}
+
+
+get pick up item info
+#    ${pickup_item_count}   Get Element Count    //p[@class="ProductName css-spo94e"]
+    ${element_xpath}   Set Variable     //p[@class="ProductName css-spo94e"]
+    ${pickup_item_list}    Get Webelements    ${element_xpath}
+    ${pickup_item_info}   Create List
+    ${j}  Set Variable  ${0}
+    FOR   ${ele}    IN  @{pickup_item_list}
+        ${j}   Evaluate    ${j}+${1}
+        ${item_name}   Get Text   ${ele}
+        ${item_tag_count}    Get Element Count    (${element_xpath})[${j}]/../div
+        ${item_tag_count}    Evaluate     ${item_tag_count}+${1}
+        Append To List     ${pickup_item_info}    ${item_name}
+        FOR  ${i}  IN RANGE   ${1}    ${item_tag_count}
+            ${text}   Get Text    ((${element_xpath})[${j}]/../div)[${i}]
+            Append To List     ${pickup_item_info}    ${text}
+        END
+
+        ${qty_eles}   Get Webelements   (${element_xpath})[${j}]/../p
+        ${qty_text}   Get Text    ${qty_eles}[-1]
+        Append To List     ${pickup_item_info}    ${qty_text}
+    END
+
+get class item info
+#    ${pickup_item_count}   Get Element Count    //p[@class="ProductName css-spo94e"]
+    ${element_xpath}   Set Variable     //p[@class="ProductName evv2g7r12 css-vprpi5"]
+    ${pickup_item_list}    Get Webelements    ${element_xpath}
+    ${product_list}   Create List
+    ${j}  Set Variable  ${0}
+    FOR   ${ele}    IN  @{pickup_item_list}
+        ${j}   Evaluate    ${j}+${1}
+        ${item_info}   Create List
+        ${item_name}   Get Text   ${ele}
+        ${item_tag_count}    Get Element Count    (${element_xpath})[${j}]/../div
+        ${item_tag_count}    Evaluate     ${item_tag_count}+${1}
+        Append To List     ${item_info}    ${item_name}
+        FOR  ${i}  IN RANGE   ${1}    ${item_tag_count}
+            ${text}   Get Text    ((${element_xpath})[${j}]/../div)[${i}]
+            Append To List     ${item_info}    ${text}
+        END
+
+        ${item_p_eles}   Get Webelements   (${element_xpath})[${j}]/../p
+        FOR   ${item_p_ele}    IN  @{item_p_eles}
+            ${p_text}   Get Text    ${item_p_ele}
+            Append To List     ${item_info}    ${p_text}
+        END
+        Append To List     ${product_list}    ${item_info}
+    END
+    Log    ${product_list}
+    [Return]     ${product_list}
+
+
+Input Phone Number
+    [Arguments]     ${phone_number}
+    Wait Until Element Is Visible     //input[@id="phoneNumber"]
+    Input Text     //input[@id="phoneNumber"]    ${phone_number}
+    sleep    1
+
+Shipping Save Verify Address
+    Wait Until Page Contains Elements Ignore Ad    //p[text()="Verify Address"]
+    Wait Until Element Is Visible    //p[text()="Verify Address"]
+    CLick Element    //div[text()="SAVE"]/..
+
+Check Paypal Be Selected in Order Review
+    Wait Until Page Contains Element     //p[text()="Paypal"]
+    Wait Until Element Is Visible     //p[text()="Paypal"]
+    ${text}    Get Text    //p[text()="Paypal"]/following-sibling::p
+    Should Be Equal As Strings     ${text}     (You will be redirected to Paypal, to complete your order)     Paypal text is wrong
+    Page Should Contain Element     //p[text()="Paypal"]/../../../preceding-sibling::span[@data-checked]
+    ${aria_hidden_class}    Get Element Attribute     //p[text()="Paypal"]/../../../preceding-sibling::span     aria-hidden
+    Should Be Equal As Strings      ${aria_hidden_class}    true      aria_hidden_class is wrong

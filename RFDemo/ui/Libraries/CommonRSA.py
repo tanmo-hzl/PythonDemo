@@ -4,18 +4,17 @@
 # 参考1 https://blog.csdn.net/u010693827/article/details/78629268
 # 参考2 https://www.cnblogs.com/huxianglin/p/6387045.html
 # 参考3 https://blog.csdn.net/orangleliu/article/details/72964948
-import base64
 import json
-import urllib.parse
+import urllib.parse,base64
+from Crypto.Hash import SHA
+from Crypto import Random
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
+from Crypto.Signature import PKCS1_v1_5 as Signature_pkcs1_v1_5
+from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
 from urllib.parse import quote
 
-from Crypto import Random
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.Cipher import PKCS1_v1_5 as Cipher_pkcs1_v1_5
-from Crypto.Hash import SHA
-from Crypto.Hash import SHA256
-from Crypto.PublicKey import RSA
-from Crypto.Signature import PKCS1_v1_5 as Signature_pkcs1_v1_5
 
 '''
 加密的 plaintext 最大长度是 证书key位数/8 - 11

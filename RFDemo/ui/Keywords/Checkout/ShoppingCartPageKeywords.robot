@@ -1,7 +1,8 @@
 *** Settings ***
 Resource    ../../TestData/Checkout/config.robot
 Resource    BuyerCheckKeywords.robot
-Resource    CommonKeywords.robot
+Resource    ../../Keywords/Checkout/Common.robot
+Resource   ../../Keywords/Checkout/VerifyCartKeywords.robot
 Library     ../../Libraries/Checkout/BuyerKeywords.py
 Library     ../../TestData/Checkout/GuestGenerateAddress.py
 
@@ -85,12 +86,14 @@ Verify Subtotal Items Correctness Compare Cart With Order Summary
    ${Side List}    Create List
    @{Side Items}   Get Webelements   //p[@class='css-l24f64']
    FOR   ${Item}   IN   @{Side Items}
-         ${Item Info}   Get Text    ${Item}
+         ${Item Info}   Get Text       ${Item}
          @{Item Temp}   Create List    ${Item Info}
-         ${Side List}=  Evaluate   ${Side List} + ${Item Temp}
+         ${Side List}=  Evaluate       ${Side List} + ${Item Temp}
    END
    ${Subtotal Number}   ${Side Items Sum}   Items Verify    ${Subtotal.text}    ${Side List}
-   Run Keyword And Warn On Failure     Should Be Equal As Strings    ${Subtotal Number}   ${Side Items Sum}
+   ${Verify Res}    Web Element Number Verification    ${Subtotal Number}   ${Side Items Sum}
+   [Return]     ${Verify Res}
+
 
 
 Shipping Align Based On PDP and Cart
@@ -140,23 +143,33 @@ Verify The Multiple Store Selection
     [Return]   ${Re Blue Box List}    ${Address Collection}
 
 
+If Ignore Error
+    ${status}    Run Keyword And Ignore Error     Wait Until Page Contains Element     //p[text()="Error"]    5
+    IF    "${status[0]}" == "PASS"
+        Wait Until Page Contains Element    //div[text()="CLOSE"]/..
+        Click Element     //div[text()="CLOSE"]/..
+    END
+
+Change zipcode
+    [Arguments]    ${zipcode}
+    Wait Until Page Contains Element     //p[text()="Change"]
+    Click Element     //p[text()="Change"]
+
 
 
 Click Proceed To Checkout Button
     Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]     ${Long Waiting Time}
     Run Keyword And Warn On Failure    Wait Until Element Is Visible    //*[text()="Shopping Cart"]
-    ${ENV}    Lower Parameter    ${ENV}
-#    IF   "${ENV}" == "qa" or "${ENV}" == "stg"
+#    If Ignore Error
+#    Change ZipCode Adjust Glade Parks      75260
     Run Keyword And Warn On Failure     Wait Until Element Is Visible    //p[text()="Remove All Items"]
-#    ELSE
-#        Run Keyword And Warn On Failure     Wait Until Element Is Visible    //p[text()="Remove all Items"]
-#    END
     Scroll Element Into View    //div[text()='PROCEED TO CHECKOUT']
     Wait Until Element Is Enabled    //div[text()='PROCEED TO CHECKOUT']/parent::button
     Wait Until Element Is Visible    //div[text()='PROCEED TO CHECKOUT']/parent::button
     Click Button   //div[text()='PROCEED TO CHECKOUT']/parent::button
 
 Paypal Payment in Cart
+    Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]     ${Long Waiting Time}
     Paypal Payment
 
 
@@ -167,15 +180,15 @@ clear cart if test case fail
 
 
 clear cart
-    sleep    1
-    go to   ${Home URL}/cart
-#    Wait Until Page Contains Element     //*[@stroke="transparent"]
-#    Wait Until Page Contains Element     //button[@id="popover-trigger-14"]
-#    Wait Until Element Is Visible     //button[@id="popover-trigger-14"]
-#    Click Element    //button[@id="popover-trigger-14"]
+    ${current_url}    Get Location
+    ${url}    Split Parameter    ${current_url}    /
+    IF    "${url[-1]}" != "cart"
+        go to   ${Home URL}/cart
+    END
     sleep    2
     Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]     ${Long Waiting Time}
     Run Keyword And Warn On Failure    Wait Until Element Is Visible    //*[text()="Shopping Cart"]
+#    If Ignore Error
     ${is_popup}    Get Element Count    //p[text()="Order Fulfillment Error"]
     IF   ${is_popup} > 0
         Click Element    //div[text()="Got it!"]/..
@@ -185,6 +198,7 @@ clear cart
     IF   ${isRemove} > 0
         Page Should Contain Element     ${remove_all_items_ele}
         Wait Until Element Is Enabled     ${remove_all_items_ele}
+        Close Cart Initiate Error popup
         Click Element    ${remove_all_items_ele}
         Wait Until Element Is Visible    //p[text()="Remove All Products?"]
         Click Element    //div[text()="Yes"]
@@ -199,31 +213,20 @@ login in shopping cart page
     wait until element is visible    //input[@id="email"]
     click element    //input[@id="email"]
     input text    //input[@id="email"]    ${user}
-    input text    //input[@id="password"]    ${password}
+    input text    //input[@id="newPassword"]    ${password}
     click button    //div[text()="SIGN IN"]/parent::button
     ${user_information}    Get Account Info
     Set Suite Variable     ${USER_INFO}    ${user_information}
 
 
 login in header
-    [Arguments]     ${user}    ${password}    ${first_name}=${account_info["first_name"]}
-    Wait Until Page Contains Element    //p[text()="Sign In"]/parent::button
-    Wait Until Element Is Visible     (//p[text()="Sign In"]/..)[2]
-    mouse over    (//p[text()="Sign In"]/..)[2]
+    [Arguments]     ${user}    ${password}
+    Wait Until Page Contains Element    //p[text()="Sign In"]/parent::div
+    Wait Until Element Is Visible     //p[text()="Sign In"]/parent::div
+    mouse over    //p[text()="Sign In"]/parent::div
     Wait Until Page Contains Element     //p[text()="Sign In"]/parent::a
     Click Element    //p[text()="Sign In"]/parent::a
-    Wait Until Element Is Visible    //h1[text()="Sign in"]
-    Wait Until Element Is Visible    //p[text()="Remember me"]
-    Wait Until Element Is Enabled    //input[@id="email"]
-    click element    //input[@id="email"]
-    Sleep  1
-    Press Keys  //input[@id="email"]   ${user}
-    Click Element    //input[@id="password"]
-    Sleep  1
-    Press Keys  //input[@id="password"]   ${password}
-    Click Button   //div[text()="SIGN IN"]/parent::button
-    Wait Until Page Does Not Contain Element     //div[text()="SIGN IN"]/parent::button
-    Wait Until Page Contains Element    //p[text()="${first_name}"]     ${Long Waiting Time}
+    Login Without Open Browser     ${user}    ${password}
     ${user_information}    Get Account Info
     Set Suite Variable     ${USER_INFO}    ${user_information}
 
@@ -255,7 +258,6 @@ change store from cart
         Append To List    ${stores_text}   ${store_text[0]}    ${store_text[-1]}
     END
     [Return]   ${stores_text}
-
 
 
 check shopping cart
@@ -408,9 +410,69 @@ check cart store items
 Delivering to Zipcode Verify
     [Arguments]    ${Element}
     ${Zip Updated}   Set Variable   Not Set
-    Run Keyword And Ignore Error    Wait Until Element Is Visible    //p[text()="${Element}"]
-    ${Zip Code}    Run Keyword And Ignore Error     Get Text    //p[text()="${Element}"]
+    Run Keyword And Ignore Error    Wait Until Element Is Visible    //p[text()="${Element} "]    5
+    ${Zip Code}    Run Keyword And Ignore Error     Get Text    //p[text()="${Element} "]
     IF  '${Zip Code}[0]' == 'PASS'
         ${Zip Updated}   Extract Last Text    ${Zip Code}[1]
     END
     [Return]    ${Zip Updated}
+
+Change ZipCode Adjust Different ZipCode    #Different ZipCode
+    [Arguments]   ${Guest ZipCode}
+    ${Zip Display}    Delivering To Zipcode Verify     Delivering to
+    IF  '${Zip Display}' != '${Guest ZipCode}'
+        Click Element    //p[text()="Change"]
+        Input Text       id=zipCode     ${Guest ZipCode}
+        Click Element    //button[@formid="zipCode"]
+        ${Apply Check}   Run Keyword And Ignore Error   Wait Until Element Is Visible   //p[contains(text(), "is already applied")]    3
+        IF  '${Apply Check}[0]' == 'PASS'
+            Set Focus To Element   id=zipCode
+            Clear Element Text     id=zipCode
+            Input Text             id=zipCode     ${Guest ZipCode}
+            Click Element    //button[@formid="zipCode"]
+        END
+
+        ${Updated ZipCode}    Delivering To Zipcode Verify     Delivering to
+        ${Verify Res}  Run Keyword And Warn On Failure   Should Be Equal As Strings    ${Updated ZipCode}  ${Guest ZipCode}
+    END
+    [Return]   ${Verify Res}
+
+
+Click Save For Later Button By Index
+    [Arguments]     ${index}
+    Wait Until Page Contains Element     (//div[text()="Save for Later"])\[${index}\]
+    Wait Until Element Is Visible     (//div[text()="Save for Later"])\[${index}\]
+    Click Element     (//div[text()="Save for Later"])\[${index}\]
+
+
+Click Move to Cart Button By Index
+    [Arguments]     ${index}
+    Wait Until Page Contains Element     (//div[text()="Move to Cart"])\[${index}\]
+    Wait Until Element Is Visible     (//div[text()="Move to Cart"])\[${index}\]
+    Click Element     (//div[text()="Move to Cart"])\[${index}\]
+
+
+Check Paper Bag Fees In Order Summary
+    [Arguments]    ${E_pbf}
+    Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]
+    Wait Until Element Is Visible    //h3[text()="Order Summary"]
+    Wait Until Element Is Visible    //*[text()="Total:"]/following-sibling::h4
+    Wait Until Element Is Visible    //p[text()="Other Fees"]
+    Click Element     //p[text()="Other Fees"]
+    Wait Until Element Is Visible     //p[text()="Paper Bag Fees"]/../following-sibling::p
+    ${pbf}   Get Text    //p[text()="Paper Bag Fees"]/../following-sibling::p
+    Should Be Equal As Strings     ${pbf}    ${E_pbf}     Paper Bag Fees are wrong
+
+
+Check Paper Bag Fees Not In Order Summary
+    [Arguments]    ${E_pbf}
+    Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]
+    Wait Until Element Is Visible    //h3[text()="Order Summary"]
+    Wait Until Element Is Visible    //*[text()="Total:"]/following-sibling::h4
+    Page Should Contain Element     //p[text()="Paper Bag Fees"]/../following-sibling::p
+
+
+Click SignIn in michaels rewards moudle
+    Wait Until Page Contains Element     //div[text()="Sign In"]/..
+    Wait Until Element Is Visible     //div[text()="Sign In"]/..
+    Click Element    //div[text()="Sign In"]/..

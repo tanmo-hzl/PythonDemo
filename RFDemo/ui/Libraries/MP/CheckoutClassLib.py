@@ -28,4 +28,4 @@ class CheckoutClassLib(object):
 
 if __name__ == '__main__':
 	c = CheckoutClassLib()
-	c.get_class_info(22)
+	c.get_class_guest_info(22)

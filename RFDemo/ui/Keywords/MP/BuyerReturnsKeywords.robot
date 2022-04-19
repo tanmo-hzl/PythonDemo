@@ -1,10 +1,9 @@
 *** Settings ***
-Library        ../../Libraries/CommonLibrary.py
-Library        ../../Libraries/MP/BuyerReturnLib.py
-Library        ../../Libraries/MP/BuyerAccountInfoLib.py
-Resource        ../../Keywords/Common/CommonKeywords.robot
+Library             ../../Libraries/CommonLibrary.py
+Library             ../../Libraries/MP/BuyerAccountInfoLib.py
 Resource            ../../Keywords/Common/MenuKeywords.robot
 Resource            ../../Keywords/MP/BuyerOrderHistoryKeywords.robot
+Resource            ../../Keywords/MP/EAInitialBuyerDataAPiKeywords.robot
 
 *** Variables ***
 ${Return_Reasons}
@@ -73,19 +72,20 @@ Buyer Return - Eneter Detail Page By Status
 
 
 Buyer Return - Back To Order List On Order Detail Page
-    Click Element    //p[text()="Return and Dispute"]/parent::a
+    Click Element    //p[text()="Return and Dispute"]/../parent::a
     Wait Until Element Is Not Visible    //p[text()="Payment Method"]
     Wait Until Element Is Visible    //p[starts-with(text(),"Filter")]/../parent::button
 
 Buyer Return - Cancel Pending Return Order
     [Arguments]    ${sure}=${True}
     Click Element    //div[text()="Cancel"]/parent::button
-    Wait Until Element Is Visible    //h3[text()="Cancel Return"]
+    Wait Until Element Is Visible    //*[text()="Cancel Return"]
     Wait Until Element Is Visible    //p[text()="Are you sure you want to cancel your return order ?"]
     IF    '${sure}'=='${True}'
         Click Element  //div[text()="Confirm"]/parent::button
         Wait Until Element Is Visible    //*[text()="Success"]
         Wait Until Element Is Not Visible    //*[text()="Success"]
+        Page Should Contain Element    //p[text()="Cancelled"]
     ELSE
         Click Element  //div[text()="Close"]/parent::button
     END
@@ -178,12 +178,13 @@ Buyer Return - Click Submit
 Buyer Return - View Return Detail After Submit
     Wait Until Element Is Visible    //span[text()="View Return Details"]/parent::button
     Click Element    //span[text()="View Return Details"]/parent::button
-    Wait Until Element Is Visible    //p[text()="Return and Dispute"]/parent::a
+    Wait Until Element Is Visible    //p[text()="Return and Dispute"]/../parent::a
     Wait Loading Hidden
-    Page Should Contain Element    //p[text()="Pending Return"]
+    Page Should Contain    Refund Summary
 
 Buyer Return - Cancel Return Request After Submit
     Wait Until Element Is Visible    //span[text()="View Return Details"]/parent::button
+    Scroll Last Button Into View
     ${count}    Get Element Count    //span[text()="Cancel Return Request"]/parent::button
     IF    ${count}==1
         Click Element    //span[text()="Cancel Return Request"]/parent::button
@@ -192,12 +193,13 @@ Buyer Return - Cancel Return Request After Submit
         Click Element    //span[text()="Confirm"]/parent::button
         Wait Until Element Is Not Visible    //span[text()="Cancel Return Request"]/parent::button
         Wait Until Element Is Visible    //p[text()="Your return order has been cancelled successfully."]
+        Click Element    //p[text()="Tips"]/following-sibling::*
         Click Element    //span[text()="View Return Details"]/parent::button
-        Wait Until Element Is Visible    //p[text()="Return and Dispute"]/parent::a
+        Wait Until Element Is Visible    //p[text()="Return and Dispute"]/../parent::a
         Wait Loading Hidden
-        Page Should Contain Element    //p[text()="Return Cancelled"]
+        Page Should Contain Element    //p[text()="Cancelled"]
     ELSE
-        Skip    This return order can't be cancel!
+        Pass Execution    This return order can't be cancel!
     END
 
 Buyer Return - Change Customer Address
@@ -329,12 +331,56 @@ Buyer Return - Flow - Submit Return For All Items
         Buyer Return - Cancel Return Request After Submit
     END
 
-Buyer Return - Flow - Create Return Order
-    [Arguments]     ${occupancy_parameter}=0
-    ${order_numbers}    Get Shipped Order Numbers    ${Returnable_Order_Number}    ${ENV}
+Buyer Return - Get Shipping And Completed Order By API
+    ${order_list}    API - Get Buyer Order List
+    ${returnable_orders}    Get Shipping And Completed Order    ${order_list}
+    [Return]    ${returnable_orders}
+
+Buyer Return - Get Returnable Order By API
+    ${order_numbers}    Buyer Return - Get Shipping And Completed Order By API
     ${order_len}    Get Length    ${order_numbers}
     Skip If    '${order_len}'=='0'    There are no order can return
-    Buyer Order - Loop Enter Detail Page Find Returnable Order    ${order_numbers}
-    Buyer Return - Flow - Submit Return For All Items
-    Buyer Return - Return Order Again And Again    ${Returnable_Order_Number}
-    Buyer Left Menu - Orders & Purchases - Order History
+    ${order}    Set Variable
+    ${return_parent_order_number}    Set Variable    ${None}
+    FOR    ${order}    IN    @{order_numbers}
+        ${returnable}    API - Check Buyer Order Actionable By Parent Order Number    ${order}    return
+        IF    "${returnable}"=="${True}"
+            ${return_parent_order_number}    Set Variable    ${order}
+            Set Suite Variable    ${Returnable_Order_Number}    ${order}
+            Exit For Loop
+        END
+    END
+    [Return]    ${return_parent_order_number}
+
+Buyer Return - Go To Order History Detail Page
+    [Arguments]    ${parent_order_number}=${None}
+    IF    "${parent_order_number}"!="${None}"
+        Go To    ${URL_MIK}/buyertools/order-history?detail=${parent_order_number}
+        Log   EA_Report_Data=${parent_order_number}
+        Wait Loading Hidden
+        Wait Until Element Is Visible    //div[text()="Buy All Again"]/parent::button
+        Wait Until Element Is Visible    //img[@alt="thumbnail"]
+    ELSE
+        Skip   There are no order can create return order.
+    END
+
+
+Buyer Return - Flow - Create Return Order By API
+    [Arguments]    ${partial_item_return}=${False}    ${partial_quantity_return}=${False}    ${buyer_reason}=${False}
+    ${return_parent_order_number}    Buyer Return - Get Returnable Order By API
+    ${partial_item_return}    Set Variable If     "${partial_item_return}"=="partialItemReturn"    ${True}    ${False}
+    ${partial_quantity_return}    Set Variable If     "${partial_item_return}"=="partialQuantityReturn"    ${True}    ${False}
+    ${buyer_reason}    Set Variable If     "${partial_item_return}"=="buyerReason"    ${True}    ${False}
+    IF    "${return_parent_order_number}"!="${None}"
+        API - Buyer Create Return Order By Parent Order Number    ${return_parent_order_number}
+        ...    ${partial_item_return}    ${partial_quantity_return}    ${buyer_reason}
+        IF    "${partial_item_return}"=="${True}" or "${partial_quantity_return}"=="${True}"
+            ${returnable}    API - Check Buyer Order Actionable By Parent Order Number    ${return_parent_order_number}    return
+            IF    "${returnable}"=="${True}"
+                API - Buyer Create Return Order By Parent Order Number    ${return_parent_order_number}
+                ...    ${False}    ${False}    ${buyer_reason}
+            END
+        END
+    ELSE
+        Skip   There are no order can create return order by API.
+    END

@@ -1,7 +1,7 @@
 *** Settings ***
 Library        ../../Libraries/CommonLibrary.py
-Library             ../../Libraries/MP/SellerStoreSettingLib.py
-Resource        ../../Keywords/Common/CommonKeywords.robot
+Library        ../../Libraries/MP/SellerStoreSettingLib.py
+Resource       ../../Keywords/Common/CommonKeywords.robot
 Resource       ../../TestData/EnvData.robot
 
 *** Variables ***
@@ -52,7 +52,7 @@ Store Profile - Show Photo Documentation
     ${types}    Create List    Logo     Banner (optional)
     ${item}    Set Variable
     FOR    ${item}    IN    @{types}
-        Click Element    //h4[text()="${item}"]/following-sibling::p//p[text()="Click here"]
+        Click Element    //h2[text()="${item}"]/following-sibling::p//p[text()="Click here"]
         Wait Until Element Is Visible    //p[text()="GOT IT"]
         IF    "${item}"=="Logo"
             Page Should Contain Element    //header/p[text()="Michaels Logo Image Standards"]
@@ -71,7 +71,7 @@ Store Profile - Change Store Photo
     ${types}    Create List    Logo     Banner (optional)
     ${item}    Set Variable
     FOR    ${item}    IN    @{types}
-        Choose File    //h4[text()="${item}"]/following-sibling::button[1]//input    ${photo_path}
+        Choose File    //h2[text()="${item}"]/following-sibling::button[1]//input    ${photo_path}
         Wait Until Element Is Visible    //header[text()="Banner photo edit"]
         Click Element    //div[text()="Apply"]/parent::button
         Wait Until Element Is Not Visible    //header[text()="Banner photo edit"]
@@ -190,7 +190,7 @@ Customer Service - Update Michael Contact Info - Department
 
 Customer Service - Update Michael Contact Info - Unselect All Department
     [Arguments]    ${department_index}=0
-    Scroll Element Into View    //h4[text()="Privacy Policy"]
+    Scroll Element Into View    //h2[text()="Privacy Policy"]
     Click Element    //*[@id="secondaryContacts[${department_index}].department"]
     ${count}    Get Element Count    //*[@id="secondaryContacts[${department_index}].department"]//label/span[@data-checked]/p
     ${index}    Set Variable
@@ -231,32 +231,32 @@ Return Policy - Update Return Center Location By Index
     Click Element    (//*[@id="returnCenter"]/option)[${index}]
 
 Return Policy - Update Return Policy
-    [Documentation]    No Returns(Not recommended),30 Days Return(Default),60 Days Return
+    [Documentation]    No Returns(Not recommended),30 Day Returns,60 Day Returns
     ...      You can enter only part of the text
     [Arguments]    ${name}
-    Click Element    //h4[contains(text(),"${name}")]/../parent::label
+    Click Element    //h3[contains(text(),"${name}")]/../parent::label
 
-Return Policy - Return Shipping Service - Open
+Return Policy - Set Return Shipping Service Open
+    [Arguments]    ${open}=${True}
     ${element}    Set Variable    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label/span[@data-checked]
     ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='0'    Click Element    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label
-    Sleep    1
-
-Return Policy - Return Shipping Service - Close
-    ${element}    Set Variable    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label/span[@data-checked]
-    ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='1'    Click Element    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label
-    Sleep    1
+    IF    '${count}'=='0' and '${open}'=='${True}'
+        Click Element    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label
+        Element Should Be Visible    //*[@id="upsId"]
+    ELSE IF    ${count}>0 and '${open}'=='${False}'
+        Click Element    //p[text()="Return Shipping Service"]/following-sibling::div[1]//label
+        Element Should Not Be Visible    //*[@id="upsId"]
+    END
 
 Return Policy - Input UPS User Info
     [Arguments]   ${name}    ${pwd}    ${accress_key}
     Scroll Element Into View    //*[contains(text(),"SAVE")]
     Clear Element Value    //*[@id="upsId"]
-    Clear Element Value    //*[@id="upsPassword"]
+    Clear Element Value    //*[@id="upsMima"]
     Clear Element Value    //*[@id="upsAccessKey"]
     Clear Element Value    //*[@id="upsAccountNumber"]
     Input Text    //*[@id="upsId"]    ${name}
-    Input Text    //*[@id="upsPassword"]    ${pwd}
+    Input Text    //*[@id="upsMima"]    ${pwd}
     Input Text    //*[@id="upsAccessKey"]    ${accress_key}
     ${number}    Get Random Code    6
     Input Text    //*[@id="upsAccountNumber"]    ${number}
@@ -287,8 +287,10 @@ Product Groups - Click Button - Create Product Groups
 Product Groups - Input Group Name
     Wait Until Element Is Visible    //*[@id="groupTitle"]
     ${gorup_name}    Get uuid Split
+    ${now_time}    Get Time
+    ${now_time}    Evaluate    '${now_time}'\[2:10\]
     Clear Element Value    //*[@id="groupTitle"]
-    Set Suite Variable    ${New_Group_Name}    Group ${gorup_name}
+    Set Suite Variable    ${New_Group_Name}    ${now_time} ${gorup_name}
     Input Text    //*[@id="groupTitle"]    ${New_Group_Name}
 
 Product Groups - Search Listing
@@ -373,12 +375,25 @@ Product Groups - Copy Group By Group Name
 Product Groups - Delete Group By Group Name
     [Arguments]    ${name}    ${sure}=${True}
     Product Groups - Click Button Name With Group Name    trash    ${name}
+    Product Groups - Delete Group Pop-Up    ${sure}
+    Wait Until Element Is Not Visible    //p[text()="${name}"]
+
+Product Groups - Delete Group Pop-Up
+    [Arguments]    ${sure}=${True}
     Wait Until Element Is Visible    //header[text()="Delete this product group?"]
     Page Should Contain Element    //*[contains(text(),"We will delete this product group once you click")]
     Run Keyword If   '${sure}'=='${True}'    Click Element    //div[text()="Got It"]/parent::button
     Run Keyword If   '${sure}'=='${False}'    Click Element    //div[text()="Caccel"]/parent::button
     Wait Until Element Is Not Visible    //header[text()="Delete this product group?"]
-    Wait Until Element Is Not Visible    //p[text()="${name}"]
+
+Product Groups - Delete All Group
+    ${count}    Get Element Count    //*[contains(@class,"icon-tabler-trash")]
+    FOR    ${index}    IN RANGE    ${count}
+        Click Element    //*[contains(@class,"icon-tabler-trash")]
+        Product Groups - Delete Group Pop-Up    ${True}
+    END
+    Wait Until Page Contains     There are no product group available currently.
+
 
 Product Groups - Show Group Item By Group Name
     [Arguments]    ${name}
@@ -398,16 +413,16 @@ Product Groups - Get Total Group Quantity
 Product Groups - Set Group Visible In Storefront By Name
     [Arguments]    ${name}    ${visible}=${True}
     ${base_ele}    Set Variable    //p[text()="${name}"]/../../following-sibling::div//label
-    ${isVisible}    Get Text    ${base_ele}/following-sibling::p
+    ${isVisible}    Get Text    ${base_ele}//p
     Run Keyword If    '${isVisible}'=='No' and '${visible}'=='${True}'
     ...  Click Element    ${base_ele}
     Run Keyword If    '${isVisible}'=='Yes' and '${visible}'=='${False}'
     ...  Click Element    ${base_ele}
     Sleep    1
     IF    '${visible}'=='${True}'
-        Wait Until Element Is Visible    ${base_ele}/following-sibling::p[text()="Yes"]
+        Wait Until Element Is Visible    ${base_ele}//p[text()="Yes"]
     ELSE
-        Wait Until Element Is Visible    ${base_ele}/following-sibling::p[text()="No"]
+        Wait Until Element Is Visible    ${base_ele}//p[text()="No"]
     END
 
 Fulfillment Info - Rename Fulfillment
@@ -523,8 +538,8 @@ Fulfillment Info - Update Observed Holidays - Unselect Observed Holidays
 Fulfillment Info - Update Observed Holidays - Observed Holidays
     #Customer Care,Billing,Order Resolution,Technical Issues,Marketing
     [Arguments]    ${fulfil_index}=0    ${holidays_index}=0    ${holiday}=${None}
-    ${base_ele}    Set Variable     //*[@name="fulfillmentCenters[${fulfil_index}].fulfillmentName"]//div[@id="fulfillment${holidays_index}holidayName"]
-    Click Element    ${base_ele}
+    ${base_ele}    Set Variable     //*[@id="fulfillmentCenters[${fulfil_index}].anthorHolidays[${holidays_index}].holidayName"]
+    Click Element     ${base_ele}
     Wait Until Element Is Visible    ${base_ele}//p\[text()="New Years Day"\]/..
     Sleep    0.5
     ${name}   Set Variable    ${holiday}[name]
@@ -611,28 +626,31 @@ Fulfillment Info - Update Shipping Rate Table - Add Threshold
     Input Text    //*[@id="expeditedShippingLines[0].shipmentCost"]    ${shipmentcost}
     Input Text    //*[@id="expeditedShippingLines[${expeditedindex}].shipmentCost"]    ${expeditedshipcost}
 
-Fulfillment Info - Offer Expedited Shipping To Customers - Open
-    ${element}    Set Variable    //p[text()="Will you offer expedited shipping to customers?"]/following-sibling::div//span[@data-checked]
-    ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='0'    Click Element     //p[text()="Will you offer expedited shipping to customers?"]/following-sibling::div//span
+Fulfillment Info - Offer Expedited Shipping To Customers Open
+    [Arguments]    ${open}=${True}
+    ${element}    Set Variable    //p[text()="Will you offer expedited shipping to customers?"]/following-sibling::div//label
+    ${count}    Get Element Count    ${element}//span\[@data-checked\]
+    IF    '${count}'=='0' and "${open}"=="${True}"
+        Click Element     ${element}
+        Wait Until Element Is Visible    ${element}//p\[text()="Yes"\]
+    ELSE IF    ${count}>0 and "${open}"=="${False}"
+        Click Element     ${element}
+        Wait Until Element Is Visible    ${element}//p\[text()="No"\]
+    END
     Sleep    1
 
-Fulfillment Info - Offer Expedited Shipping To Customers - Close
-    ${element}    Set Variable    //p[text()="Will you offer expedited shipping to customers?"]/following-sibling::label/span[@data-checked]
-    ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='1'    Click Element    //p[text()="Will you offer expedited shipping to customers?"]/following-sibling::label/span
+Fulfillment Info - Offer Different Price Threshold For Expedited Shipping Open
+    [Arguments]    ${open}=${True}
+    ${element}    Set Variable    //p[text()="Will you offer different price threshold for expedited shipping?"]/../following-sibling::div/label
+    ${count}    Get Element Count    ${element}/span\[@data-checked\]
+    IF    ${count}==0 and "${open}"=="${True}"
+        Click Element    ${element}
+        Wait Until Element Is Visible    ${element}//p\[text()="Yes"\]
+    ELSE IF    ${count}>0 and "${open}"=="${False}"
+        Click Element    ${element}
+        Wait Until Element Is Visible    ${element}//p\[text()="No"\]
+    END
     Sleep    1
-
-Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Open
-        ${element}    Set Variable    //p[text()="Will you offer different price threshold for expedited shipping?"]/../following-sibling::div/label/span[@data-checked]
-    ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='0'    Click Element    //p[text()="Will you offer different price threshold for expedited shipping?"]/../following-sibling::div/label/span
-    Sleep    1
-
-Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Close
-    ${element}    Set Variable    //p[text()="Will you offer different price threshold for expedited shipping?"]/../following-sibling::div/label/span[@data-checked]
-    ${count}    Get Element Count    ${element}
-    Run Keyword If    '${count}'=='1'    Click Element    //p[text()="Will you offer different price threshold for expedited shipping?"]/../following-sibling::div/label/span
 
 Fulfillment Info - Offer Different Price Threshold For Expedited Shipping - Delet Threshold
 #    [Arguments]    ${ffcenters}=0

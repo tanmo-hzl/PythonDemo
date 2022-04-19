@@ -29,7 +29,7 @@ Test Seller Reject Return Order
     Seller Returns - Search Order By Return ID    ${Cur_Return_ID}
     Seller Returns - Enter Return Detail Page By Line Index
     Seller Returns - Set All Items Full Or No Refund    ${False}
-    Seller Returns - Submit Refund Decision
+    Seller Returns - Submit Refund Decision Pop-Ups
     Seller Returns - Back To Order List On Return Detail Page
 
 Test Submit Disputes For Offer Full Refund

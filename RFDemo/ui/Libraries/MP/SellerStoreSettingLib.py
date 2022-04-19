@@ -62,16 +62,16 @@ class SellerStoreSettingLib(object):
 			"state": address[2],
 			"zipcode": address[0],
 			"name": "Fulfillment {}".format(uu_code[:9]),
-			"start1": ["08", str(random.randint(10, 20)), "AM"],
-			"end1": ["08", str(random.randint(50, 59)), "PM"],
-			"start2": ["08", str(random.randint(50, 59)), "AM"],
-			"end2": ["10", str(random.randint(10, 20)), "PM"],
+			"start1": ["08", "00", "AM"],
+			"end1": ["08", "00", "PM"],
+			"start2": ["09", "00", "AM"],
+			"end2": ["10", "00", "PM"],
 			"holiday1": {"name": random.choice(self.holidays_list),
-			             "startDate": datetime.datetime.now().strftime("%Y-%m-%d"),
+			             "startDate": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d"),
 			             "endDate": (datetime.datetime.now() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")},
 			"holiday2": {"name": random.choice(self.holidays_list),
-			             "startDate": (datetime.datetime.now() + + datetime.timedelta(days=21)).strftime("%Y-%m-%d"),
-			             "endDate": (datetime.datetime.now() + datetime.timedelta(days=3)).strftime("%Y-%m-%d")}
+			             "startDate": (datetime.datetime.now() + datetime.timedelta(days=9)).strftime("%Y-%m-%d"),
+			             "endDate": (datetime.datetime.now() + datetime.timedelta(days=12)).strftime("%Y-%m-%d")}
 		}
 		print(fulfillment_info)
 		return fulfillment_info

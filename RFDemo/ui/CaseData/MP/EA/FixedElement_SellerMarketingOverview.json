@@ -1,14 +1,15 @@
 {
-  "p": [
-    "Marketing",
-    "Keep track of your marketing performance and analytics to enhance your handmade goods growth!",
-    "All Data is Based on Central Standard Time (CST)",
+  "h3": [
     "Create a customer Promotion",
     "Marketing Effect",
+    "Marketing Campaign"
+  ],
+  "p": [
+    "Marketing",
+    "Keep track of your marketing performance and analytics to enhance your handmade goods growth! All Data is Based on Central Standard Time (CST)",
     "Active Campaigns",
     "Revenue from Discounts",
     "Go to Analytics for more details",
-    "Marketing Campaign",
     "Actions",
     "Name",
     "Message",

@@ -20,7 +20,7 @@ Checkout Class - Get Class Guest Quantity
     Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]
     Wait Until Element Is Visible    //h2[text()="Getting your Order"]
     Wait Until Element Is Visible    //div[text()="Next: Payment & Order Review"]/parent::button
-    ${Guest_Ele}    Set Variable    (//h2[text()="Classes"]/../..//div[contains(text(),"Guest")])
+    ${Guest_Ele}    Set Variable    (//div[contains(text(),"Guest")])
     Set Suite Variable    ${Guest_Ele}    ${Guest_Ele}
     ${count}    Get Element Count    ${Guest_Ele}
     ${Guest_Data}    Get Class Guest Info    ${count}

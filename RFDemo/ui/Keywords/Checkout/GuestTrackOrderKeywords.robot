@@ -7,7 +7,7 @@ Library     ../../TestData/Checkout/GuestGenerateAddress.py
 
 *** Keywords ***
 Guest Track My Order Process
-    [Arguments]      ${Extracted Number}   ${Channel Mode}   ${Mulit Store Check}    ${Place Order Total}    ${IF PIS}   ${IF MKR}   ${Refined Store Address}   ${Multiple Store Address}=None
+    [Arguments]      ${Extracted Number}   ${Channel Mode}   ${Mulit Store Check}    ${Place Order Total}    ${IF PIS}   ${IF MKR}   ${Refined Store Address}   ${Updated ZipCode}   ${Multiple Store Address}=None
     # Store Address For PIS MODE, Multiple Store For PISM Mode
     ${Ship Address}                 Set Variable
     ${Order Address Collection}     Create List
@@ -18,7 +18,11 @@ Guest Track My Order Process
         Set To Dictionary	${Track Info}    lastName=${pickupInfo.lastName}
     END
     Go TO    ${Home URL}/${Track Order Suffix}
-    Wait Until Element Is Visible     xpath=//h2[text()='Track Order']     ${Mid Waiting Time}
+    ${Track Order Page Check}   Run Keyword And Ignore Error     Wait Until Element Is Visible      //div[text()='It seems the feature is currently unavailable']    3
+    IF  '${Track Order Page Check}[0]' == 'PASS'
+        Go TO    ${Home URL}/footer-nav/${Track Order Suffix}
+    END
+    Wait Until Element Is Visible     //h2[text()='Track Order']     ${Mid Waiting Time}
     FOR    ${key}   ${value}   IN ZIP   ${Track Info.keys()}    ${Track Info.values()}
         Input Text    //input[@id='${key}']    ${value}
     END
@@ -28,7 +32,7 @@ Guest Track My Order Process
     Sleep  2
 
     Wait Until Element Is Visible    //h1[text()='Track My Order']    ${Mid Waiting Time}
-    ${Track Order Page Info}    Get Text            //h4[@class='css-1jmss33']
+    ${Track Order Page Info}    Get Text            //h4[text()="Order #"]
     ${Track Page Order}         Number Extracted    ${Track Order Page Info}
     Should Be Equal             ${Track Page Order}    ${Extracted Number}
 
@@ -48,7 +52,7 @@ Guest Track My Order Process
     IF  '${IF PIS}' != 'PIS Only'
         ${Actual Address}    Get Text       //p[text()="Ship To"]/parent::div/following-sibling::div
         ${Actual Address}    Convert Store Address To Regular Space    ${Actual Address}
-        ${Expected Address}  Join Address   ${guestInfo.addressLine1}   ${guestInfo.city}   ${guestInfo.state}   ${guestInfo.zipCode}
+        ${Expected Address}  Join Address   ${guestInfo.addressLine1}   ${guestInfo.city}   ${guestInfo.state}   ${Updated ZipCode}
         Run Keyword And Warn On Failure    String Comparison    ${Expected Address}   ${Actual Address}
     ELSE
         ${Ship To}    Get Element Count     //*[contains(text(), "Ship To")]
@@ -103,17 +107,40 @@ Clear The Cart After Clicking Buy All Again
     [Arguments]    ${Role}
     Go To  ${Home URL}/cart
     ${Continue Shopping}  Run Keyword And Ignore Error  Wait Until Element Is Visible  //div[text()="CONTINUE SHOPPING"]    5
-    Skip If  '${Continue Shopping}[0]' == 'PASS'
-    ${Remove Items}       Run Keyword And Ignore Error  Wait Until Element Is Visible  //p[text()="Remove All Items"]
-    IF   '${Remove Items}[0]' == 'FAIL'
-         AD Exception Handle   //p[text()="Remove All Items"]
+    IF  '${Continue Shopping}[0]' == 'FAIL'
+        ${Remove Items}       Run Keyword And Ignore Error  Wait Until Element Is Visible  //p[text()="Remove All Items"]
+        IF   '${Remove Items}[0]' == 'FAIL'
+             AD Exception Handle   //p[text()="Remove All Items"]
+        END
+        AD Exception Handle              //p[text()="Remove All Items"]
+        Run Keyword And Ignore Error     Wait Until Element Is Visible    //h4[text()="Are you sure you want to remove all products from the cart?"]
+        AD Exception Handle              //div[text()="Yes"]
+        IF  '${Role}' == 'Guest' or '${Role}' == 'GUEST'
+            Run Keyword And Warn On Failure    Wait Until Page Contains Element    //h4[text()="Are you missing items?"]
+        ELSE
+            Run Keyword And Warn On Failure    Wait Until Page Contains Element    //h4[text()="Your shopping cart is empty"]
+        END
+        Run Keyword And Ignore Error    Wait Until Element Is Visible   //div[text()="CONTINUE SHOPPING"]
     END
-    AD Exception Handle              //p[text()="Remove All Items"]
-    Run Keyword And Ignore Error     Wait Until Element Is Visible    //h4[text()="Are you sure you want to remove all products from the cart?"]
-    AD Exception Handle              //div[text()="Yes"]
-    IF  '${Role}' == 'Guest' or '${Role}' == 'GUEST'
-        Run Keyword And Warn On Failure    Wait Until Page Contains Element    //h4[text()="Are you missing items?"]
-    ELSE
-        Run Keyword And Warn On Failure    Wait Until Page Contains Element    //h4[text()="Your shopping cart is empty"]
-    END
-    Run Keyword And Ignore Error    Wait Until Element Is Visible   //div[text()="CONTINUE SHOPPING"]
+
+
+Get Guest Track My Order info
+    [Arguments]    ${order_number}   ${last_name}     ${email}
+    Go To   ${Home URL}/${Track Order Suffix}
+    Track Order by Order Number    ${order_number}   ${last_name}     ${email}
+    Wait Until Page Contains Elements Ignore Ad   //*[text()="Track My Order"]
+    Wait Until Page Contains Elements Ignore Ad   //*[text()="Order #"]
+    ${tarck_order_number}   Get Text  //*[text()="Order #"]
+    Should Be Equal As Strings   ${tarck_order_number[7:]}   ${order_number}
+
+
+Track Order by Order Number
+    [Arguments]    ${order_number}   ${last_name}     ${email}
+    Wait Until Page Contains Elements Ignore Ad  //*[text()="Track Order by Order Number"]
+    Click Element   //input[@id="orderNumber"]
+    Press Keys      //input[@id="orderNumber"]    ${order_number}
+    Click Element   //input[@id="lastName"]
+    Press Keys      //input[@id="lastName"]        ${last_name}
+    Click Element   //input[@id="emailAddress"]
+    Press Keys      //input[@id="emailAddress"]    ${email}
+    Click Element   //*[text()="TRACK ORDER"]/parent::button

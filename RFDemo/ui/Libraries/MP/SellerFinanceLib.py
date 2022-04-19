@@ -44,21 +44,21 @@ class SellerFinanceLib(object):
 		print("bank_detail=", body)
 		return body
 
-	def get_card_detail_info(self):
+	def get_card_detail_info(self, virtual_address=False):
 		uuCode = str(uuid.uuid1()).split("-")[0]
 		cardNumber = random.choice(self.cardList)
 		body = {
 			"cardHolderName": "Card {}".format(uuCode),
 			"bankCardNickName": "Nick {}".format(uuCode),
 			"expirationDate": "0{}{}".format(random.randint(1, 9), random.randint(26, 33)),
-			"addressLine1": "{} SANDRO RD".format(random.randint(1000, 9999)),
-			"addressLine2": "{} SANDRO RD".format(random.randint(100, 999)),
-			"zipCode": "55438-1229",
-			"city": "MINNEAPOLIS",
-			"state": "MN",
+			"addressLine1": "{} SANDRO RD".format(random.randint(1000, 9999)) if virtual_address else "2317 Margaret St",
+			"addressLine2": "{} SANDRO RD".format(random.randint(100, 999)) if virtual_address else "",
+			"zipCode": "55438-1229" if virtual_address else "77093",
+			"city": "MINNEAPOLIS" if virtual_address else "Houston",
+			"state": "MN" if virtual_address else "TX",
 			"firstName": "Test",
 			"lastName": "Auto",
-			"phoneNumber": "3318{}996".format(random.randint(100,999)),
+			"phoneNumber": "3318{}996".format(random.randint(100, 999)),
 			"cardNumber": cardNumber,
 			"endNumber": cardNumber[-4:],
 			"cvv": "{}".format(random.randint(100, 999))
@@ -66,7 +66,33 @@ class SellerFinanceLib(object):
 		print("card_detail=", body)
 		return body
 
+	@staticmethod
+	def format_prices(prices, split_by=","):
+		if type(prices) is float or int:
+			temp_prices = prices.split(".")
+			integer_part = temp_prices[0]
+			if len(temp_prices) > 1:
+				fractional_part = temp_prices[1].ljust(2, "0")
+			else:
+				fractional_part = "00"
+			index = 0
+			temp_integer_part = []
+			for i in range(len(integer_part)-1, -1, -1):
+				temp_integer_part.append(integer_part[i])
+				index += 1
+				if index == 3 and i != 0:
+					temp_integer_part.append(split_by)
+					index = 0
+			temp_integer_part.reverse()
+			f_prices = "".join(temp_integer_part)+"."+fractional_part
+			return f_prices
+		else:
+			return prices
+
 
 if __name__ == '__main__':
 	f = SellerFinanceLib()
-	print(f.get_bank_detail_info())
+
+	s = f.format_prices("16122323.23")
+	print(s)
+

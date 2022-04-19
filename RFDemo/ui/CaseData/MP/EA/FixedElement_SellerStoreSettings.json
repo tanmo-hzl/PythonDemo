@@ -2,9 +2,7 @@
   "!status": {
     "storeProfile": {
       "h2": [
-        "Store Profile"
-      ],
-      "h4": [
+        "Store Profile",
         "Store Name and Location",
         "Logo",
         "Banner (optional)",
@@ -37,14 +35,11 @@
     },
     "customerService": {
       "h2": [
-        "Customer Service"
-      ],
-      "h4": [
+        "Customer Service",
         "Primary Contact Information",
         "Michaels Contact Information",
         "Primary Department Contact",
-        "Privacy Policy",
-        "We have provided a default privacy policy for you to display to customers. Feel free to replace or edit it based on your business needs."
+        "Privacy Policy"
       ],
       "p": [
         "Provide accurate, up-to-date contact information for customers to reach you.",
@@ -52,11 +47,12 @@
         "Select Days",
         "Who should Michaels reach out to in case of any issues? These contacts are for Michaels internal use and are not displayed publicly.",
         "Department",
-        "Add another contact"
+        "Add another contact",
+        "We have provided a default privacy policy for you to display to customers. Feel free to replace or edit it based on your business needs."
       ],
       "label": [
         "Email Address",
-        "Phone Number",
+        "Phone number",
         "Timezone",
         "Start Time",
         "End Time"
@@ -67,9 +63,7 @@
     },
     "fulfillment": {
       "h2": [
-        "Fulfillment"
-      ],
-      "h4": [
+        "Fulfillment",
         "Shipping Rate Table"
       ],
       "p": [
@@ -124,14 +118,12 @@
       "h2": [
         "Return Policy"
       ],
-      "h4": [
-        "Return Policy and Information",
+      "h3": [
         "No Returns (Not recommended)",
-        "30 Days Return (Default)",
-        "60 Days Return",
-        "If your purchase does not meet your satisfaction, it may be returned for full purchase amount within 60 days of your purchase."
-      ],
+        "30 Day Returns",
+        "60 Day Returns"],
       "p": [
+        "Return Policy",
         "Provide your return center location. Set up your return shipping service and customize your return policy.",
         "Return Center Location",
         "Select your fulfillment center location for the default return center location of your store. If you’d like to update it, you can go back to the previous step. The default return center location will be used for your return shipping label. We will not display the full address on your storefront.",
@@ -142,8 +134,9 @@
         "Additional holidays",
         "Return Policy",
         "You may select some return policies which we set up in the system. You can also create customized return policies if you want to.",
-        "This is a final sale item. If your purchase does not meet your satisfaction, it cannot be returned.",
-        "If your purchase does not meet your satisfaction, it may be returned for full purchase amount within 30 days of your purchase.",
+        "All sales final.  No returns allowed.",
+        "If your purchase does not meet your satisfaction, it may be returned, to the seller, for a refund within 30 days of your purchase.",
+        "If your purchase does not meet your satisfaction, it may be returned, to the seller, for a refund within 60 days of your purchase.",
         "Return Shipping Service",
         "Do you want to save your UPS account for return shipping services?",
         "Once you save your own UPS account, we will directly use your default shipping service and shipping rate for your store return service. If not, you will use the UPS shipping service from Michaels. You can setup this information in store setting later.",
@@ -153,6 +146,7 @@
         "Manage the shipping label in your Marketplace account"
       ],
       "div": [
+        "Return Policy and Information",
         "SAVE"
       ]
     },
@@ -168,6 +162,19 @@
       "div": [
         "PREVIEW IN STOREFRONT",
         "CREATE A PRODUCT GROUP"
+      ]
+    },
+    "productGroupsNone": {
+      "h2": [
+        "Product Groups"
+      ],
+      "p": [
+        "Let’s Get Started",
+        "Welcome to your product groups! With variety of products, keep organized with product groups."
+      ],
+      "h4": ["There are no product group available currently."],
+      "div": [
+        "CREATE PRODUCT GROUP"
       ]
     }
   }

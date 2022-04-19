@@ -8,8 +8,10 @@ Resource            ../../TestData/EnvData.robot
 
 *** Variables ***
 ${Rsa_Email_Pwd}
-${Headers_Get}
-${Headers_Post}
+${Headers_Get_Seller}
+${Headers_Post_Seller}
+${Headers_Get_Buyer}
+${Headers_Post_Buyer}
 
 *** Keywords ***
 Set Post Headers
@@ -47,6 +49,16 @@ Send Post Request
     ${response}    POST On Session    alias     ${path}    json=${data}    verify=${False}    expected_status=${status}
 	[Return]    ${response}
 
+Send Delete Request
+	[Arguments]     ${url}      ${path}      ${data}    ${headers}=${None}    ${status}=200
+    IF    "${headers}"=="${None}"
+        ${headers}    Set Post Headers    ${None}
+    END
+	Create Session      alias     url=${url}      headers=${headers}    verify=${True}    timeout=${timeout}
+    ${response}     Delete On Session    alias     ${path}    json=${data}    verify=${False}    expected_status=${status}
+	[Return]    ${response}
+
+
 Mik - Get Public Key And Encrypt Account Info
     [Arguments]    ${user}
     ${res}    Send Get Request   ${API_HOST_MIK}    /usr/user/get-public-key
@@ -71,10 +83,21 @@ Mik - User Sign In By Secure - POST
 Mik - Set Seller Suite Variables
     [Arguments]    ${data}
     ${token}    Get Json Value    ${data}    token
-    ${Headers_Get}     Set Get Headers    ${token}
-    ${Headers_Post}    Set Post Headers    ${token}
+    ${Headers_Get_Seller}     Set Get Headers    ${token}
+    ${Headers_Post_Seller}    Set Post Headers    ${token}
     ${Seller_Store_Id}     Get Json Value     ${data}    sellerStoreProfile    sellerStoreId
-    Set Suite Variable    ${Headers_Get}    ${Headers_Get}
-    Set Suite Variable    ${Headers_Post}    ${Headers_Post}
+    Set Suite Variable    ${Headers_Get_Seller}    ${Headers_Get_Seller}
+    Set Suite Variable    ${Headers_Post_Seller}    ${Headers_Post_Seller}
     Set Suite Variable    ${Seller_Store_Id}    ${Seller_Store_Id}
     Set Suite Variable    ${Seller_Info}    ${data}
+
+Mik - Set Buyer Suite Variables
+    [Arguments]    ${data}
+    ${token}    Get Json Value    ${data}    token
+    ${Headers_Get_Buyer}     Set Get Headers    ${token}
+    ${Headers_Post_Buyer}    Set Post Headers    ${token}
+    ${Buyer_Id}     Get Json Value     ${data}    user    id
+    Set Suite Variable    ${Headers_Get_Buyer}    ${Headers_Get_Buyer}
+    Set Suite Variable    ${Headers_Post_Buyer}    ${Headers_Post_Buyer}
+    Set Suite Variable    ${Buyer_Id}    ${Buyer_Id}
+    Set Suite Variable    ${Buyer_Info}    ${data}

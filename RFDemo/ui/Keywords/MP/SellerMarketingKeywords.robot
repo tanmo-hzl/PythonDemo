@@ -1,13 +1,56 @@
 *** Settings ***
 Library        ../../Libraries/CommonLibrary.py
+Library        ../../Libraries/MP/SellerMarketingLib.py
 Resource       ../../Keywords/Common/CommonKeywords.robot
 Resource       ../../TestData/EnvData.robot
+Resource       ../../Keywords/MP/EAInitialSellerDataAPiKeywords.robot
+Resource       ../../Keywords/MP/EAInitialBuyerDataAPiKeywords.robot
 
 *** Variables ***
+${index}
 ${Promotion_Code}
 ${Day_Range}
+${Unique_Discount_Sku}
+${Cur_Sku}
+
 
 *** Keywords ***
+Seller Marketing - Find Active Promotion Info By Promotion Type
+    [Arguments]    ${pro_type}=1
+    ${content}    Create List
+    FOR    ${index}    IN RANGE    1    5
+        ${page_total}    ${data}    API - Get Promotion List    ${index}
+        ${content}    Combine Lists    ${content}    ${data}
+        Exit For Loop If    ${index}==${page_total}
+    END
+    ${results}    ${type_name}    ${Unique_Discount_Sku}    Get Promotion Info By Index    ${content}    ${pro_type}
+    IF    "${results}"=="${False}"
+        Skip   There are no Unique_Discount_Sku in ${type_name}.
+    END
+    Set Suite Variable    ${Unique_Discount_Sku}    ${Unique_Discount_Sku}
+
+Seller Marketing - Go To Promotion Items PLP or PDP Page
+    [Arguments]    ${to_page}=PLP
+    Set Suite Variable    ${Cur_Sku}    ${Unique_Discount_Sku}[value]
+    Go To    ${URL_MIK}/search?q=${cur_sku}
+    Wait Until Element Is Visible    //div[@idx="0"]/a[contains(@href,"${cur_sku}")]
+    IF    "${to_page}"=="PDP"
+        Click Element    //div[@idx="0"]/a[contains(@href,"${cur_sku}")]
+        Wait Until Element Is Visible     //p[text()="Sold and shipped by"]
+    END
+    Sleep    1
+
+Seller Marketing - Get Cur Promotion Items Variants
+    ${data}    Api - Get Product Detial By Sku Number - GET    ${Cur_Sku}
+    ${sku_number}    ${variants}    Get Promotion Items Variants     ${data}    ${Cur_Sku}
+    Set To Dictionary     ${Unique_Discount_Sku}    sku_number=${sku_number}    variants=${variants}
+    Set Suite Variable    ${Unique_Discount_Sku}    ${Unique_Discount_Sku}
+
+Seller Marketing - Set Day Range
+    [Arguments]    ${start_day}=1     ${end_day}=5
+    ${Day_Range}    Create List    ${start_day}     ${end_day}
+    Set Suite Variable    ${Day_Range}    ${Day_Range}
+
 Seller Marketing - Click Button Create Customer Promotion
     Wait Until Element Is Visible    //div[text()="CREATE A PROMOTION"]/parent::button
     Click Element    //div[text()="CREATE A PROMOTION"]/parent::button
@@ -27,10 +70,11 @@ Seller Marketing - Promotion Type - Select By Index
     Click Element    //header[contains(@id,"chakra-modal--header")]/following-sibling::div/div/div[${index}]
     Wait Until Element Is Not Visible    //header[contains(@id,"chakra-modal--header")]/following-sibling::button
     Sleep    1
-    Wait Until Element Is Visible    //h2[text()="Promotion Details"]
+    Wait Until Element Is Visible    //h3[text()="Promotion Details"]
     Sleep    1
 
 Seller Marketing - Click Link Change Promotion Type
+    Wait Until Element Is Visible    //form[@id="promotionForm"]//div[text()="Change "]/parent::button
     Click Element    //form[@id="promotionForm"]//div[text()="Change "]/parent::button
     Wait Until Element Is Visible    //header[contains(@id,"chakra-modal--header")]/following-sibling::button
 
@@ -78,7 +122,7 @@ Seller Marketing - Set Start And End Time
     [Arguments]    ${start_day_add}=0     ${end_day_add}=3
     ${now_tiem}    Get Current Date
     ${abFrom}    Add Time To Date     ${now_tiem}    ${start_day_add} days
-    ${abTo}    Add Time To Date     ${abFrom}    ${end_day_add} days
+    ${abTo}    Add Time To Date     ${abFrom}    ${${start_day_add}+${end_day_add}} days
     ${s_t}    Convert Date    ${abFrom}    datetime
     ${e_t}    Convert Date    ${abTo}    datetime
     ${s_month}    Get En Month    ${s_t.month}
@@ -93,14 +137,14 @@ Seller Marketing - Set Start And End Time
 Seller Marketing - Click Button Select Product
     Scroll Element Into View    //div[text()="Select Product"]/parent::button
     Click Element    //div[text()="Select Product"]/parent::button
-    Wait Until Element Is Visible    //h3[text()="Choose Products to add"]
+    Wait Until Element Is Visible    //*[text()="Choose Products to add"]
     Wait Until Element IS Visible    //table//tbody//td[4]//p
     Sleep    1
 
 Seller Marketing - Click Button Choose Gift
     Scroll Element Into View    //div[text()="Choose Gift"]/parent::button
     Click Element    //div[text()="Choose Gift"]/parent::button
-    Wait Until Element Is Visible    //h3[text()="Choose Products to add"]
+    Wait Until Element Is Visible    //*[text()="Choose Products to add"]
     Wait Until Element IS Visible    //table//tbody//td[4]//p
     Sleep    1
 
@@ -132,25 +176,35 @@ Seller Marketing - Select Product - Search
     ...    Wait Until Element Is Visible    //table//tbody//td[3]//p[text()="${search_value}"]
     Sleep    1
 
+Seller Marketing - Select Product - Page Turning
+    Common - Page Turning    Last
+    ${count}    Get Element Count    //div[contains(@id,"page-")]/p
+    ${max_page}    Get Text    (//div[contains(@id,"page-")]/p)[${count}]
+    ${page_index}    Evaluate    random.randint(${max_page}-5,${max_page}-1)
+    Common - Page Turning    ${page_index}
+
 Seller Marketing - Select Product - Selected By Index
-    [Documentation]    index:=0 - select all; >0 - select by line index
+    [Documentation]    index:=0 - select all; >0 - Select multiple items randomly
     [Arguments]    ${index}=1
-    ${count}    Get Element Count    (//div[contains(@id,"page-")]/p)
-    ${page_index}    Evaluate    random.randint(1,${count})
-    Scroll Element Into View    (//div[contains(@id,"page-")]/p)[${page_index}]
-    Click Element    (//div[contains(@id,"page-")]/p)[${page_index}]
+    Seller Marketing - Select Product - Page Turning
     Sleep    1
     Wait Until Page Contains Element     //table//thead//th//*[@stroke="currentColor"]
     Scroll Element Into View    //table//thead//th//*[@stroke="currentColor"]
     IF    '${index}'=='0'
         Click Element    //table//thead//th//*[@stroke="currentColor"]
     ELSE
-        Click Element    (//table//tbody//td//*[@stroke="currentColor"])[${index}]
+        ${items_index}    Evaluate    random.sample([i for i in range(1, 10)], 3)
+        FOR    ${temp_index}    IN    @{items_index}
+            ${tr_count}    Get Element Count   (//table//tbody//td//*[@stroke="currentColor"])[${temp_index}]
+            IF  ${tr_count}>0
+                Click Element    (//table//tbody//td//*[@stroke="currentColor"])[${temp_index}]
+            END
+        END
     END
 
 Seller Marketing - Add Sale Product To Promotion
     Seller Marketing - Click Button Select Product
-    Seller Marketing - Select Product - Selected By Index    0
+    Seller Marketing - Select Product - Selected By Index    3
     Seller Marketing - Select Product - Add
 
 Seller Marketing - Add Gift Product To Promotion
@@ -194,7 +248,7 @@ Seller Marketing - Input Off Value
 
 Seller Marketing - Check For Example Text By Promotion Type
     [Arguments]    ${pom_type}=1    ${buy_value}=0    ${get_value}=0    ${off_value}=0
-    Scroll Element Into View    //div[text()="BACK"]
+    Scroll Last Button Into View
     Sleep    1
     IF    '${pom_type}'=='1'
         Page Should Contain Element   //h4[text()="Spend $${buy_value} or more get ${off_value}% Off"]
@@ -226,7 +280,7 @@ Seller Marketing - Create Promotion - Back
 
 Seller Marketing - Create Promotion - Save And Continue
     Click Element    //div[text()="SAVE AND CONTINUE"]/parent::button
-    Wait Until Element Is Visible      //h2[text()="Promotion Review"]
+    Wait Until Element Is Visible      //h3[text()="Promotion Review"]
 
 
 Seller Marketing - Promotion Review - Save As Draft
@@ -262,28 +316,77 @@ Seller Marketing - Campaign - Search
     Clear Element Value    //*[@id="searchOrders"]
     Input Text    //*[@id="searchOrders"]    ${search_value}
     Press Keys    None    ${RETURN_OR_ENTER}
+    Seller Marketing - Campaign - Wait Loading Hidden
+
+Seller Marketing - Campaign - Clear Search Value
+    Clear Element Value    //*[@id="searchOrders"]
+    Press Keys    None    ${RETURN_OR_ENTER}
+
+Seller Marketing - Campaign - Filter Open
+    Click Element    ${Filter_Btn_Ele1}
+    Wait Until Element Is Visible    ${Filter_View_Results}
+    Sleep    1
+    Click Element    //h5[text()="Date Range"]/following-sibling::button[text()="CLEAR"]
+    Click Element    //h5[text()="Status"]/following-sibling::button[text()="CLEAR"]
+
+Seller Marketing - Campaign - Filter View Results
+    Click Element    ${Filter_View_Results}
+    Wait Until Element Is Not Visible    //h5[text()="Status"]/following-sibling::button[text()="CLEAR"]
+    Seller Marketing - Campaign - Wait Loading Hidden
+
+Seller Marketing - Campaign - Wait Loading Hidden
     Sleep    1
     Wait Until Element Is Visible    //*[@id="searchOrders"]/preceding-sibling::div//*[contains(@class,"icon-tabler-search")]
     Sleep    1
 
-Seller Marketing - Campaign - Filter Clear All
-    Click Element    ${Filter_Btn_Ele1}
-    Wait Until Element Is Visible    ${Filter_View_Results}
-    Sleep    1
-    Click Element    ${Filter_Clear_All}
+Seller Marketing - Campaign - Filter By Date Range
+    [Arguments]    ${start_day}=-7    ${end_days}=0
+    Seller Marketing - Campaign - Filter Open
+    ${date_range}    Create List    ${start_day}    ${end_days}
+    ${filter_date_range}    Common - Filter Select Date Range    //*[@id="startDate"]    ${date_range}
+    Seller Marketing - Campaign - Filter View Results
+    [Return]    ${filter_date_range}
 
-Seller Marketing - Campaign - Filter Search By Status
+Seller Marketing - Campaign - Check Results After Filter By Date Range
+    [Arguments]    ${filter_date_range}
+    ${page_date_range}    Seller Marketing - Campaign - Get Pomotion Date Range By Index
+    Check Filter Date Range Contains Page Date    ${filter_date_range}    ${page_date_range}
+    Common - Page Turning    Last
+    Seller Marketing - Campaign - Wait Loading Hidden
+    ${tr_count}    Get Element Count    //table/tbody/tr
+    ${page_date_range}    Seller Marketing - Campaign - Get Pomotion Date Range By Index    ${tr_count}
+    Check Filter Date Range Contains Page Date    ${filter_date_range}    ${page_date_range}
+
+Seller Marketing - Campaign - Get Pomotion Date Range By Index
+    [Arguments]    ${index}=1
+    ${page_start_date}    Get Text    //table/tbody/tr[${index}]/td[7]//p
+    ${page_end_date}    Get Text    //table/tbody/tr[${index}]/td[8]//p
+    ${page_date_range}    Create List    ${page_start_date}    ${page_end_date}
+    [Return]    ${page_date_range}
+
+Seller Marketing - Campaign - Filter By Status
     [Documentation]    All Status,Active,Completed,Draft,Terminated,Scheduled
     [Arguments]    ${status}
-    Click Element    ${Filter_Btn_Ele1}
-    Wait Until Element Is Visible    ${Filter_View_Results}
-    Sleep    1
-    Click Element    //h5[text()="Status"]/following-sibling::button[text()="CLEAR"]
+    Seller Marketing - Campaign - Filter Open
     Click Element    //span[text()="${status}"]/parent::label
-    Click Element    ${Filter_View_Results}
-    Sleep    1
-    Wait Until Element Is Visible    //*[@id="searchOrders"]/preceding-sibling::div//*[contains(@class,"icon-tabler-search")]
-    Sleep    1
+    Seller Marketing - Campaign - Filter View Results
+
+Seller Marketing - Campaign - Get Promotion Info By Index
+    [Arguments]  ${index}=1
+    ${base_ele}    Set Variable    //table//tbody/tr[${index}]
+    ${name}    Get Text      ${base_ele}/td\[2\]//p
+    ${message}    Get Text      ${base_ele}/td\[3\]//p
+    ${type}    Get Text      ${base_ele}/td\[4\]/p
+    ${discount}    Get Text      ${base_ele}/td\[5\]/p
+    ${status}    Get Text      ${base_ele}/td\[6\]/p
+    ${start_date}    Get Text      ${base_ele}/td\[7\]//p
+    ${end_date}    Get Text      ${base_ele}/td\[8\]/p
+    ${Cur_Pomotion_Info}    Create Dictionary    name=${name}    message=${message}    type=${type}
+    ...    discount=${discount}    status=${status}    startDate=${start_date}    endDate=${end_date}
+    Set Suite Variable    ${Cur_Pomotion_Info}    ${Cur_Pomotion_Info}
+    Set Suite Variable    ${Cur_Pomotion_Msg}    ${message}
+    Set Suite Variable    ${Cur_Pomotion_Status}    ${status}
+
 
 Seller Marketing - Campaign - Select Actions By Index
     [Documentation]    action:View Details,Edit,Delete,Terminated
@@ -307,8 +410,22 @@ Seller Marketing - Campaign - View Details By Index
     [Arguments]    ${index}=1
     Seller Marketing - Campaign - Select Actions By Index    View Details    ${index}
     Wait Until Element Is Visible    //header[text()="Promotion Details"]
+    Seller Marketing - Campaign - Check Details Info
     Click Element    //div[text()="Close"]/parent::button
     Wait Until Element Is Not Visible    //header[text()="Promotion Details"]
+
+Seller Marketing - Campaign - Check Details Info
+    Page Should Contain    ${Cur_Pomotion_Info}[name]
+    Page Should Contain    ${Cur_Pomotion_Info}[message]
+    Page Should Contain    ${Cur_Pomotion_Info}[startDate]
+    Page Should Contain    ${Cur_Pomotion_Info}[endDate]
+
+Seller Marketing - Campaign - View Details After Filter By Status
+    [Arguments]    ${status}
+    Seller Marketing - Campaign - Scroll To End
+    Seller Marketing - Campaign - Filter By Status    ${status}
+    Seller Marketing - Campaign - Get Promotion Info By Index
+    Seller Marketing - Campaign - View Details By Index
 
 Seller Marketing - Campaign - Delete By Index
     [Arguments]    ${index}=1    ${sure}=${True}
@@ -344,7 +461,7 @@ Seller Marketing - Campaign - Terminated By Index
 Seller Marketing - Campaign - Edit By Index
     [Arguments]    ${index}=1
     Seller Marketing - Campaign - Select Actions By Index    Edit    ${index}
-    Wait Until Element Is Visible    //h2[text()="Promotion Details"]
+    Wait Until Element Is Visible    //h3[text()="Promotion Details"]
     Sleep    1
 
 Seller Marketing - Flow - Create&Update Promotion Info
@@ -362,7 +479,7 @@ Seller Marketing - Flow - Create&Update Promotion Info
         Seller Marketing - Input Off Value    ${off_value}
     END
     Seller Marketing - Check For Example Text By Promotion Type    ${pom_type}    ${buy_value}    ${get_value}    ${off_value}
-        Seller Marketing - Create Promotion - Save And Continue
+    Seller Marketing - Create Promotion - Save And Continue
     IF    '${publish}'=='${True}'
         Seller Marketing - Promotion Review - Publish Campaign
     ELSE

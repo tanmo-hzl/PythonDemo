@@ -1,5 +1,5 @@
 *** Settings ***
-Library             SeleniumLibrary     run_on_failure=Capture Screenshot and embed it into the report    implicit_wait=0.2 seconds
+Library             SeleniumLibrary     run_on_failure=Capture Screenshot and embed it into the report
 Library             Collections
 Library             BuiltIn
 Library             DateTime
@@ -12,7 +12,8 @@ ${TIME_OUT}                    15
 ${MAX_TIME_OUT}                30
 ${URL_MIK}                     https://mik.${env}.platform.michaels.com
 ${URL_MIK_SIGNIN}              ${URL_MIK}/signin
-${URL_MIK_cart}              ${URL_MIK}/cart
+${URL_MIK_cart}                ${URL_MIK}/cart
+${URL_MIK_profile}             ${URL_MIK}/buyertools/profile
 ${URL_MP_LANDING}              ${URL_MIK}/mp/landing
 ${URL_MP_APPLY}                ${URL_MIK}/mp/apply
 ${URL_MAP}                     https://map.${env}.platform.michaels.com
@@ -30,4 +31,5 @@ ${API_HOST_MIK}                ${URL_MIK}/api
 
 *** Keywords ***
 Capture Screenshot and embed it into the report
+    Run Keyword And Ignore Error    Get Browser Console Log
     Capture Page Screenshot    filename=EMBED

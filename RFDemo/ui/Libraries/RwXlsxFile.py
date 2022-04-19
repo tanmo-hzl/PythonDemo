@@ -1,10 +1,9 @@
 import json
-import os
-from typing import Optional
-
-from openpyxl import Workbook
 from openpyxl import load_workbook
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+from typing import Optional
+import os
 
 
 class RwXlsxFile(object):

@@ -9,11 +9,11 @@ ${MAP_PWD}
 *** Keywords ***
 Sign In Map With Admin Account
     Go To   ${URL_MAP}
-    Wait Until Element Is Visible    //h2[text()="Member Login"]
+    Wait Until Element Is Visible    //*[text()="Member Login"]
     Input Text  //input[@type='text']    ${MAP_EMAIL}
     Input Text  //input[@type='password']    ${MAP_PWD}
-    Click Element  xpath=//button[@type='submit']
-    Wait Until Element Is Visible    //p[text()="Marketplace"]
+    Click Element  //*[@id="submitBtn"]
+    Wait Until Element Is Visible    //*[text()="Explore the living ideas with Michaels Admin Portal."]
 
 Main Menu - To Michaels.com
     Click Element    //p[text()="Michaels.com"]/../parent::button

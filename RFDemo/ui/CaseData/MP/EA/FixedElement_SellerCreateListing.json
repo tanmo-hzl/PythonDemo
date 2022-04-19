@@ -2,7 +2,6 @@
   "step1": {
     "@placeholder": [
       "Enter listing title",
-      "Search listing category, such as Art Supplies, Christmas",
       "Enter Seller SKU",
       "Enter brand name",
       "Enter manufacturer name",

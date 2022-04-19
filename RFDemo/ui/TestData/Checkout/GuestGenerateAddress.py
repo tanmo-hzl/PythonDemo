@@ -1,12 +1,23 @@
-import random
+import json
 import random
 import re
-# from browsermobproxy import Server
-from itertools import permutations
-
-import productInfo
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import productInfo
+# from browsermobproxy import Server
+from itertools import permutations
+import zipCodeInfo
+
+mkr_combination = ["MKR", "MKRS", "MKR CLASS", "MKRS CLASS"]
+pis_combination = ["PIS", "PISM"]
+
+
+def random_getting_zipcode(count):
+    if int(count) < len(zipCodeInfo.zip_code_list) // 2:
+        zip_list = random.sample(zipCodeInfo.zip_code_list, int(count))
+    else:
+        zip_list = random.sample(zipCodeInfo.zip_code_list, 4)
+    return zip_list
 
 
 def create_profile():
@@ -97,9 +108,6 @@ def mixed_list(channel, category, env):
     return mixed_lists, channel_exp_lists
 
 
-print(items_channel_dictionary_creation("PIS|SDDH", "1|1", "qa"))
-
-
 def split_skus_from_partial_url(sku_dict):
     sku_list = []
     partial_urls = []
@@ -126,8 +134,8 @@ def if_class(products):
     return 'Product'
 
 
-def if_pick_only(channel):
-    if channel in ["PIS", "PISM", "PIS|PISM", "PISM|PIS"]:
+def pis_only_verify(channel):
+    if channel in permutation_with_channel(pis_combination):
         return 'PIS Only'
     elif "PISM" in channel or "PIS|PISM" in channel or "PISM|PIS" in channel:
         return 'PISM Existed'
@@ -135,20 +143,30 @@ def if_pick_only(channel):
         return 'Not PIS Only'
 
 
-def if_mkr_only(channel):
-    mkr_combination = ["MKR", "MKRS", "MKR CLASS", "MKRS CLASS"]
-    permute_list = []
-    for i in range(len(mkr_combination)):
-        for result in permutations(mkr_combination, i + 1):
-            if i == 0:
-                permute_list.append(result)
-            else:
-                permute_list.append("|".join(result))
-
-    if channel in permute_list:
+def mkr_only_verify(channel):
+    mkr_permute_list = permutation_with_channel(mkr_combination)
+    if channel in mkr_permute_list:
         return 'MKR Only'
     else:
         return 'Not MKR Only'
+
+
+def sdd_detect(channel):
+    if "SDD" in channel:
+        return "YES"
+    else:
+        return "NO"
+
+
+def permutation_with_channel(channel_list):
+    permutation_channel_list = []
+    for i in range(len(channel_list)):
+        for result in permutations(channel_list, i + 1):
+            if i == 0:
+                permutation_channel_list.append(str(result[0]))
+            else:
+                permutation_channel_list.append("|".join(result))
+    return permutation_channel_list
 
 
 def if_mik_exist(channel):
@@ -262,17 +280,26 @@ def remove_simple_ship_to_me(lists):
 
 
 def items_verify(subtotal, side_subtotal):
-    subtotal_number = int(re.findall('[0-9]+', subtotal)[0])
+    try:
+        subtotal_number = int(re.findall('[0-9]+', subtotal)[0])
+    except IndexError:
+        subtotal_number = 0
     side_items_sum = 0
     for side in side_subtotal:
-        side_number = int(re.findall('[0-9]+', side)[0])
+        try:
+            side_number = int(re.findall('[0-9]+', side)[0])
+        except IndexError:
+            side_number = 0
         side_items_sum += side_number
+
     return subtotal_number, side_items_sum
 
 
 def number_extracted(rough_number):
     extracted_number = re.findall('[0-9]+', rough_number)
     order_number = "".join(extracted_number)
+    if order_number == "":
+        order_number = 0
     return order_number
 
 
@@ -347,11 +374,15 @@ def convert_store_address_to_regular_space(raw_address):
 
 
 def store_panel_stock_handle(stock_element, qty):
-    if stock_element.split(" ")[0] == "999+" or stock_element.split(" ")[0] == "99+":
-        return True
-    elif int(stock_element.split(" ")[0]) >= int(qty):
-        return True
-    return False
+    try:
+        if stock_element.split(" ")[0] == "999+" or stock_element.split(" ")[0] == "99+":
+            return True
+        elif int(stock_element.split(" ")[0]) >= int(qty):
+            return True
+        else:
+            return False
+    except ValueError:
+        return False
 
 
 def append_element_to_list(original, *elements):
@@ -397,6 +428,13 @@ def extract_last_text(string):
     res = string.split(" ")[-1]
     return res
 
+
+def get_stats_from_order_summary(param):
+    if param.upper() == 'ADD A PROMO CODE':
+        return "Promo Code", "0"
+    else:
+        return param.splitlines()[0], param.splitlines()[1].replace("$", "")
+
 # a = remove_javascript([
 #     'https://mik.qa.platform.michaels.com/product/3-pack-silver-fundamentals-8-x-8-display-case-by-studio-dcor-10641514',
 #     'https://mik.qa.platform.michaels.com/fgm/product/uifree-shipping-one-8-6041083673213394944',
@@ -404,17 +442,13 @@ def extract_last_text(string):
 #     'javascript:void(0)',
 #     'https://sandbox.affirm.com/shop/michaels'])
 # print(a)
-
 # print(pism_list("PISM", 3))
-
 # print(mixed_list("PISM|MKR", "2|2"))
-
 # a_list = ["$3.99", "$-3.99", "-$3.99"]
 # b = []
 # for a in a_list:
 #     b.append(float(a.replace("$", "")))
 # print(sum(b))
-
 # b = items_list("MKR Class", "1")
 # print(b)
 # c = url_to_sku_list(b)

@@ -1,9 +1,8 @@
 import datetime
-import os
-import sys
-
 import pytz
 from bs4 import BeautifulSoup
+import os
+import sys
 
 
 def get_total_case_info(soup):

@@ -1,9 +1,8 @@
-import os
 import tkinter as tk
 import uuid
 from tkinter import filedialog
-
 from PIL import Image
+import os
 
 
 class ToolsResizeImg:

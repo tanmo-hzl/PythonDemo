@@ -1,6 +1,6 @@
 *** Settings ***
 Resource       ../../TestData/EnvData.robot
-Resource       CommonKeywords.robot
+
 
 *** Variables ***
 ${Cur_User_Name}
@@ -13,12 +13,15 @@ Open User Menu List
     Sleep    1
 
 User Sign Out
-    CLick Element    //a[@aria-label="Logo Home"]
-    Sleep    2
+    [Arguments]    ${to_home}=${False}
+    IF    '${to_home}'=='${True}'
+        CLick Element    //a[@aria-label="Logo Home"]
+        Sleep    2
+    END
     Open User Menu List
-    Click Element    //p[text()="Sign Out"]
+    Click Element    //*[@role="tooltip"]//p[text()="Sign Out"]
     Wait Until Element Is Not Visible      //p[text()='${Cur_User_Name}']
-    Wait Until Element Is Visible      //p[text()='Sign In']
+    Wait Until Page Contains Element      //p[text()='Sign In']
 
 Main Menu - Account Page
     Open User Menu List
@@ -78,14 +81,16 @@ Store Left Menu - Order Management - Returns
     Store Left Menu - Open Order Management
     Wait Until Element Is Visible    //p[text()="Returns"]/parent::button
     Click Element    //p[text()="Returns"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Returns"]
+    Wait Loading Hidden
+    Wait Until Element Is Visible    //*[@id="searchOrders"]
     Wait Until Element Is Visible    ${Filter_Btn_Ele}
 
 Store Left Menu - Order Management - Disputes
     Store Left Menu - Open Order Management
     Wait Until Element Is Visible    //p[text()="Disputes"]/parent::button
     Click Element    //p[text()="Disputes"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Disputes"]
+    Wait Loading Hidden
+    Wait Until Element Is Visible    //*[@id="searchOrders"]
     Wait Until Element Is Visible    ${Filter_Btn_Ele}
 
 Store Left Menu - Open Store Settings
@@ -130,7 +135,7 @@ Store Left Meun - Store Settings - Product Groups
 Store Left Menu - Dashboard
     Wait Until Element Is Visible    //p[text()="Dashboard"]/parent::button
     Click Element    //p[text()="Dashboard"]/parent::button
-    Wait Until Element Is Visible    //h1[starts-with(text(),"Welcome to your Dashboard")]
+    Wait Until Element Is Visible    //h2[starts-with(text(),"Welcome to your Dashboard")]
     Sleep   2
 
 Store Left Menu - Messages
@@ -145,13 +150,23 @@ Store Left Menu - Account Settings
     Wait Until Element Is Visible    //h2[text()="Account Settings"]
     Sleep   1
 
-Store Left Menu - Marketing
+Store Left Menu - Marketing - Overview
     Wait Until Element Is Visible    //p[text()="Marketing"]
     ${count}    Get Element Count    //p[text()="Marketing"]/../parent::button[@aria-expanded="true"]
     Run Keyword If   '${count}'=='0'    Click Element    //p[text()="Marketing"]/../parent::button
-    Run Keyword If   '${count}'=='1'    Click Element    //p[text()="Marketing Overview"]/parent::button
-    Wait Until Element Is Visible     //p[text()="Create a customer Promotion"]
+    Run Keyword If   '${count}'=='1'    Click Element    //p[text()="Marketing"]/../../following-sibling::div//p[text()="Overview"]/parent::button
+    Wait Until Element Is Visible     //*[text()="Create a customer Promotion"]
     Wait Until Page Contains Element    //*[@id="searchOrders"]/preceding-sibling::div//*[contains(@class,"icon-tabler-search")]
+    Sleep    1
+
+Store Left Menu - Marketing - Advertisement
+    Wait Until Element Is Visible    //p[text()="Marketing"]
+    ${count}    Get Element Count    //p[text()="Marketing"]/../parent::button[@aria-expanded="true"]
+    Run Keyword If   '${count}'=='0'    Click Element    //p[text()="Marketing"]/../parent::button
+    Run Keyword If   '${count}'=='1'    Click Element    //p[text()="Marketing"]/../../following-sibling::div//p[text()="Advertisement"]/parent::button
+    ${handles}    Get Window Handles
+    Switch Window    ${handles[1]}
+    Wait Until Element Is Visible     //p[text()="Management"]
     Sleep    1
 
 Store Left Menu - Open Finances
@@ -187,7 +202,7 @@ Store Left Menu - Finances - Tax Information
 
 Buyer Left Menu - Open Orders & Purchases
     ${base_ele}    Set Variable    (//p[text()="Orders & Purchases"])[2]
-    Wait Until Element Is Visible    ${base_ele}/../parent::button
+    Wait Until Page Contains Element    ${base_ele}/../parent::button
     ${count}    Get Element Count    ${base_ele}/../parent::button[@aria-expanded="false"]
     Run Keyword If    '${count}'=='1'    Click Element    ${base_ele}/../parent::button
     Wait Until Element Is Visible    //p[text()="Order History"]/parent::div
@@ -206,16 +221,17 @@ Buyer Left Menu - Orders & Purchases - Subscription
     Wait Until Element Is Visible    //p[text()="Item Name"]
 
 Buyer Left Menu - Return and Dispute
-    Wait Until Element Is Visible    //p[text()="Return and Dispute"]/../parent::a
+    Wait Until Page Contains Element    //p[text()="Return and Dispute"]/../parent::a
     Click Element    //p[text()="Return and Dispute"]/../parent::a
-    Wait Until Element Is Visible    //h2/div[text()="Return & Dispute"]
+    Wait Until Element Is Visible    //h2[text()="Return & Dispute"]
     Wait Until Element Is Visible    //p[contains(text(),"Filter")]
 
 Buyer Left Menu - Open Account Information
-    Wait Until Element Is Visible    (//p[text()="Account Information"]/parent::div)[2]
+    Scroll Element Into View    (//p[text()="Account Information"]/parent::div)[2]
+    Wait Until Page Contains Element    (//p[text()="Account Information"]/parent::div)[2]
     ${count}    Get Element Count    (//p[text()="Account Information"]/../parent::button[@aria-expanded="false"])[2]
     Run Keyword If    '${count}'=='1'    Click Element    (//p[text()="Account Information"]/parent::div)[2]
-    Wait Until Element Is Visible    //p[text()="Profile"]/parent::div
+    Wait Until Page Contains Element    //p[text()="Profile"]/parent::div
     Sleep    1
 
 Buyer Left Menu - Account Information - Account Settings
@@ -227,7 +243,8 @@ Buyer Left Menu - Account Information - Account Settings
 Buyer Left Menu - Account Information - Profile
     Buyer Left Menu - Open Account Information
     Click Element    //p[text()="Profile"]/parent::div
-    Wait Until Element Is Visible    //h2[text()="Profile"]
+    Wait Until Page Contains Element    //h2[text()="My Profile"]
+    Scroll Element Into View    //h2[text()="My Profile"]
     Sleep    1
 
 Buyer Left Menu - Account Information - Wallet

@@ -12,12 +12,25 @@ ${Dispute_Decisions}
 ${Status_List}
 @{Decisions}
 ${Cur_Order_Total}
+${Dispute_Detail}
 
 *** Keywords ***
-Seller Disputes - Filter - Clear All Filter
+Seller Disputes - Filter - Open
     Wait Loading Hidden
     Click Element    ${Filter_Btn_Ele}
     Wait Until Element Is Visible    ${Filter_View_Results}
+    Sleep    0.5
+    Seller Disputes - Filter - Click Button CLEAR
+
+Seller Disputes - Filter - View Results
+    Sleep    0.5
+    Click Element    //div[text()="View Results"]/parent::button
+    Wait Until Element Is Not Visible    //p[text()="Disputes Status"]
+    Wait Loading Hidden
+    Sleep    0.5
+
+Seller Disputes - Filter - Clear All Filter
+    Seller Disputes - Filter - Open
     Click Element    ${Filter_Clear_All}
     Wait Until Element Is Not Visible    ${Filter_View_Results}
     Wait Until Element Is Visible    ${Filter_Btn_Ele}
@@ -33,24 +46,17 @@ Seller Disputes - Filter - Search Order By Status Single
     [Documentation]    Dispute Opened,Dispute In Process,Offer Made,Offer Rejected,
     ...    Dispute Resolved,Dispute Escalated,Escalation Under Review,Dispute Canceled
     [Arguments]    ${status}
-    Click Element    ${Filter_Btn_Ele}
-    Wait Until Element Is Visible    //p[text()="Disputes Status"]/following-sibling::button
-    Seller Disputes - Filter - Click Button CLEAR
+    Seller Disputes - Filter - Open
     ${order_count}    Get Text    //p[text()="${status}"]/following-sibling::p
     Click Element    //input[@value="${status}"]/parent::label
-    Sleep    0.5
-    Click Element    //div[text()="View Results"]/parent::button
-    Wait Until Element Is Not Visible    //p[text()="Disputes Status"]
-    Wait Loading Hidden
+    Seller Disputes - Filter - View Results
     [Return]    ${order_count}
 
 Seller Disputes - Filter - Search Order By Status List
     [Documentation]    Dispute Opened,Dispute In Process,Offer Made,Offer Rejected,
     ...    Dispute Resolved,Dispute Escalated,Escalation Under Review,Dispute Canceled
     [Arguments]    ${status}
-    Click Element    ${Filter_Btn_Ele}
-    Wait Until Element Is Visible    //p[text()="Disputes Status"]
-    Seller Disputes - Filter - Click Button CLEAR
+    Seller Disputes - Filter - Open
     ${item}    Set Variable
     ${order_count}    Set Variable    0
     FOR    ${item}    IN    @{status}
@@ -58,60 +64,89 @@ Seller Disputes - Filter - Search Order By Status List
         ${order_count}    Evaluate    ${order_count}+${number}
         Click Element    //input[@value="${item}"]/parent::label
     END
-    Sleep    0.5
-    Click Element    //div[text()="View Results"]/parent::button
-    Wait Until Element Is Not Visible    //p[text()="Disputes Status"]
-    Wait Loading Hidden
+    Seller Disputes - Filter - View Results
     [Return]    ${order_count}
+
+Seller Disputes - Filter - Search Order By Duration And Status
+    [Arguments]    ${duration}    @{status}
+    Seller Disputes - Filter - Open
+    ${item}    Set Variable
+    Click Element    //p[text()="${duration}"]/../../parent::label
+    FOR    ${item}    IN    @{status}
+        Click Element    //input[@value="${item}"]/parent::label
+    END
+    Seller Disputes - Filter - View Results
+    Common - Page Turning    Last
+    Seller Disputes - Check Current Page Order Status    ${status}
+    Seller Disputes - Check Current Page Order Date    ${duration}
+    Common - Page Turning    First
+    Seller Disputes - Check Current Page Order Status    ${status}
+    Seller Disputes - Check Current Page Order Date    ${duration}
+
 
 Seller Disputes - Filter - Search Order By Status And Check Result
     [Arguments]    ${quantity}=1
     ${status}    Get Dispute Status By Number    ${quantity}
     ${order_count}    Seller Disputes - Filter - Search Order By Status List    ${status}
     Seller Disputes - Get Results Total Number
-    IF   '${Cur_Order_Total}'!='${order_count}'
-        Fail    ${status}, Filter=${order_count},Results=${Cur_Order_Total}
+    Run Keyword And Ignore Error    Seller Disputes - Compare Filter Total And Page Total    ${status}    ${order_count}
+    Seller Disputes - Check Current Page Order Status    ${status}
+    Common - Page Turning    Next
+    Seller Disputes - Check Current Page Order Status    ${status}
+    Common - Page Turning    Last
+    Seller Disputes - Check Current Page Order Status    ${status}
+
+Seller Disputes - Compare Filter Total And Page Total
+    [Arguments]    ${value}    ${filter_total}
+    IF   '${Cur_Order_Total}'!='${filter_total}'
+        Fail    ${value}, Filter=${filter_total},Results=${Cur_Order_Total}
     END
+
+Seller Disputes - Check Current Page Order Status
+    [Arguments]    ${status}
     ${count}    Get Element Count    //table//tbody/tr
     ${index}    Set Variable
-    ${dispute_status_list}    Create List
-    FOR    ${index}    IN RANGE    1    ${${count} + 1}
+    FOR    ${index}    IN RANGE    1    ${${count}+1}
         ${page_status}    Get Text    //table//tbody/tr[${index}]/td[3]//span
-        Append To List    ${dispute_status_list}    ${page_status}
+        List Should Contain Value    ${status}    ${page_status}
     END
-    ${item}    Set Variable
-    FOR    ${item}    IN    @{dispute_status_list}
-        List Should Contain Value    ${status}    ${item}
+
+Seller Disputes - Check Current Page Order Date
+    [Arguments]    ${purchased_within}
+    ${date_range}    Get Date Range By Purchased Within    ${purchased_within}
+    ${tr_count}    Get Element Count    //table//tbody//tr
+    IF    ${tr_count}>0
+        ${page_date}    Get Text    //table//tbody/tr[1]/td[2]//p
+        Check Page Date In Filter Date Range    ${page_date}    ${date_range}    ${purchased_within}
+        ${page_date}    Get Text    //table//tbody/tr[${tr_count}]/td[2]//p
+        Check Page Date In Filter Date Range    ${page_date}    ${date_range}    ${purchased_within}
     END
 
 Seller Disputes - Filter - Search Order By Duration Single
     [Documentation]    All Time    Today    Yesterday    Past 7 days    Past 30 days    Past 6 Month
     [Arguments]    ${duration}
-    Click Element    ${Filter_Btn_Ele}
-    Wait Until Element Is Visible    //p[text()="Disputes Status"]/following-sibling::button
-    Seller Disputes - Filter - Click Button CLEAR
-    Sleep    0.5
+    Seller Disputes - Filter - Open
     ${order_count}    Get Text    //p[text()="${duration}"]/following-sibling::p
     Click Element    //p[text()="${duration}"]/../../parent::label
-    Sleep    0.5
-    Click Element    //div[text()="View Results"]/parent::button
-    Wait Until Element Is Not Visible    //p[text()="Disputes Status"]
-    Wait Loading Hidden
+    Seller Disputes - Filter - View Results
     [Return]    ${order_count}
 
 Seller Disputes - Filter - Search Order By Duration And Check Result
     [Arguments]    ${duration}=All Time
     ${order_count}    Seller Disputes - Filter - Search Order By Duration Single    ${duration}
     Seller Disputes - Get Results Total Number
-    IF   '${Cur_Order_Total}'!='${order_count}'
-        Fail    ${duration}, Filter=${order_count},Results=${Cur_Order_Total}
-    END
+    Run Keyword And Ignore Error    Seller Disputes - Compare Filter Total And Page Total    ${duration}    ${order_count}
+    Seller Disputes - Check Current Page Order Date    ${duration}
+    Common - Page Turning    Last
+    Seller Disputes - Check Current Page Order Date    ${duration}
+    Common - Page Turning    Previous
+    Seller Disputes - Check Current Page Order Date    ${duration}
 
 Seller Disputes - Get Results Total Number
-    Wait Until Page Contains Element    //table/following-sibling::div//p
-    ${count}    Get Element Count    //table/following-sibling::div//p
+    Wait Until Page Contains Element    //table/../following-sibling::div//p
+    ${count}    Get Element Count    //table/../following-sibling::div//p
     IF    ${count}>0
-        ${result}    Get Text    //table/following-sibling::div//p
+        ${result}    Get Text    //table/../following-sibling::div//p
         ${order_total}    Evaluate    '${result}'.split(" ")\[2\]
         Set Suite Variable    ${Cur_Order_Total}    ${order_total}
     END
@@ -131,9 +166,16 @@ Seller Disputes - Clear Search Value
 
 Seller Disputes - Search Order By Search Value
     [Arguments]    ${search_value}
+    Seller Disputes - Clear Search Value
     Input Text    //*[@id="searchOrders"]    ${search_value}
     Press Keys    ${None}    ${RETURN_OR_ENTER}
     Wait Loading Hidden
+
+Seller Disputes - Get Dispute Detail Info
+    ${retrun_id}    Get Text    //p[text()="Return Request ID:"]//following-sibling::p
+    ${order_id}    Get Text    //p[text()="Order ID:"]//following-sibling::p
+    ${Dispute_Detail}     Create Dictionary      returnId=${retrun_id}    orderId=${order_id}
+    Set Suite Variable    ${Dispute_Detail}    ${Dispute_Detail}
 
 Seller Disputes - Get Dispute Info By Index
     [Arguments]    ${index}=1
@@ -202,11 +244,13 @@ Seller Disputes - Enter Order Detail Page By Index
 Seller Disputes - Back To Disputes List On Order Detail Page
     Scroll Last Button Into View
     Click Element    //p[text()="Back"]/parent::button
-    Wait Until Element Is Visible    //h2[text()="Disputes"]
+    Wait Loading Hidden
+    Wait Until Element Is Visible    //*[@id="searchOrders"]
 
 Seller Disputes - Back To Disputes List On Dispute Detail Page
     Click Element    //p/p[text()="Disputes"]
-    Wait Until Element Is Visible    //h2[text()="Disputes"]
+    Wait Loading Hidden
+    Wait Until Element Is Visible    //*[@id="searchOrders"]
     Sleep    1
 
 Seller Disputes - Details - Click Dispute Request Details
@@ -369,6 +413,7 @@ Seller Disputes - Flow - Eneter Dispute Page To Mack Decision
     [Arguments]    ${decision}
     Seller Disputes - Get Dispute Info By Index
     Seller Disputes - Enter Dispute Details Page By Index And Status    1    ${Dispute_Status}
+    Log   EA_Report_Data=${Dispute_ID}
     Seller Disputes - Details - Click Dispute Request Details
     Seller Disputes - Process - Click Review Request    ${Dispute_Status}
     Seller Disputes - Process - Click Make Decision

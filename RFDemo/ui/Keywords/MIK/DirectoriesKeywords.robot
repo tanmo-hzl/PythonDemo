@@ -11,21 +11,33 @@ ${little_title}
 
 *** Keywords ***
 Go to Secondary Directories
-    [Arguments]  @{path}
+    [Arguments]  ${path}
     Mouse Over and wait  //div[text()='Shop Categories']/parent::a
-    FOR  ${i}  IN  @{path}
-        Mouse Over and wait  //div[text()='${i}']
+    Mouse Over And Wait  //div[text()='Shop Categories']/parent::a/following-sibling::div//a
+    FOR  ${title}  IN   @{path}
+        IF  '${title}'=='Trending Now'
+            Scroll Element And Wait And Click  (//h4[text()='Trending Now']/following-sibling::a)[${path[-1]}]
+            Wait Until Page Contains  ADD TO CART
+            Exit For Loop
+        ELSE IF  '${title}'=='${path}[-1]'
+            Scroll Element And Mouse Over And Wait  //div[text()='${title}']/parent::a
+            IF  '${title}'=='${path}[0]'
+                Scroll Element And Wait And Click    (//div[text()='${title}']/parent::a)[16]
+            ELSE
+                Scroll Element And Wait And Click    //div[text()='${title}']/parent::a
+            END
+            FOR  ${v}  IN  @{path}
+                wait until page contains  ${v}
+            END
+        ELSE
+            Scroll Element And Mouse Over And Wait  //div[text()='${title}']/parent::a
+        END
     END
-    Click On The Element And Wait  //div[text()='${i}']
-    FOR  ${v}  IN  @{path}
-        wait until page contains  ${v}
-    END
-    Verify PLP  ${path}[-1]  Flase
 
 Verify PLP Ordering
     ${sort_text_list}  Create List  Best Sellers  New Arrivals
-    ...  Price: High to Low  Price: Low to High  Rating: High to Low
-    Mouse Click And Wait  //p[text()='Best Match']/../../parent::button
+    ...  Price: High to Low  Price: Low to High  Rating: High to Low  Best Match
+    Mouse Click And Wait  //p[text()='Sort By']/following-sibling::button
     FOR  ${i}  IN  @{sort_text_list}
         Click On The Element And Wait  //p[text()='${i}']/parent::button
         Wait Loading End
@@ -59,14 +71,8 @@ Select the label and verify
         FOR  ${i}  IN RANGE  ${count}  0  -1
             ${ele_text}  Get Text  (${label})[${i}]
             Click On The Element And Wait  (${label})[${i}]
-            IF  "${ele_text}"!="In-Store Pickup"
-                Click On The Element And Wait  //p[text()='Clear All']
-            ELSE
-                ${result}  Run Keyword And Ignore Error  Click On The Element And Wait  (${label})[${i}]
-                IF  '${result[0]}'=='FAIL'
-                    Go Back
-                END
-            END
+            Wait Loading End
+            Click On The Element And Wait  //p[text()='Clear All']
             Wait Loading End
         END
     END
@@ -76,8 +82,7 @@ Select the Ratings and verify
     ${count}  Get Element Count  //p[text()='Ratings']
     IF  ${count}>0
         Click On The Element And Wait  (//p[text()='Please choose a rating']/preceding-sibling::div/*)[${num}]
-        Wait Until Element Is Visible  //p[@title]
         Wait Until Element Is Visible  //div[text()='Rating: ${num} & UP']  30
         Click On The Element And Wait  //p[text()='Clear All']
-        Wait Until Element Is Visible  //p[@title]
+        Wait Until Element Is Not Visible  //p[text()='Clear All']
     END

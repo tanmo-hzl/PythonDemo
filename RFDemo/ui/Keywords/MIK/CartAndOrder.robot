@@ -11,10 +11,7 @@ ${detail_page_price}
 Add Shopping Cart
     [Arguments]  ${cart_num}=1
     Verify Add Shopping Cart And Input Cart Num  ${cart_num}
-    ${result}  ${detail_page_title}  Run Keyword And Ignore Error  Get Text And Wait  //h1
-    IF  '${result}'=='FAIL'
-        ${detail_page_title}  Get Text And Wait  //p[starts-with(text(), 'Item # ')]/preceding-sibling::p
-    END
+    ${detail_page_title}        Get Text And Wait  //h1
     ${detail_page_price}        Get Text And Extraction Price  (//*[starts-with(text(),'$')])[1]
     Set Suite Variable          ${detail_page_price}
     ${detail_page_num}          Get Value  //input[@aria-label="Number Stepper"]
@@ -23,12 +20,13 @@ Add Shopping Cart
     IF  "${product_table}"=="FGM"
         ${ADD_CART_ELE}  Set Variable  //p[text()='ADD TO CART']/../parent::button
     ELSE
-        ${ADD_CART_ELE}  Set Variable  //div[text()='ADD TO CART']/parent::button
+        ${ADD_CART_ELE}  Set Variable  //div[text()='Add to Cart']/parent::button
     END
+    Sleep  3
     Click On The Element And Wait  ${ADD_CART_ELE}
-    Wait Until Element Is Enabled  //div[text()='View My Cart']/parent::button
-    Sleep  0.5
-    ${popup_ele}           Set Variable  //p[text()='Items added to cart!']/../../div[3]//p
+    Wait Until Element Is Visible  //div[text()='View My Cart']/parent::button
+    Sleep  1
+    ${popup_ele}           Set Variable  //*[text()='Items added to cart!']/../../div[3]//p
     ${popup_title}         Get Text And Extraction data  (${popup_ele})[2]
     ${popup_price}         Get Text And Extraction Price   (${popup_ele})[3]
     ${popup_num}           Get Text And Extraction Data  (${popup_ele})[4]  4
@@ -40,7 +38,7 @@ Add Shopping Cart
     Should Be Equal As these data   ${detail_page_num}    ${popup_num}  ${popup_Subtotal_num}
     Should Be Equal As these data   ${popup_all_price}    ${popup_count_all_price}  ${detail_page_all_price}
     Click On The Element And Wait   //div[text()='View My Cart']/parent::button
-    Wait Until Page Contains Element  //p[text()='Total:']/following-sibling::h4  60
+    Wait Until Page Contains Element  //h4[text()='Total:']/following-sibling::h4  60
     Sleep  1
 
 Click Cart Add and Minus
@@ -65,7 +63,7 @@ Click Cart Add and Minus
     ELSE
         Log  The ginseng error
     END
-    Click On The Element And Wait  //p[text()='Total:']/following-sibling::h4
+    Click On The Element And Wait  //h4[text()='Total:']/following-sibling::h4
     Sleep  0.3
     ${cart_value}  Get Value      (//input[@aria-label="Number Stepper"])[${item_num}]
     Should Be Equal As Numbers    ${cart_num}  ${cart_value}
@@ -114,7 +112,7 @@ Remove All Shopping Cart
     Go To  ${URL_MIK_cart}
     ${result}  Run Keyword And Ignore Error   Wait Until Page Contains Element   //p[text()='Remove All Items']
     IF  '${result[0]}'=='PASS'
-        Wait Until Page Contains Element  //p[text()='Total:']/following-sibling::h4  60
+        Wait Until Page Contains Element  //h4[text()='Total:']/following-sibling::h4  60
         Click On The Element And Wait  //p[text()='Remove All Items']
         Click On The Element And Wait  //div[text()='Yes']/parent::button
         Click On The Element And Wait  //div[text()='CONTINUE SHOPPING']/parent::button
@@ -122,23 +120,22 @@ Remove All Shopping Cart
 
 Verify Add Shopping Cart And Input Cart Num
     [Arguments]  ${cart_num}=6
-    ${add_cart_disabled}  Get Element Count   //div[text()='ADD TO CART']/parent::button[@disabled]
+    ${add_cart_disabled}  Get Element Count   //div[text()='Add to Cart']/parent::button[@disabled]
     IF  ${add_cart_disabled}>0
         Log  Items not inventory
-        Search Project  ${search_result}
-        Verify PLP     ${search_result}
     END
     Input Shopping Cart Num          ${cart_num}
 
 Save for Later
     Click On The Element And Wait  //div[text()='Save for Later']/parent::button
     Wait Until Page Contains       Save for Later
+    Sleep  1
     Click On The Element And Wait  //div[text()='Move to Cart']/parent::button
 
 Verify Shopping Cart info
     [Arguments]  ${item_len}=1
     ${Order_Summary}  Get Shoop Cart Order Summary
-    ${Cart_Total}     Get Text And Extraction price  //p[text()='Total:']/following-sibling::h4
+    ${Cart_Total}     Get Text And Extraction price  //h4[text()='Total:']/following-sibling::h4
     Should Be Equal As These Data  ${Order_Summary}  ${Cart_Total}
 
 Get Shoop Cart Order Summary
@@ -187,18 +184,19 @@ Get Estimated Tax
     Return From Keyword  ${Estimated_Tax}
 
 Check Out
-    Wait Until Page Contains Element  //p[text()='Total:']/following-sibling::h4
-    wait until page contains element  //div[text()='PROCEED TO CHECKOUT']
+    Wait Until Page Contains Element  //h4[text()='Total:']/following-sibling::h4  60
+    Sleep  1
     Click On The Element And Wait  //div[text()='PROCEED TO CHECKOUT']/parent::button
     Wait Until Page Contains  Getting your Order
     ${info_count}  Get Element Count  //input[@id="firstName"]
     IF  ${info_count}>0
         ${info_dict}  Create Dictionary  firstName=summer  lastName=summer  addressLine1=5907 Wisdom Creek Dr
-        ...  addressLine2=5907 Wisdom Creek Dr  city=Dallas  state=TX  zipCode=75249  phoneNumber=3252235680
+        ...  addressLine2=5907 Wisdom Creek Dr  city=Dallas  zipCode=75249  email=${checkout_email}  phoneNumber=3252235680
         For dict and input text  ${info_dict}
+        Select From List By Value  //select[@id="state"]  TX
     END
     Wait Until Page Contains  Qty
-    ${Total}  Get Text And Extraction Data  //p[text()='Total:']/following-sibling::h4  1
+    ${Total}  Get Text And Extraction Data  //h4[text()='Total:']/following-sibling::h4  1
     Wait Until Page Does Not Contain Element    //*[@stroke="transparent"]
     Click On The Element And Wait  //div[text()='Next: Payment & Order Review']/parent::button
     ${result}  Run Keyword And Ignore Error  Wait Until Page Contains  Payment Method  5
@@ -208,17 +206,13 @@ Check Out
             Click On The Element And Wait  //div[text()='Use USPS Suggestion']/parent::button
         END
     END
-    Wait Until Page Contains       Payment Method  60
-    Click On The Element And Wait  //p[text()='Paypal']
-    Click On The Element And Wait  (//h3[text()='Payment Method']/parent::div//span)[1]
-    Wait Until Page Contains Element  //div[text()='PLACE ORDER']/parent::button
-    Click On The Element And Wait  //p[text()='Add A Gift Card']/preceding-sibling::div/*
-    Click On The Element And Wait  //div[text()='PLACE ORDER']/parent::button
-    Wait Until Page Contains  Order Confirmation
-
-Go To Order History
-    Mouse Over  //p[text()='summer']/../parent::button
-    Click On The Element And Wait  //p[text()='Orders']
+    Wait Until Page Contains           Payment Method  60
+    Click On The Element And Wait      //p[text()='Paypal']
+    Click On The Element And Wait      (//h3[text()='Payment Method']/parent::div//span)[1]
+    Wait Until Page Contains Element   //div[text()='PLACE ORDER']/parent::button
+    Click On The Element And Wait      //p[text()='Add A Gift Card']/preceding-sibling::div/*
+    Click On The Element And Wait      //div[text()='PLACE ORDER']/parent::button
+    Wait Until Page Contains    Order Confirmation      ${Default_wait_time}
 
 Search Order History
     [Arguments]  ${Search_order}
@@ -259,15 +253,15 @@ Order History View Details
     [Arguments]  ${num}=1
     Go To Order Details Page  ${num}
     Click On The Element And Wait  //div[text()='Buy All Again']
-    Wait Until Page Contains       Success  60
+    Wait Until Page Contains       Success
+    ${Order_Total_one}  Get Text And Extraction price  (//p[text()='Order Total'])[1]/following-sibling::p
     Click On The Element And Wait  //p[text()='View Receipt']
     Wait Until Page Contains       Order Date
-    ${Order_Total_one}  Get Text And Extraction price  (//p[text()='Order Total'])[1]/following-sibling::p
-    Scroll Element Into View  (//p[text()='Order Total'])[2]
-    ${Order_Total_two}  Get Text And Extraction price  (//p[text()='Order Total'])[2]/following-sibling::p
+    Scroll Element Into View  //h2[text()='Order Total']
+    ${Order_Total_two}  Get Text And Extraction price  //h2[text()='Order Total']/following-sibling::h2
     Should Be Equal As Numbers  ${Order_Total_one}  ${Order_Total_two}
     Scroll Element And Wait And Click  //button[@aria-label="Close"]
-    Click On The Element And Wait  //p[text()='Orders']/parent::a
+    Click On The Element And Wait  (//p[text()='Order History'])[2]
     Go To Order Details Page  ${num}
     Click On The Element And Wait  //a[text()='Help Center']
     Wait Until Page Contains  Customer Care

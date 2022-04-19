@@ -1,8 +1,11 @@
+import sys
 import time
+from datetime import timedelta
+
+from robot.libraries.BuiltIn import BuiltIn
 
 from SeleniumLibrary import SeleniumLibrary
 from SeleniumLibrary.base import keyword
-from robot.libraries.BuiltIn import BuiltIn
 
 
 class CustomSeleniumKeywords(SeleniumLibrary):
@@ -22,6 +25,7 @@ class CustomSeleniumKeywords(SeleniumLibrary):
 	def custom_selenium_keyword_inner(self):
 		raise AssertionError
 
+	@keyword
 	def check_errors_console_log(self, url):
 		"""Function to get the browser's console log errors"""
 		self.driver.get(url)
@@ -48,11 +52,21 @@ class CustomSeleniumKeywords(SeleniumLibrary):
 				print("\nBrowser console error on url: %s\nConsole error(s):%s" % (
 					self.driver.current_url, '\n----'.join(new_errors)))
 
+	@keyword
 	def get_browser_console_log(self):
 		"""Get the browser console log"""
 		try:
-			log = self.driver.get_log('browser')
-			return log
+			logs = self.driver.get_log('browser')
+			error_msg = []
+			for item in logs:
+				msg = item.get("message")
+				if msg.count(".js") or msg.count(".jpeg") or msg.count(".css") \
+						or (msg.count("data:image") and msg.count("base64")):
+					continue
+				else:
+					if msg not in error_msg:
+						error_msg.append(msg)
+			print("BrowserError: {}".format(error_msg))
 		except Exception as e:
 			print("Exception when reading Browser Console log")
 			print(str(e))
@@ -75,3 +89,18 @@ class CustomSeleniumKeywords(SeleniumLibrary):
 			self.execute_javascript('document.querySelector("#attentive_creative").remove()')
 			print("hidden attentive_creative success")
 			time.sleep(0.5)
+
+	@keyword
+	def wait_until_page_contains_elements_ignore_ad(self, locator, timeout=5):
+		start_time = time.time()
+		while True:
+			time.sleep(1)
+			end_time = time.time()
+			ele = self.find_elements(locator)
+			self.hidden_unknown_popup()
+			if len(ele) > 0:
+				print("Find element: {} success!".format(locator))
+				break
+			if int(end_time - start_time) > int(timeout):
+				msg = "Find element: {} timeout".format(locator)
+				assert False, msg

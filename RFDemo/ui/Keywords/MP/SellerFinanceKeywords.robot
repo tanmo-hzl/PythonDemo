@@ -77,7 +77,8 @@ Deposit Options - Check Bank Detail Is Update
 
 
 Deposit Options - Click Add Additional Card
-    ${count}    Get Element Count    //h4[text()="Credit Cards"]/../following-sibling::div/div
+    Wait Until Page Contains Element    //p[text()="Add Additional Card"]/parent::button
+    ${count}    Get Element Count    //h3[text()="Credit Cards"]/../following-sibling::div/div
     ${disable_button}    Get Element Count    //p[text()="Add Additional Card"]/parent::button[@disabled]
     IF    "${count}"=="5" and "${disable_button}"=="1"
         Pass Execution    Up to five cards can be added
@@ -104,24 +105,60 @@ Deposit Options - Billing Address
     Input Text    //*[@id="phoneNumber"]    ${Card_Detail}[phoneNumber]
 
 Deposit Options - Add&Edit Card Save
-    [Arguments]    ${sure}=${True}
+    [Arguments]    ${real_address}=${None}    ${sure}=${True}    ${btn_type}=${True}
     IF    '${sure}'=='${True}'
         Click Element    //div[text()="SAVE"]/parent::button
-        Deposit Options - Address Not Verify
+        Wait Until Element Is Not Visible    //div[text()="Cancel"]/parent::button
+        IF    "${real_address}"=="${None}"
+            Sleep    2
+            ${verify_count}    Get Element Count    //p[text()="Verify Address"]
+            IF    ${verify_count}==0
+                ${real_address}    Set Variable    ${True}
+            ELSE
+                ${real_address}    Set Variable    ${False}
+            END
+        END
+        IF    "${real_address}"=="${True}"
+            Deposit Options - Save Real Address    ${btn_type}
+        ELSE
+            Deposit Options - Save Virtual Address    ${btn_type}
+        END
     ELSE
         Click Element    //div[text()="CANCEL"]/parent::button
         Wait Until Element Is Not Visible    //p[text()="Card Information"]
     END
 
-Deposit Options - Address Not Verify
+Deposit Options - Save Real Address
+    [Arguments]    ${save_usps}=${True}
+    Wait Until Element Is Visible    //*[text()="USPS Address Suggestion"]
+    Sleep    1
+    IF    "${save_usps}"=="${True}"
+        Click Element    //*[text()="Use USPS Suggestion"]
+    ELSE
+        Click Element    //*[text()="Use Original Address"]
+    END
+    Wait Until Element Is Not Visible    //*[text()="USPS Address Suggestion"]
+    Wait Until Element Is Visible    //*[contains(text(),"Success")]
+    Wait Until Element Is Not Visible    //*[contains(text(),"Success")]
+
+Deposit Options - Save Virtual Address
+    [Arguments]    ${btn_type}=${True}
     Wait Until Element Is Visible    //p[text()="Verify Address"]
     Wait Until Element Is Visible    //footer//div[text()="SAVE"]/parent::button
     Sleep    1
-    Click Element    //footer//div[text()="SAVE"]/parent::button
-    Wait Until Element Is Not Visible    //p[text()="Verify Address"]
-    Wait Until Element Is Not Visible    //p[text()="Card Information"]
-    Wait Until Element Is Visible    //*[contains(text(),"Success")]
-    Wait Until Element Is Not Visible    //*[contains(text(),"Success")]
+    IF    "${btn_type}"=="${True}"
+        Click Element    //footer//div[text()="SAVE"]/parent::button
+        Wait Until Element Is Not Visible    //p[text()="Verify Address"]
+        Wait Until Element Is Not Visible    //p[text()="Card Information"]
+        Wait Until Element Is Visible    //*[contains(text(),"Success")]
+        Wait Until Element Is Not Visible    //*[contains(text(),"Success")]
+    ELSE
+        Click Element    //footer//div[text()="EDIT"]/parent::button
+        Wait Until Element Is Not Visible    //footer//div[text()="EDIT"]/parent::button
+        Wait Until Element Is Visible    //div[text()="CANCEL"]/parent::button
+        Click Element    //div[text()="CANCEL"]/parent::button
+        Wait Until Element Is Not Visible    //p[text()="Card Information"]
+    END
 
 Deposit Options - Select Last Credit Card
     ${edit_count}    Get Element Count    //p[text()="Edit"]/../parent::button
@@ -154,10 +191,10 @@ Deposit Options - Check New Card Info
 Deposit Options - Remove Credit Card
     [Arguments]    ${sure}=${True}
     Reload Page
-    Wait Until Element Is Visible    //h4[text()="Credit Cards"]/../following-sibling::div/div
-    ${count}    Get Element Count    //h4[text()="Credit Cards"]/../following-sibling::div/div
-    IF    ${count}>2
-        Click Element    (//p[text()="Expiration"]/../following-sibling::div//button)[${count}]
+    Wait Until Element Is Visible    //h3[text()="Credit Cards"]/../following-sibling::div/div
+    ${count}    Get Element Count    //h3[text()="Credit Cards"]/../following-sibling::div/div
+    IF    ${count}>1
+        Click Element    //p[text()="Expiration"]/../following-sibling::div//button
         Wait Until Element Is Visible    //p[text()="Remove"]/../parent::button
         Click Element    //p[text()="Remove"]/../parent::button
         Wait Until Element Is Visible    //p[text()="Remove Payment Method"]
@@ -169,8 +206,8 @@ Deposit Options - Remove Credit Card
         Wait Until Element Is Visible    //*[contains(text(),"Success")]
         Wait Until Element Is Not Visible    //*[contains(text(),"Success")]
     ELSE
-        Capture Element Screenshot    //h4[text()="Credit Cards"]/../parent::div    credit_card_list.png
-        Skip  credit card number less than 2, not remove
+        Capture Element Screenshot    //h3[text()="Credit Cards"]/../parent::div    credit_card_list.png
+        Skip  credit card number less than 1, not remove
     END
 
 Transactions - Search Order
@@ -182,37 +219,54 @@ Transactions - Search Order
     Sleep    1
     Clear Element Value    //*[@id="searchOrders"]
 
-Transactions - Filter By Status Or Transaction Single
-    [Documentation]    Completed,Pending,Paid，Payout,Sales,Refund,Cancellation,Return Shipping Label Fee
-    [Arguments]    ${status}
+Transactions - Filter - Open Filter
     Wait Until Element Is Visible    ${Filter_Btn_Ele1}
     Click Element    ${Filter_Btn_Ele1}
     Wait Until Element Is Visible    ${Filter_Clear_All}
     Click Element    ${Filter_Clear_All}
     Sleep  0.5
-    Click Element    //*[text()="${status}"]/../parent::label
-    Sleep  0.5
+
+Transactions - Filter - View Results
     Click Element    ${Filter_View_Results}
     Wait Until Element Is Not Visible    ${Filter_View_Results}
     Wait Loading Hidden
     Sleep    1
 
+Transactions - Filter By Date Range
+    [Arguments]    ${start_day}=-7    ${end_day}=0
+    Transactions - Filter - Open Filter
+    ${date_range}    Create List    ${start_day}    ${end_day}
+    ${filter_date_range}    Common - Filter Select Date Range    //*[@id="startDate"]    ${date_range}
+    Transactions - Filter - View Results
+    ${text}    Get Text    //*[contains(text(),"Filter")]
+    Should Be Equal As Strings    ${text}    Filter (1)
+    [Return]    ${filter_date_range}
+
+Transactions - Check Date Range Filter Results
+    [Arguments]    ${filter_date_range}
+    ${page_end_date}    Get Text    //table//tbody/tr[1]/td[1]/p
+    Common - Page Turning    Last
+    ${tr_count}   Get Element Count    //table//tbody/tr
+    ${page_start_date}    Get Text    //table//tbody/tr[${tr_count}]/td[1]/p
+    Check Page Date In Filter Date Range    ${page_start_date}    ${filter_date_range}
+    Check Page Date In Filter Date Range    ${page_end_date}    ${filter_date_range}
+
+
+Transactions - Filter By Status Or Transaction Single
+    [Documentation]    Completed,Pending,Paid，Payout,Sales,Refund,Cancellation,Return Shipping Label Fee
+    [Arguments]    ${status}
+    Transactions - Filter - Open Filter
+    Click Element    //*[text()="${status}"]/../parent::label
+    Transactions - Filter - View Results
+
 Transactions - Filter By Status Or Transaction List
     [Documentation]    Completed,Pending,Paid，Payout,Sales,Refund,Cancellation,Return Shipping Label Fee
     [Arguments]    ${status_list}
-    Wait Until Element Is Visible    ${Filter_Btn_Ele1}
-    Click Element    ${Filter_Btn_Ele1}
-    Wait Until Element Is Visible    ${Filter_Clear_All}
-    Click Element    ${Filter_Clear_All}
-    Sleep  0.5
+    Transactions - Filter - Open Filter
     FOR    ${item}   IN  ${status_list}
         Click Element    //*[text()="${item}"]/../parent::label
     END
-    Sleep  0.5
-    Click Element    ${Filter_View_Results}
-    Wait Until Element Is Not Visible    ${Filter_View_Results}
-    Wait Loading Hidden
-    Sleep    1
+    Transactions - Filter - View Results
 
 Transactions - Get Order Number By Index
     [Arguments]    ${index}=1
@@ -263,22 +317,13 @@ Transactions - Close
     Wait Until Element Is Not Visible   //p[text()="Transaction Details"]/following-sibling::*
     Sleep    1
 
-Tax Information - Edit Business Info
-    Wait Until Element Is Visible    //p[text()="Edit"]/parent::button
-    Click Element    //p[text()="Edit"]/parent::button
-    Wait Until Element Is Visible    //p[text()="Edit Business Information"]
-    ${code}    Get Random Code    6    ${False}
-    Clear Element Value    //input[@id="firstName"]
-    Input Text    //input[@id="firstName"]    ${code}
-    Clear Element Value    //*[@id="lastName"]
-    Input Text    //*[@id="lastName"]    Auto
-    Clear Element Value    //*[@id="companyName"]
-    Input Text    //*[@id="companyName"]    Business ${code}
-    Sleep    1
-#    Click Element    //div[text()="Update Business Information"]/parent::button
-#    Wait Until Element Is Not Visible    //p[text()="Edit Business Information"]
-    Click Element    //div[text()="Cancel"]/parent::button
-    Pass Execution   This account can't edit business info.
+Tax Information - Check EIN Tips
+    Mouse Over    //p[text()="Employer Identification Number (EIN)"]/following-sibling::div/*
+    Sleep    0.5
+    Element Should Be Visible    //p[text()="An Employer Identification Number (EIN) is also known as a Federal Tax Identification Number, and is used to identify a business entity. Generally, businesses need an EIN."]
+    Mouse Over    //*[text()="Business Information"]
+    Sleep    0.5
+    Element Should Not Be Visible    //p[text()="An Employer Identification Number (EIN) is also known as a Federal Tax Identification Number, and is used to identify a business entity. Generally, businesses need an EIN."]
 
 Transactions - Export To Xlsx On Overview Page And Check Results
     Wait Until Element Is Visible    //div[text()="Export to XLSX"]/parent::button
@@ -300,7 +345,8 @@ Transactions - Check Export Data
             ${first_export}     Set Variable    ${export_info[1]}
             Page Should Contain Element    //table//tbody/tr[1]/td[2]//p[contains(text(),"${first_export[1]}")]
             Page Should Contain Element    //table//tbody/tr[1]/td[3]//p[text()="${first_export[3]}"]
-            Page Should Contain Element    //table//tbody/tr[1]/td[4]//p[contains(text(),"${first_export[5]}")]
+            ${amount}    Format Prices    ${first_export[5]}
+            Page Should Contain Element    //table//tbody/tr[1]/td[4]//p[contains(text(),"${amount}")]
         END
     ELSE IF    "${transaction_page}"=="${True}"
         IF    "${transaction}"!="All"
@@ -313,15 +359,18 @@ Transactions - Check Export Data
             ${first_export}     Set Variable    ${export_info[1]}
             Page Should Contain Element    //table//tbody/tr[1]/td[2]//p[contains(text(),"${first_export[1]}")]
             Page Should Contain Element    //table//tbody/tr[1]/td[3]//p[text()="${first_export[3]}"]
-            Page Should Contain Element    //table//tbody/tr[1]/td[4]//p[contains(text(),"${first_export[5]}")]
+            ${amount}    Format Prices    ${first_export[5]}
+            Page Should Contain Element    //table//tbody/tr[1]/td[4]//p[contains(text(),"${amount}")]
             IF    "${first_export[6]}"=="--"
                 ${text}   Get Text    //table//tbody/tr[1]/td[5]//p
                 Should Be Equal As Strings    "${text}"    "——"
                 Page Should Contain Element    //table//tbody/tr[1]/td[5]//p[contains(text(),"——")]
             ELSE
-                Page Should Contain Element    //table//tbody/tr[1]/td[5]//p[contains(text(),"${first_export[6]}")]
+                ${commissions}    Format Prices    ${first_export[7]}
+                Page Should Contain Element    //table//tbody/tr[1]/td[5]//p[contains(text(),"${commissions}")]
             END
-            Page Should Contain Element    //table//tbody/tr[1]/td[6]//p[contains(text(),"${first_export[8]}")]
+            ${net}    Format Prices    ${first_export[8]}
+            Page Should Contain Element    //table//tbody/tr[1]/td[6]//p[contains(text(),"${net}")]
             IF    "${transaction}"!="All"
                 ${index}   Set Variable
                 FOR   ${index}    IN RANGE    1    ${export_len}
@@ -348,9 +397,9 @@ Transactions - Get Results Total Number
 Transactions - Export To Xlsx On Transactions Page By Transaction And Check Results
     [Arguments]    ${transaction}=All
     Store Left Menu - Finances - Transactions
-    Wait Until Element Is Visible    //div[text()="EXPORT TO CSV FILE"]/parent::button
+    Wait Until Element Is Visible    //div[text()="EXPORT TO XLSX FILE"]/parent::button
     Remove Download File If Existed    transactions.xlsx
-    Click Element    //div[text()="EXPORT TO CSV FILE"]/parent::button
+    Click Element    //div[text()="EXPORT TO XLSX FILE"]/parent::button
     Wait Until Element Is Visible    //p[text()="Export Transactions"]
     IF    "${transaction}"=="All"
         Click Element    //p[text()="Export All"]/parent::button

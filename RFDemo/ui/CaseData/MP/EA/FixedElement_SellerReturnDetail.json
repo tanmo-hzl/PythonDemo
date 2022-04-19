@@ -5,7 +5,6 @@
     "Status",
     "Reason for Return",
     "Condition of Item",
-    "Additional Information",
     "Payment Method",
     "Shipping & Handling",
     "Tax",
@@ -24,8 +23,7 @@
     "Subtotal ("
   ],
   "div": [
-    "SUBMIT REFUND DECISION",
-    ""
+    "SUBMIT REFUND DECISION"
   ],
   "h4": [
     "Return Summary"

@@ -17,19 +17,31 @@ class SellerDisputeLib(object):
 		"""
 		decision = str(decision)
 		item_decision = []
+		index = 0
 		for item in items:
-			if decision.isdigit():
-				if int(decision) == 1:
+			if str(decision).startswith("-") and int(decision) == -1:
+				decision_index = index
+				if index == 1:
 					return_amount = round(float(item.get("amount")) * 0.8, 2)
 				else:
 					return_amount = 0
-				decision_value = self.decisions[int(decision)]
+				decision_value = self.decisions[int(decision_index)]
 			else:
-				decision_value = decision
-				if decision_value == self.decisions[1]:
-					return_amount = round(float(item.get("amount")) * 0.8, 2)
+				if decision.isdigit():
+					if int(decision) == 1:
+						return_amount = round(float(item.get("amount")) * 0.8, 2)
+					else:
+						return_amount = 0
+					decision_value = self.decisions[int(decision)]
 				else:
-					return_amount = 0
+					decision_value = decision
+					if decision_value == self.decisions[1]:
+						return_amount = round(float(item.get("amount")) * 0.8, 2)
+					else:
+						return_amount = 0
+			index += 1
+			if index > 2:
+				index = 0
 
 			body = {
 				"decision": decision_value,
@@ -52,4 +64,4 @@ class SellerDisputeLib(object):
 
 if __name__ == '__main__':
 	d = SellerDisputeLib()
-	d.get_dispute_decision([{"amount": "23.45"}], 1, False)
+	d.get_dispute_decision([{"amount": "23.45"}], -1, False)

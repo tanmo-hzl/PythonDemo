@@ -1,6 +1,6 @@
 *** Settings ***
 Resource            ../Keywords/Common/CommonKeywords.robot
-Resource            ../Keywords/MP/EAInitialDataAPiKeywords.robot
+Resource            ../Keywords/MP/EAInitialSellerDataAPiKeywords.robot
 
 *** Variables ***
 ${URL}          https://www.baidu.com
@@ -14,12 +14,8 @@ ${BROWSER}      Chrome
 Test Pass
     [Documentation]    test pass pass
     [Tags]   demodd    deed
-    API - Seller Sign In And Get Order Info
-    API - Get And Save Seller Order Number By Status    Shipped    orders_shipped
-    API - Get And Save Seller Return Order Info By Status    ${None}    orders_seller_returns
-    API - Get And Save Seller Return Order Info By Status    Refund Rejected    orders_refund_rejected
-    API - Get And Save Seller Dispute Order Info By Status    ${None}    orders_seller_disputes
-    API - Get And Save Seller Dispute Order Info By Status    Offer Made    orders_seller_offer_made
+    Initial Env Data
+    API - Get Store Product List
 
 
 

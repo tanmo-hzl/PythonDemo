@@ -15,8 +15,10 @@ ${Return_Url}    ?returnUrl=/mp/sellertools/messages
 Test Send Message To Buyer
     [Documentation]    Send message to buyer on message page
     [Tags]    mp    mp-ea   ea-seller-msg
-    Seller Message - Input Message
-    Seller Message - Click Button Send
+    ${now_time}    Get Time
+    ${input_msg}    Set Variable    Send Message at ${now_time}
+    Seller Message - Input Message    ${input_msg}
+    Seller Message - Click Button Send    ${input_msg}
 
 Test Send Attach File To Buyer
     [Documentation]    Send attach file to buyer on message page

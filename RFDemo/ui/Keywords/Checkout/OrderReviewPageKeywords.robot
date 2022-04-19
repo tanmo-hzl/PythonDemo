@@ -1,12 +1,21 @@
 *** Settings ***
 Resource    ../../TestData/Checkout/config.robot
 Resource    BuyerCheckKeywords.robot
-Resource    CommonKeywords.robot
+
 Library     ../../Libraries/Checkout/BuyerKeywords.py
 Library     ../../TestData/Checkout/GuestGenerateAddress.py
+Library     SeleniumLibrary
+Library     OperatingSystem
+Library     ../../Libraries/CustomSeleniumKeywords.py    run_on_failure=Capture Screenshot and embed it into the report    implicit_wait=0.2 seconds
+Resource    ../../TestData/Checkout/config.robot
+
+
 
 *** Variables ***
-
+${Paypal Xpath}    //div[@type="submit"]//iframe[@title="PayPal"]
+${Paypal Email}    //input[@id="email"]
+${Paypal Pswd}     //input[@id="password"]
+${Paypal Login}    //button[@id="btnLogin"]
 
 *** Keywords ***
 Payment Method Process
@@ -17,7 +26,10 @@ Payment Method Process
         END
         IF   '${IF PIS}' == 'PIS Only'
             FOR    ${key}   ${value}   IN ZIP   ${billAddress.keys()}    ${billAddress.values()}
-                Input Text    //input[@id='${key}']       ${value}
+                ${Error Handle}    Run Keyword And Ignore Error    Input Text    //input[@id='${key}']     ${value}
+                IF  '${Error Handle}[0]' == 'FAIL'
+                    Select From List By Value    //select[@id='${key}']    ${value}
+                END
             END
         END
 
@@ -31,8 +43,12 @@ Payment Method Process
             END
         END
         Wait Until Element Is Enabled     //p[text()='Add A Gift Card']
-        Click Element                     //p[text()='Add A Gift Card']
-        Wait Until Element Is Visible     //label[text()='Gift Card']
+#        Execute Javascript       document.getElementById('giftCardNumber')[1].scrollIntoView({behavior: 'smooth', block: 'center'})
+        ${Gift Card Display}     Run Keyword And Ignore Error    Wait Until Element Is Enabled   //input[@id='giftCardNumber']     7
+        IF   '${Gift Card Display}[0]' == 'FAIL'
+            Click Element                 //p[text()='Add A Gift Card']
+        END
+
         Input Text    //input[@id='giftCardNumber']    ${giftInfo['giftCard']}
         Input Text    //input[@id='pin']               ${giftInfo['pin']}
         Wait Until Element Is Visible     //div[text()='Apply']
@@ -40,40 +56,15 @@ Payment Method Process
         Run Keyword And Warn On Failure   Wait Until Element Is Visible    //div[text()='Remove']
         Sleep  2
     ELSE IF   '${Payment}' == 'Paypal'
-        Wait Until Element Is Visible        //h3[text()="Order Summary"]
-        Wait Until Element Is Enabled        //p[text()="Paypal"]
-        Click Element                        //p[text()="Paypal"]
-        Wait Until Page Contains Element     //div[@type="submit"]//iframe[@title="PayPal"]       ${Long Waiting Time}
-        Wait Until Element Is Visible        //div[@type="submit"]//iframe[@title="PayPal"]       ${Long Waiting Time}
-        Wait Until Element Is Enabled        //div[@type="submit"]//iframe[@title="PayPal"]       ${Long Waiting Time}
-        Sleep  2
-        Click Element                        //div[@type="submit"]//iframe[@title="PayPal"]
+        Order Review - Select Paypal Option And Click The Button
         ${handles}       Get Window Handles
         Switch Window    ${handles[1]}
         Maximize Browser Window
-        Wait Until Element Is Visible    //input[@id="email"]
-        Click Element   //input[@id="email"]
-        Input Text      //input[@id="email"]   ${paypalInfo.email}
-        Click Element   //button[@id="btnNext"]
-        Wait Until Element Is Visible    //input[@id="password"]
-
-        Execute Javascript       document.getElementById('password').click()
-        Click Element            //button[@id="btnLogin"]
-
-        Set Focus To Element               //input[@id="password"]
-        Execute Javascript                 document.querySelector("#password").value='${paypalInfo.password}'
-        ${Password Display}    Get Text    //input[@id="password"]
-        Log To Console         ${Password Display}
-        Wait Until Element Is Visible      //button[@id="btnLogin"]
-        Click Element                      //button[@id="btnLogin"]
-        Wait Until Element Is Visible      //h2[text()="Pay with"]
-        Wait Until Element Is Visible      //h2[text()="Pay later"]
-        ${Paypal Amount}   Get Text        //span[contains(@class,"Cart_cartAmount_4dnoL")]
-        ${Paypal Amount}   Set Variable    ${Paypal Amount.split(" ")[0].replace("$", "")}
-        Execute Javascript                 document.querySelector("#payment-submit-btn").click()
+        ${Paypal Amount}    Paypal Interface Payment Process
         Wait Until Page Contains Element   //p[text()="Processing..."]
         Run Keyword And Warn On Failure    Wait Until Page Does Not Contain Element   //p[text()="Processing..."]
         Switch Window   ${handles[0]}
+        Wait Until Page Does Not Contain Element     //*[@stroke="transparent"]
 
     END
     [Return]   ${Paypal Amount}
@@ -100,14 +91,18 @@ Select Gift Card
         Click Element   //p[text()="Apply"]
         Wait Until Element Is Visible     //div[text()="Undo"]
     ELSE
-        Input Text    //input[@id="cardNumber"]   ${giftInfo}[giftCard]
+        Input Text    //input[@id="giftCardNumber"]   ${giftInfo}[giftCard]
         Input Text    //input[@id="pin"]   ${giftInfo}[pin]
         Click Element    //div[text()="Apply"]
     END
+#    ${Checkout Panel Stats}  Get All Relevant Number Before Placing Order
+#    Log    ck_order_stats:${Checkout Panel Stats}
     Click Place Order Button In Order Review Page
 
 Select Credit Card
     Wait Until Element Is Visible    //h2[text()="Payment & Order Review"]
+#    ${Checkout Panel Stats}  Get All Relevant Number Before Placing Order
+#    Log    ck_order_stats:${Checkout Panel Stats}
     Click Place Order Button In Order Review Page
 
 Click Place Order Button In Order Review Page
@@ -119,6 +114,8 @@ Click Place Order Button In Order Review Page
 
 Select Paypal
     Click Paypal Radio
+#    ${Checkout Panel Stats}  Get All Relevant Number Before Placing Order
+#    Log    ck_order_stats:${Checkout Panel Stats}
     Paypal Payment
 
 Click Paypal Radio
@@ -133,20 +130,29 @@ Click Undo Button for gift card
 Check gift card hiden from order summary
     Page Should Not Contain     //p[text()="Gift Card"]
 
+Click Change Payment
+    Wait Until Page Contains Element     //p[text()="Change Payment"]
+    Wait Until Element Is Visible      //p[text()="Change Payment"]
+    Click Element    //p[text()="Change Payment"]
+
 
 Get total amount from order summary
-    Wait Until Page Contains Element     //p[text()="Total:"]/following-sibling::h4
-    ${total_amout}    Get Text     //p[text()="Total:"]/following-sibling::h4
+    Wait Until Page Contains Element     //*[text()="Total:"]/following-sibling::h4
+    ${total_amout}    Get Text     //*[text()="Total:"]/following-sibling::h4
     [Return]    ${total_amout}
 
 Click Apply button for gift card
     Click Element   //p[text()="Apply"]
 
-Check gift card from order summary
+Get gift card from order summary
     Wait Until Page Contains Element     //p[text()="Gift Card"]
     ${gift_card_amount}    Get Text     //p[text()="Gift Card"]/following-sibling::p
     [Return]    ${gift_card_amount}
 
+Check gift card pay amount equal total amout
+    [Arguments]     ${total_amout}
+    ${gift_card_amount}    Get gift card from order summary
+    Should Be Equal As Strings      ${gift_card_amount}    -${total_amout}
 
 Check credit card still be selected
     Page should Contain Element    //p[contains(text(),"Visa")]/../../../../..//preceding-sibling::label[@data-checked]
@@ -192,15 +198,17 @@ Check Gift Card In Order Review2
 
 Check non-existed gift card in order review
     [Arguments]     ${E_gift_card}
-    ${E_gift_card}    Set Variable     ****${E_gift_card[-4:]}
-    Page Should Not Contain     ****${E_gift_card[-4:]}
+#    ${E_gift_card}    Set Variable     ****${E_gift_card[-4:]}
+#    Page Should Not Contain     ****${E_gift_card[-4:]}
+    Wait Until Page Does Not Contain Element     //p[text()="Gift Cards from Wallet"]
+    
 
 
 Check add valid gift card
     [Arguments]     ${gift_card}
     ${gift_card}    Set Variable      ${gift_card[-4:]}
     ${end_gift_card}     Get Text     //p[text()="ending in"]/following-sibling::h4
-    Run Keyword And Continue On Failure      Should Be Equal As Strings    ${end_gift_card}     ****${gift_card}
+    Run Keyword And Warn On Failure      Should Be Equal As Strings    ${end_gift_card}     ****${gift_card}
     Run Keyword And Warn On Failure   Wait Until Element Is Visible    //div[text()='Remove']
 #    ${class}    Get Element Attribute     //h4[contains(text(),"${gift_card}")]/../following-sibling::div//*[name()="svg"]
 #    Should Be Equal As Strings     ${class}     icon icon-tabler icon-tabler-circle-check
@@ -328,9 +336,33 @@ Check Shipping to Address
     END
 
 
+Order Review - Select Paypal Option and Click the Button
+    Run Keyword And Ignore Error        Wait Until Element Is Enabled        //p[text()="Paypal"]
+    Run Keyword And Ignore Error        Click Element                        //p[text()="Paypal"]
+    Wait Until Page Contains Element    ${Paypal Xpath}    ${Long Waiting Time}
+    Wait Until Element Is Enabled       ${Paypal Xpath}    ${Long Waiting Time}
+    Sleep  2
+    Click Element                       ${Paypal Xpath}
 
+Paypal Interface Payment Process
+    Wait Until Element Is Visible    ${Paypal Email}
+    Click Element                    ${Paypal Email}
+    Input Text                       ${Paypal Email}    ${paypalInfo.email}
+    Click Element                    //button[@id="btnNext"]
+    Wait Until Element Is Visible    ${Paypal Pswd}
+    Execute Javascript               document.getElementById('password').click()
+    Click Element                    ${Paypal Login}
+    Set Focus To Element             ${Paypal Pswd}
+    Execute Javascript               document.querySelector("#password").value='${paypalInfo.password}'
+    Wait Until Element Is Visible    ${Paypal Login}
+    Click Element                    ${Paypal Login}
+    If Close Cookie Popup
 
-
+    Wait Until Element Is Enabled      //button[@id="payment-submit-btn"]     ${Mid Waiting Time}
+    ${Paypal Amount}   Get Text        //span[contains(@class,"Cart_cartAmount_4dnoL")]
+    ${Paypal Amount}   Set Variable    ${Paypal Amount.split(" ")[0].replace("$", "")}
+    Execute Javascript                 document.querySelector("#payment-submit-btn").click()
+    [Return]    ${Paypal Amount}
 
 
 

@@ -88,6 +88,7 @@ Buyer - Profile - Verify Address
 
 Buyer - Profile - Address - Remove Address By Index
     [Arguments]    ${index}=1
+    Scroll Element Into View    //*[text()="Edit Profile"]
     Click Element     //*[text()="Edit Profile"]
     ${count}    Get Element Count    (//*[contains(@class,"icon-tabler-trash")])
     IF    ${count}<3

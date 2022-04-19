@@ -1,11 +1,15 @@
 import datetime
 import json
-import os
 import random
+import re
+import time
 import uuid
-
+import os
 from openpyxl import load_workbook
+from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
+
+use_pro_type = True
 
 
 class SellerListingLib(object):
@@ -13,11 +17,18 @@ class SellerListingLib(object):
 		self.root_path = self.__get_root_path()
 		self.listing_status_list = ["Prohibited", "Pending Review", "Expired", "Out of stock", "Archived", "Active",
 		                            "Draft", "Inactive", "Suspended"]
-		self.categories = ['Frames', 'Art Supplies', 'Yarn, Needlework, Crochet, & Knitting', 'Storage', 'Crafts',
-		                   'Baking Supplies', 'Beads & Jewelry', 'Crafts & Hobbies', 'Decor', 'Craft Machines',
-		                   'Fabric Shop', 'Floral', 'Kids', 'Home Office', 'Party', 'Teacher Supplies',
+		self.categories = ['Frames', 'Supplies', 'Yarn', 'Needlework', 'Crochet', 'Knitting', 'Storage', 'Crafts',
+		                   'Baking', 'Supplies', 'Beads', 'Jewelry', 'Crafts', 'Decor', 'Craft', 'Machines',
+		                   'Fabric', 'Shop', 'Floral', 'Kids', 'Home', 'Office', 'Party', 'Teacher', 'Supplies',
 		                   'Wedding']
 		self.numberTypes = ["UPC", "UPC-A", "GS1-QRcode", "JAN", "EAN-8", "ISBN", "ASIN"]
+		self.over_shipping_rate = {
+			"0": "DefaultRate", "1": "OverrideRate"
+		}
+		self.custom_returns = {
+			"0": "DefaultReturn", "1": "NoReturn", "2": "30Days @NeedItems", "3": "30Days @NoItems",
+			"4": "60Days @NeedItems", "5": "60Days @NoItems",
+		}
 
 	@staticmethod
 	def __get_root_path():
@@ -37,18 +48,14 @@ class SellerListingLib(object):
 		return img_path
 
 	def get_listing_body(self, is_new=True, variants=False, variant_quantity=1,
-	                     subscription=None, overShippingRate=None, customReturn=None, returnPolicy=0):
+	                     overShippingRate=None, customReturn=None):
 		"""
-		new title: "AU Single 220111 x 034750 -0000", after split by "-",
-		[source + variant or not + create time, subscription or not,
-			overShippingRate or not, over write return or not, need return item or not]
+		new title: "AU Single 220111x034750 DefaultRate DefaultReturn"
 		:param is_new:
 		:param variants:item have variants or not
 		:param variant_quantity:
-		:param subscription:
 		:param overShippingRate:
-		:param customReturn:
-		:param returnPolicy: 0-default, 1-no return;  2-30 days,don't need return items;
+		:param customReturn: 0:default, 1-no return;  2-30 days,don't need return items;
 				3-30 days,need return items;  4-60 days,don't need return items;  5-60 days,need return items
 		:return:
 		"""
@@ -63,7 +70,7 @@ class SellerListingLib(object):
 		other_color = "None of these work? Create a new one!"
 		color = random.choice(colors)
 		uu_code = "".join(str(uuid.uuid1()).split('-'))[:16]
-		random_code = datetime.datetime.now().strftime("%y%m%d x %H%M%S")
+		random_code = datetime.datetime.now().strftime("%y%m%dx%H%M%S")
 		attributes = []
 		if variant_quantity == 1:
 			attributes_quantity = 2
@@ -76,44 +83,21 @@ class SellerListingLib(object):
 			attributes.append({"numberType": numberType,
 			                   "number": self.get_global_trade_item_number_by_type(numberType),
 			                   "sku": "".join(str(uuid.uuid1()).split('-'))[:16]})
-			if subscription is None:
-				subscription = False if random.randint(1, 10) > 5 else True
-			else:
-				if subscription:
-					subscription = True
-				else:
-					subscription = False
-
-			subNum = 0 if subscription else 1
-			subscription = None
 			if overShippingRate is None:
-				overShippingRate = False if random.randint(1, 10) > 5 else True
-			else:
-				if overShippingRate:
-					overShippingRate = True
-				else:
-					overShippingRate = False
-
-			overSNum = 0 if overShippingRate else 1
+				overShippingRate = str(random.randint(0, 1))
 
 			if customReturn is None:
-				customReturn = False if random.randint(1, 10) > 5 else True
-			else:
-				if customReturn:
-					customReturn = True
-				else:
-					customReturn = False
-			customNum = 0 if customReturn else 1
-
+				customReturn = str(random.randint(0, 5))
+		pro_type = " -{}@".format(random.randint(1, 6)) if use_pro_type else ""
 		if is_new:
 			if variants:
-				title = "AU Variants {} -{}{}{}{}" \
-					.format(random_code, subNum, overSNum, customNum, returnPolicy)
+				title = "AU Variants {} @{} @{}{}" \
+					.format(random_code, self.over_shipping_rate.get(overShippingRate), self.custom_returns.get(customReturn), pro_type)
 			else:
-				title = "AU Single {} -{}{}{}{}" \
-					.format(random_code, subNum, overSNum, customNum, returnPolicy)
+				title = "AU Single {} @{} @{}{}" \
+					.format(random_code, self.over_shipping_rate.get(overShippingRate), self.custom_returns.get(customReturn), pro_type)
 		else:
-			title = "AU {} -{}{}{}{}-".format(random_code, subNum, overSNum, customNum, returnPolicy)
+			title = "AU {} @{} @{}{} ".format(random_code, self.over_shipping_rate.get(overShippingRate), self.custom_returns.get(customReturn), pro_type)
 		body = {
 			"title": title,
 			"subTitle": ["Single", "Variants"],
@@ -128,11 +112,6 @@ class SellerListingLib(object):
 				"%Y-%m-%d"),
 			"toDate": (datetime.datetime.now() + datetime.timedelta(days=30)).strftime("%Y-%m-%d"),
 			"endDate": False if random.randint(1, 10) > 5 else True,
-			"subscription": {
-				"status": subscription,
-				"firstOff": random.randint(8, 14),
-				"repeatOff": random.randint(4, 8)
-			},
 			"photos": [self.get_random_img_path()],
 			"video": None,
 			"variants": {
@@ -142,13 +121,13 @@ class SellerListingLib(object):
 				"Color": [random.choice(variant_colors), other_color],
 				"otherColor": "Other",
 				"quantity": "{}".format(random.randint(100, 999)),
-				"price": "{}.{}".format(random.randint(1, 66), random.randint(10, 99)),
+				"price": "{}.{}".format(random.randint(0, 9), random.randint(10, 99)),
 				"unVisible": random.randint(0, attributes_quantity),
 				"attributes": attributes,
 				"volumes": [1, 1, 2, 1, 2]
 			},
 			"singleSku": {
-				"price": "{}.{}".format(random.randint(1, 66), random.randint(10, 99)),
+				"price": "{}.{}".format(random.randint(0, 9), random.randint(10, 99)),
 				"quantity": "{}".format(random.randint(20, 999)),
 				"attributes": {
 					"color": color,
@@ -158,15 +137,15 @@ class SellerListingLib(object):
 				"volumes": [1, 1, 2, 1, 2]},
 			"shippingPolicy": False if random.randint(1, 10) > 5 else True,
 			"overShippingRate": {
-				"status": overShippingRate,
+				"status": False if overShippingRate == "0" else True,
 				"standardFree": False if random.randint(1, 10) > 5 else True,
 				"standard": "{}.{}".format(random.randint(1, 3), random.randint(10, 99)),
 				"expedited": "{}.{}".format(random.randint(3, 6), random.randint(10, 99)),
 				"freight": "{}.{}".format(random.randint(6, 9), random.randint(10, 99))
 			},
 			"customReturn": {
-				"status": customReturn,
-				"returnPolicy": returnPolicy
+				"status": False if customReturn == "0" else True,
+				"returnPolicy": customReturn
 			}
 		}
 		if is_new:
@@ -218,10 +197,13 @@ class SellerListingLib(object):
 
 	@staticmethod
 	def get_listing_inventory(info):
-		if info.count("\n"):
-			inventory = (info.split("\n")[0]).split(" ")[0]
+		if info == "Out of stock":
+			inventory = 0
 		else:
-			inventory = info.split(" ")[0]
+			if info.count("\n"):
+				inventory = (info.split("\n")[0]).split(" ")[0]
+			else:
+				inventory = info.split(" ")[0]
 		return inventory
 
 	@staticmethod
@@ -293,24 +275,55 @@ class SellerListingLib(object):
 			if result[3][i].count("*"):
 				required_keys.append(title[i])
 		listing_data = []
-		if len(result)>5:
+		if len(result) > 5:
 			lst_data = result[5:]
 			for item in lst_data:
 				title_keys = {}
 				for i in range(len(item)):
 					title_keys[title[i]] = item[i]
 				listing_data.append(title_keys)
+		print(listing_data)
 		return listing_data, required_keys
 
-	def write_listing_info_to_excel(self, file_name, listing_data):
+	def save_download_listings_file(self, listing_data, download_path=None, file_name="all_listings"):
+		if download_path is None:
+			file_path = os.path.join(self.__get_root_path(), "CaseData", "MP", "EA", "{}.xlsx".format(file_name))
+		else:
+			default_downloads_path = os.path.join(os.path.expanduser('~'), "Downloads")
+			file_path = os.path.join(default_downloads_path, download_path, "{}.xlsx".format(file_name))
+		if os.path.exists(file_path):
+			os.remove(file_path)
+		with open(file_path, "wb") as f:
+			f.write(listing_data.content)
+		return file_path
+
+	def write_listing_info_to_excel(self, file_name, listing_data, download_path=None, update_title=True):
 		if os.path.exists(file_name):
 			file_path = file_name
 		else:
 			file_path = os.path.join(self.__get_root_path(), "CaseData", "MP", "EA", "{}.xlsx".format(file_name))
+		if download_path is not None:
+			default_downloads_path = os.path.join(os.path.expanduser('~'), "Downloads")
+			new_file_path = os.path.join(default_downloads_path, download_path, "{}.xlsx".format(file_name))
+			if os.path.exists(new_file_path):
+				os.remove(new_file_path)
+			wb = Workbook()
+			wb.create_sheet("Template")
+			wb.save(new_file_path)
 		if not os.path.exists(file_path):
 			print("No find file: ", file_path)
 			return None
+		if download_path is not None:
+			file_path = new_file_path
+
+		self.update_listing_file_info(file_path, listing_data, update_title)
+		print(file_path)
+		return file_path
+
+	@staticmethod
+	def update_listing_file_info(file_path, listing_data, update_title=True):
 		wb = load_workbook(file_path)
+		sheet_name = wb["Template"]
 		excel_data = []
 		for item_data in listing_data:
 			excel_column_data = []
@@ -318,15 +331,12 @@ class SellerListingLib(object):
 				excel_column_data.append(item_data.get(item))
 			excel_data.append(excel_column_data)
 
-		sheet_name = wb["Template"]
-		old_data, res_keys = self.read_listing_info_from_excel(file_path)
-		for i in range(len(old_data)+5, 5, -1):
-			sheet_name.delete_rows(i)
-		index = 1
-		if len(listing_data) > 0:
-			for item in listing_data[0]:
-				sheet_name.cell(row=5, column=index).value = item
-				index += 1
+		if update_title:
+			index = 1
+			if len(listing_data) > 0:
+				for item in listing_data[0]:
+					sheet_name.cell(row=5, column=index).value = item
+					index += 1
 
 		row_index = 6
 		for row_data in excel_data:
@@ -336,7 +346,12 @@ class SellerListingLib(object):
 				column_index += 1
 			row_index += 1
 		wb.save(file_path)
-		return file_path
+
+	@staticmethod
+	def update_import_listing_category(listing_data, new_category):
+		for item in listing_data:
+			item["category_path"] = new_category
+		return listing_data
 
 	def update_import_listing_data(self, listing_data, required_keys, **kwargs):
 		"""
@@ -400,7 +415,15 @@ class SellerListingLib(object):
 						item_data["status"] = kwargs.get("listing_status").upper()
 				if key in item_data_keys:
 					item_data[key] = kwargs.get(key)
-		if kwargs["log"]:
+
+		for item_data in listing_data:
+			if item_data.get("sku_type") in ["Parent", "Standalone"]:
+				listing_name = self.reset_import_listing_name_by_listing_data(item_data, False)
+				item_data["item_name"] = listing_name
+			if item_data.get("sku_type") == "Child":
+				item_data["item_name"] = listing_name
+
+		if "log" in kwargs.keys():
 			print("listing_data= ", listing_data)
 		return listing_data
 
@@ -412,7 +435,7 @@ class SellerListingLib(object):
 		child_can_None = ["brand_name"]
 		for item_data in listing_data:
 			if item_data.get("sku_type") == "Parent":
-				if item_data.get("status") in ["OUT OF STOCK", "EXPIRED"]:
+				if item_data.get("status") not in ["ACTIVE", "INACTIVE", "DRAFT"]:
 					all_required = False
 					break
 				now_required_keys = list(set(required_keys) - set(parent_can_None))
@@ -427,7 +450,7 @@ class SellerListingLib(object):
 						all_required = False
 						break
 			else:
-				if item_data.get("status") in ["OUT OF STOCK", "EXPIRED"]:
+				if item_data.get("status") not in ["ACTIVE", "INACTIVE", "DRAFT"]:
 					all_required = False
 					break
 				for item in item_data:
@@ -443,7 +466,7 @@ class SellerListingLib(object):
 			listing_data_item = listing_data[i]
 			err_listing_data_item = err_listing_data[i]
 			for key in listing_data_item:
-				if listing_data_item[key] != err_listing_data_item[key]:
+				if str(listing_data_item[key]) != str(err_listing_data_item[key]):
 					err_info += key + ":" + err_listing_data_item[key] + ";"
 		return err_info
 
@@ -464,7 +487,7 @@ class SellerListingLib(object):
 		                  'tag_1': 'Import',
 		                  'status': '',
 		                  'image_url_1': '',
-		                  'price': ''  '{}.{}'.format(random.randint(1, 66), random.randint(10, 99)),
+		                  'price': ''  '{}.{}'.format(random.randint(0, 9), random.randint(10, 99)),
 		                  'quantity': random.randint(100, 999),
 		                  'item_width': '{}.{}'.format(random.randint(1, 9), random.randint(10, 99)),
 		                  'item_length': '{}.{}'.format(random.randint(1, 9), random.randint(10, 99)),
@@ -502,6 +525,7 @@ class SellerListingLib(object):
 		data1 = self.update_import_listing_data(data1, request_keys, data_status=data_status, listing_status=status, log=False)
 		data2 = self.update_import_listing_data(data2, request_keys, data_status=data_status, listing_status=status, log=False)
 		global_trade_item_number_type = random.choice(self.numberTypes)
+		category_path = self.get_new_category_by_old()
 		if int(data_type) == 0 or int(data_type) == 2:
 			for i in range(int(quantity)):
 				temp_data = {}
@@ -514,8 +538,8 @@ class SellerListingLib(object):
 				temp_data["seller_sku"] = "".join(str(uuid.uuid1()).split('-'))[:16]
 				temp_data["global_trade_item_number_type"] = global_trade_item_number_type
 				temp_data["global_trade_item_number"] = self.get_global_trade_item_number_by_type(global_trade_item_number_type)
-				temp_data["item_name"] = "AU Single Import {} @ {}".format(datetime.datetime.now().strftime("%y%m%d x %H%M%S"),
-				                                                           str(uuid.uuid1()).split("-")[0])
+				temp_data["item_name"] = self.reset_import_listing_name_by_listing_data(listing, True)
+				temp_data["category_path"] = category_path
 				new_listing_data.append(temp_data)
 		if int(data_type) == 1 or int(data_type) == 2:
 			parent_count = 0
@@ -529,10 +553,9 @@ class SellerListingLib(object):
 						variant_listing.append(item)
 				else:
 					variant_listing.append(item)
-			# print(variant_listing)
+
 			for i in range(int(quantity)):
-				item_name = "AU Variants Import {} x {}".format(datetime.datetime.now().strftime("%y%m%d x %H%M%S"),
-				                                                str(uuid.uuid1()).split("-")[0])
+				item_name = self.reset_import_listing_name_by_listing_data(variant_listing[0], True)
 				parent_sku = "".join(str(uuid.uuid1()).split('-'))[:16]
 				for item in variant_listing:
 					temp_data = {}
@@ -542,6 +565,7 @@ class SellerListingLib(object):
 					temp_data["item_name"] = item_name
 					temp_data["manufacture_name"] = ""
 					temp_data["tag_1"] = "Import"
+					temp_data["category_path"] = category_path
 					if temp_data.get("sku_type") == "Parent":
 						temp_data["seller_sku"] = parent_sku
 						temp_data["global_trade_item_number_type"] = ""
@@ -552,8 +576,44 @@ class SellerListingLib(object):
 						temp_data["global_trade_item_number_type"] = global_trade_item_number_type
 						temp_data["global_trade_item_number"] = self.get_global_trade_item_number_by_type(global_trade_item_number_type)
 					new_listing_data.append(temp_data)
-		print(new_listing_data)
-		return new_listing_data
+		return new_listing_data, category_path
+
+	def reset_import_listing_name_by_listing_data(self, listing_data, is_new=False):
+		sku_type = listing_data.get("sku_type")
+		listing_name = listing_data.get("item_name")
+		now_time = datetime.datetime.now().strftime("%y%m%dx%H%M%S")
+		uu_code = str(uuid.uuid1()).split("-")[0]
+		if not listing_name.count("Days") and not listing_name.count("Return"):
+			if listing_data.get("override_shipping_rate") == "N":
+				overRate = self.over_shipping_rate.get("0")
+			else:
+				overRate = self.over_shipping_rate.get("1")
+			if listing_data.get("override_return_policy") == "N":
+				customReturn = self.custom_returns.get("0")
+			else:
+				if listing_data.get("return_policy_option") == "NO_RETURN":
+					customReturn = self.custom_returns.get("1")
+				elif listing_data.get("return_policy_option") == "IN_30_DAYS":
+					if listing_data.get("refund_only") == "N":
+						customReturn = self.custom_returns.get("2")
+					else:
+						customReturn = self.custom_returns.get("3")
+				else:
+					if listing_data.get("refund_only") == "N":
+						customReturn = self.custom_returns.get("4")
+					else:
+						customReturn = self.custom_returns.get("5")
+			if is_new:
+				action = "Create"
+			else:
+				action = "Update"
+			pro_type = " -{}@".format(random.randint(1, 6)) if use_pro_type else ""
+			if sku_type == "Standalone":
+				listing_name = "AU Single Import-{} {} #{} @{} @{}{}".format(action, now_time, uu_code, overRate, customReturn, pro_type)
+			else:
+				listing_name = "AU Variants Import-{} {} #{} @{} @{}{}".format(action, now_time, uu_code, overRate, customReturn, pro_type)
+		listing_name = update_listing_name(listing_name, is_new)
+		return listing_name
 
 	def check_listing_detail_is_update_after_import(self, listing_data, listing_detail):
 		sku_type = listing_data[0].get("sku_type")
@@ -583,8 +643,8 @@ class SellerListingLib(object):
 				error_msg += "tags not update; "
 			if actual_listing.get("onlineOnly").get("availableFromDate") != import_listing.get("available_from"):
 				error_msg += "availableFromDate not update; "
-			if actual_listing.get("onlineOnly").get("availableToDate") != import_listing.get("available_to"):
-				error_msg += "availableToDate not update; "
+			# if actual_listing.get("onlineOnly").get("availableToDate") != import_listing.get("available_to"):
+			# 	error_msg += "availableToDate not update; "
 
 		if sku_type in ['Standalone', 'Child']:
 			if actual_listing.get("global_trade_item_number") != import_listing.get("globalTradeItemNumber"):
@@ -604,8 +664,103 @@ class SellerListingLib(object):
 
 		return error_msg
 
+	def check_taxonomy_file_is_need_update(self, file_name="Taxonomy.json"):
+		file_path = os.path.join(self.__get_root_path(), 'CaseData', 'MP', 'EA', file_name)
+		is_need_update = True
+		if os.path.exists(file_path):
+			with open(file_path, "r", encoding="utf-8") as f:
+				taxonomy = json.load(f)
+			timestamp = taxonomy.get("timestamp")
+			now_time = int(time.time())
+			if now_time - timestamp < 20 * 60 * 60:
+				is_need_update = False
+		return is_need_update
+
+	def save_taxonomy_file(self, data, file_name="Taxonomy.json"):
+		file_path = os.path.join(self.__get_root_path(), 'CaseData', 'MP', 'EA', file_name)
+		data["timestamp"] = int(time.time())
+		with open(file_path, "w+", encoding="utf-8") as f:
+			json.dump(data, f, indent=4)
+		return file_path
+
+	def get_new_category_by_old(self, old_category=None, file_name="Taxonomy.json"):
+		file_path = os.path.join(self.__get_root_path(), 'CaseData', 'MP', 'EA', file_name)
+		with open(file_path, "r", encoding="utf-8") as f:
+			taxonomy = json.load(f)
+		all_taxonomy = taxonomy.get("data")
+		if old_category is not None:
+			categories = old_category.split("//")
+			last_category = categories[len(categories)-1]
+			if last_category.count(" "):
+				last_category = last_category.split(" ")[0]
+			new_categories = []
+			for item in all_taxonomy:
+				if item.get("taxonomyName").count(last_category) or item.get("taxonomyPath").count(last_category):
+					new_categories.append(item)
+			if len(new_categories) > 0:
+				new_category = random.choice(new_categories).get("taxonomyPath")
+			else:
+				new_category = random.choice(all_taxonomy).get("taxonomyPath")
+		else:
+			new_category = random.choice(all_taxonomy).get("taxonomyPath")
+		return new_category
+
+
+def update_listing_name(listing_name, is_new):
+
+	if listing_name.count(" Import-Update "):
+		if is_new:
+			listing_name = listing_name.replace(" Import-Update ", " Import-Create ")
+
+	if listing_name.count(" Import-Create "):
+		if not is_new:
+			listing_name = listing_name.replace(" Import-Create ", " Import-Update ")
+
+	if listing_name.count(" Import "):
+		if is_new:
+			listing_name = listing_name.replace(" Import ", " Import-Create ")
+		else:
+			listing_name = listing_name.replace(" Import ", " Import-Update ")
+
+	if not listing_name.count("Import"):
+		if is_new:
+			listing_name = listing_name.replace("AU ", "AU Import-Create ")
+		else:
+			listing_name = listing_name.replace("AU ", "AU Import-Update ")
+
+	now_time = datetime.datetime.now().strftime("%y%m%dx%H%M%S")
+	uu_code = str(uuid.uuid1()).split("-")[0]
+	try:
+		date = re.findall(r"\d{6}x\d{6}", listing_name)
+		if is_new and len(date) > 0:
+			listing_name = listing_name.replace(date[0], now_time)
+
+		if len(date) == 0:
+			listing_name = listing_name.replace("AU ", "AU {} ".format(now_time))
+
+		if use_pro_type:
+			pro_type_flag = re.findall(r"-\d@", listing_name)
+			if len(pro_type_flag) == 0:
+				listing_name = listing_name + " -{}@".format(random.randint(1, 6))
+			if is_new and len(pro_type_flag) > 0:
+				pro_type = "-{}@".format(random.randint(1, 6))
+				listing_name = listing_name.replace(pro_type_flag[0], pro_type)
+
+		uu_date = re.findall(r"#.{8}", listing_name)
+		if len(uu_date) > 0:
+			listing_name = listing_name.replace("{} ".format(uu_date[0]), "")
+			listing_name = listing_name.replace("AU ", "AU #{} ".format(uu_code))
+	except Exception as e:
+		print(e)
+
+	return listing_name
+
 
 if __name__ == '__main__':
 	lib = SellerListingLib()
+	use_pro_type = True
+	name = "AU Variants Import-Create #0608446a #0608446a @OverrideRate @30Days @NeedItems"
+	n = update_listing_name(name, False)
+	print(n)
 
 

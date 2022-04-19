@@ -10,7 +10,8 @@ class BuyerAccountInfoLib(object):
 		                     ['21401', 'Annapolis', 'MD'],
 		                     ['21201', 'Baltimore', 'MD'],
 		                     ['35201', 'Birmingham', 'AL'],
-		                     ['14201', 'Buffalo', 'NY']]
+		                     ['14201', 'Buffalo', 'NY'],
+		                     ['99501', 'ANCHORAGE', 'AK']]
 
 	def get_address_info(self):
 		address = random.choice(self.address_list)

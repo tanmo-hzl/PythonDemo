@@ -126,7 +126,95 @@ class BuyerDisputeLib(object):
 		print(return_ids)
 		return return_ids
 
+	@staticmethod
+	def get_return_orders_can_disputes(after_sales_order_list, can_submit=True, need_dispute_status=None):
+		order_list = []
+		for item in after_sales_order_list:
+			returnOrderLines = item.get("returnOrderLines")
+			dispute_status = None
+			if item.get("status") == 19100:
+				is_disputed = False
+				for line in returnOrderLines:
+					if line.get("disputeId") is not None:
+						is_disputed = True
+						dispute_status = line.get("disputeStatus")
+
+				if can_submit and not is_disputed:
+					order_list.append(item)
+				if not can_submit and is_disputed:
+					if need_dispute_status is None:
+						order_list.append(item)
+					else:
+						if int(need_dispute_status) == dispute_status:
+							order_list.append(item)
+
+			if item.get("status") == 18000:
+				is_disputed = False
+				dispute_id = None
+				for line in returnOrderLines:
+					if line.get("status") == 19100:
+						is_disputed = True
+						dispute_id = line.get("disputeId")
+						dispute_status = line.get("disputeStatus")
+				if is_disputed and dispute_id is None and can_submit:
+					order_list.append(item)
+				if is_disputed and dispute_id is not None and not can_submit:
+					if need_dispute_status is None:
+						order_list.append(item)
+					else:
+						if int(need_dispute_status) == dispute_status:
+							order_list.append(item)
+
+		orders = []
+		for item in order_list:
+			orders.append({"orderNumber": item.get("orderNumber"),
+			               "returnOrderNumber": item.get("returnOrderNumber"),
+			               "status": item.get("status")})
+
+		print(orders)
+		return orders
+
+	def get_create_dispute_order_body(self,order_detail):
+		disputeItemVos = []
+		returnOrderLines = order_detail.get("returnOrderLines")
+		print(returnOrderLines)
+		for item in returnOrderLines:
+			if item.get("status") == 19100 and item.get("disputeStatus") == 0:
+				reason = item.get("afterSalesReason")
+				if item.get("buyerUploadMediaJson") is None or len(item.get("buyerUploadMediaJson"))==0:
+					evidenceMedia = []
+				else:
+					evidenceMedia = [{
+						"contentType": "IMAGE",
+						"fileName": item.get("buyerUploadMediaJson")[0][-15:],
+						"url": item.get("buyerUploadMediaJson")[0]
+					}]
+				if reason not in self.reason_list:
+					reason = self.reason_list[len(self.reason_list)-1]
+					evidenceMedia = []
+				disputeItem = {
+					"orderAfterSalesItemId": item.get("orderAfterSalesItemId"),
+					"disputeItemQuantity": item.get("quantity"),
+					"disputeType": reason,
+					"buyerDisputeReason": "Test API {},{}.".format(reason, datetime.datetime.now()),
+					"evidenceMedia": evidenceMedia
+				}
+				disputeItemVos.append(disputeItem)
+
+		body = {
+			"parentOrderNumber": order_detail.get("parentOrderNumber"),
+			"returnOrderNumber": order_detail.get("returnOrderNumber"),
+			"orderNumber": order_detail.get("orderNumber"),
+			"disputeItemVos": disputeItemVos
+		}
+		print(body)
+		return body
+
 
 if __name__ == '__main__':
 	b = BuyerDisputeLib()
-	b.get_dispute_reason(2)
+	with open("a.json", "r", encoding="utf-8") as f:
+			data = json.load(f)
+	d = b.get_create_dispute_order_body(data.get("data"))
+	print(d)
+

@@ -2,7 +2,7 @@
 Library    Collections
 Library    ../../Libraries/Checkout/BuyerKeywords.py
 Resource    BuyerCheckKeywords.robot
-Resource    ../../TestData/Checkout/config.robot
+#Resource    ../../TestData/Checkout/config.robot
 
 
 
