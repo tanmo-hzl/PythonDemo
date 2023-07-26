@@ -7,12 +7,12 @@ import pprint
 
 """
 @Description: 
-@Author: hzlvxln
+@Author: 
 @Time: 2021/12/12 10:57
-@Website: hezhilv@126.com
+@Website: 
 @project: PythonDemo
 @FileName: DictionaryTest.py
-@Copyright: ©2019-2021 家灏信息科技有限公司
+
 """
 
 class DictionaryTest(object):

@@ -4,7 +4,7 @@
 @Description: Database connection pool
 @Author: Evan He
 @Time: 12/29/2021 12:01 AM
-@Website: hezhilv@126.com
+@Website: 
 @project: PythonDemo
 @FileName: PoolUtils.py
 @Copyright: ©2019-2021 michaels.com

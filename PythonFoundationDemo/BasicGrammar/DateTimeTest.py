@@ -6,12 +6,12 @@ import datetime
 
 """
 @Description: 标准库time，处理时间相关的方法
-@Author: hzlvxln
+@Author: 
 @Time: 2021/12/14 20:19
-@Website: hezhilv@126.com
+@Website: 
 @project: PythonDemo
 @FileName: DateTimeTest.py
-@Copyright: ©2019-2021 家灏信息科技有限公司
+
 """
 
 

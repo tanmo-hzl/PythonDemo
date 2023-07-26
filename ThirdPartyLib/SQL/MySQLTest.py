@@ -4,7 +4,7 @@
 @Description:
 @Author: Evan He
 @Time: 12/28/2021 3:34 AM
-@Website: hezhilv@126.com
+@Website: 
 @project: PythonDemo
 @FileName: MySQLTest.py
 @Copyright: ©2019-2021 michaels.com
