@@ -2,8 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import pyperclip
-
-
+from PythonFoundationDemo.ProjectDemo.ImportTest import ImportTest
 """
 @Description: pyperclip模块有copy()和paste()函数，可以向计算机的剪切板发送文本，或从计算机的剪切板接受文本。
 @Author: hzlvxln
@@ -25,4 +24,6 @@ class PyperclipTest(object):
 
 if __name__ == '__main__':
     pyperclipTest = PyperclipTest()
-    pyperclipTest.test_copy_and_paste()
+    # pyperclipTest.test_copy_and_paste()
+    IM= ImportTest()
+    ImportTest.testA(IM)
