@@ -10,7 +10,7 @@ from PythonFoundationDemo.ProjectDemo.ImportTest import ImportTest
 @Website: 
 @project: PythonDemo
 @FileName: PyperclipTest.py
-@Copyright: ©2019-2022 家灏信息科技有限公司
+@Copyright: ©2019-2022 
 """
 
 class PyperclipTest(object):

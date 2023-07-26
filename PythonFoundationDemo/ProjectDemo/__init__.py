@@ -8,7 +8,7 @@
 @Website: 
 @project: PythonDemo
 @FileName: __init__.py.py
-@Copyright: ©2019-2022 家灏信息科技有限公司
+@Copyright: ©2019-2022 
 """
 
 if __name__ == '__main__':

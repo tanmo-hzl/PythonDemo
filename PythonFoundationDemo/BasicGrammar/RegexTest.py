@@ -10,7 +10,7 @@ import re
 @Website: 
 @project: PythonDemo
 @FileName: RegexTest.py
-@Copyright: ©2019-2022 家灏信息科技有限公司
+@Copyright: ©2019-2022 
 """
 
 
