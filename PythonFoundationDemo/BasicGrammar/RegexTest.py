@@ -47,6 +47,29 @@ class RegexTest(object):
         print(areaCode)         # 415
         print(mainNumber)       # 555-5656
 
+    # 采用?P<name>对分组进行自定义名称
+    def test_regex_group_name(self):
+        # 正则表达式字符串中的第一对括号是第1 组。第二对括号是第2 组。
+        phoneNumRegex = re.compile(r'(?P<name1>\d{3})-(?P<name2>\d{3}-\d{4})')
+        # search()扫描整个字符串并返回第一个成功的匹配
+        mo = phoneNumRegex.search('My number is 415-555-5656')
+        print(mo)  # <re.Match object; span=(13, 25), match='415-555-5656'>
+        # 向group()方法传入0或不传参数，将返回整个匹配的文本
+        print(mo.group())  # 415-555-5656
+        print(mo.group(0))  # 415-555-5656
+        # 向group()匹配对象方法传入整数1或2，就可以取得匹配文本的不同部分。
+        print(mo.group(1))  # 415
+        print(mo.group(2))  # 555-5656
+
+        print("name1", mo.group("name1"))  # 415
+        print("name2", mo.group("name2"))  # 555-5656
+
+        # 如果一次想获取所有的分组，请使用groups()方法，请注意函数名的复数形式。
+        print(mo.groups())  # ('415', '555-5656')
+        areaCode, mainNumber = mo.groups()
+        print(areaCode)  # 415
+        print(mainNumber)  # 555-5656
+
     #  管道符匹配多个分组：    |
     def test_regex_pipe(self):
         batRegex = re.compile(r'Bat(man|mobile|copter|bat)')
@@ -283,4 +306,4 @@ if __name__ == '__main__':
     # ci.test_regex_findall()
     # ci.test_regex_dotall()
     # ci.test_regex_ignorecase()
-    ci.test_regex_sub()
+    ci.test_regex_group_name()
