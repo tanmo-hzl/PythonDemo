@@ -306,4 +306,7 @@ if __name__ == '__main__':
     # ci.test_regex_findall()
     # ci.test_regex_dotall()
     # ci.test_regex_ignorecase()
-    ci.test_regex_group_name()
+    # ci.test_regex_group_name()
+    print(re.match(r'(hello)?,[a-z]{2,3}(?(1)[a-z]{2,}|\d*)', 'hello,python333'))
+    print(re.match(r'(hello)?,[a-z]{2,3}(?(1)[a-z]{2,}|\d*)', ',python333'))
+    print(re.match(r'(hello)?,[a-z]{2,3}(?(1)[a-z]{2,}|\d*)', 'hello1,python333'))
