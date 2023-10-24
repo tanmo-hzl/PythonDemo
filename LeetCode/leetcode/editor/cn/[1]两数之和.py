@@ -73,9 +73,17 @@ class Solution:
     def two_sum_2(self, nums: List[int], target: int) -> List[int]:
         hashtable = dict()
         for i, num in enumerate(nums):
-            if target - num in hashtable:       # 判断"target-num"的数是否在hashtable中。如果在，直接返回当前数的下标和 “target-num”的下标
+            if target - num in hashtable:  # 判断"target-num"的数是否在hashtable中。如果在，直接返回当前数的下标和 “target-num”的下标
                 return [hashtable[target - num], i]
-            hashtable[nums[i]] = i      # 在hashtable中没有找到"target-num"这个数，则将{num : i } 存入hashtable中，供下次查找使用
+            hashtable[nums[i]] = i  # 在hashtable中没有找到"target-num"这个数，则将{num : i } 存入hashtable中，供下次查找使用
+        return []
+
+    def two_sum_2_bak(self, nums: List[int], target: int) -> List[int]:
+        hashtable = {}
+        for i, num in enumerate(nums, 0):
+            if target - num in hashtable:
+                return [hashtable[target - num], i]
+            hashtable[num] = i
         return []
 
 
@@ -83,8 +91,7 @@ if __name__ == '__main__':
     sol = Solution()
     nums = [3, 2, 4, 3]
     target = 6
-    result = sol.two_sum_1(nums, target)
+    result = sol.two_sum_2_bak(nums, target)
     print(result)
-
 
 # leetcode submit region end(Prohibit modification and deletion)
